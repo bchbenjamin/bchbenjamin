@@ -1,0 +1,22 @@
+/*
+ * Dovetail design tokens.
+ *
+ * Palette rules for this site:
+ * - Cards are #141414 on a near-black page, separated by 1px #313131 borders.
+ * - No box-shadows anywhere; separation comes from hairlines and spacing.
+ * - #6798ff (--color-accent) is a text, border and underline colour only.
+ *   It is never used as a fill/background.
+ */
+@theme inline {
+  --color-ink: #0b0b0b;
+  --color-card: #141414;
+  --color-line: #313131;
+  --color-line-soft: #242424;
+  --color-fg: #ededed;
+  --color-fg-muted: #a3a3a3;
+  --color-fg-faint: #6f6f6f;
+  --color-accent: #6798ff;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+}
