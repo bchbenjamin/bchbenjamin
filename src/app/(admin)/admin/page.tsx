@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { requireOwner } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/db/config";
 import { getProfileRow, listItemSummaries } from "@/db/admin";
@@ -58,9 +60,17 @@ export default async function AdminPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.24em] text-accent">
-          Items
-        </h2>
+        <div className="flex items-baseline justify-between gap-6">
+          <h2 className="font-mono text-[11px] uppercase tracking-[0.24em] text-accent">
+            Items
+          </h2>
+          <Link
+            href="/admin/items/new"
+            className="border border-line px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-fg-muted transition-colors hover:border-accent hover:text-accent"
+          >
+            New item
+          </Link>
+        </div>
         <div className="mt-4 overflow-x-auto border border-line">
           <table className="w-full border-collapse text-sm">
             <thead>
@@ -86,7 +96,12 @@ export default async function AdminPage() {
               {items.map((entry) => (
                 <tr key={entry.id} className="border-b border-line/60 last:border-0">
                   <td className="px-4 py-3 text-fg">
-                    {entry.title}
+                    <Link
+                      href={`/admin/items/${entry.id}`}
+                      className="transition-colors hover:text-accent"
+                    >
+                      {entry.title}
+                    </Link>
                     <span className="ml-2 font-mono text-[10px] text-fg-faint">
                       /{entry.slug}
                     </span>
