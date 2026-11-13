@@ -32,6 +32,21 @@ npm run build      # next build
 
 Before pushing: `npm run lint && npm run typecheck && npm test && npm run build`.
 
+## Environment
+
+Phase 0 reads no environment variables, so the site runs with no env file at
+all. `.env.example` documents every variable the project reads, grouped by the
+phase that adds it:
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` is git-ignored and must never be committed; `.env.example` holds
+placeholders only. On Vercel, set the same names under Project → Settings →
+Environment Variables. Nothing secret may use the `NEXT_PUBLIC_` prefix, because
+those values are inlined into the browser bundle.
+
 ## Layout
 
 ```
