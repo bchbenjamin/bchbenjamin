@@ -1,6 +1,12 @@
 import rawContent from "@/content/site.json";
 
 import {
+  publicItemBySlug,
+  publicItems,
+  publicItemsByType,
+  skillsByCategory,
+} from "./selectors";
+import {
   ITEM_TYPES,
   type Item,
   type ItemType,
@@ -12,9 +18,10 @@ import {
 } from "./types";
 
 /*
- * Phase 0 reads site content from src/content/site.json so the public site can
- * ship before the database exists. Phase 1 swaps these helpers for reads through
- * the app_read role; the shapes below mirror the planned tables.
+ * The checked-in content is the fallback source: it is what the site serves
+ * until DATABASE_URL_APP exists, and it is what the tests run against. Once the
+ * database is configured, src/content/repository.ts reads the public views
+ * instead and reuses the same validators and selectors.
  */
 
 function fail(path: string, expected: string): never {
@@ -93,7 +100,7 @@ function parseUrl(value: unknown, path: string): ItemUrl {
   };
 }
 
-function parseItem(value: unknown, path: string): Item {
+export function parseItem(value: unknown, path = "item"): Item {
   const item = objectAt(value, path);
   const type = stringAt(item.type, `${path}.type`);
   if (!isItemType(type)) fail(`${path}.type`, `one of ${ITEM_TYPES.join(", ")}`);
@@ -136,7 +143,7 @@ function parseProfileLink(value: unknown, path: string): ProfileLink {
   };
 }
 
-function parseProfile(value: unknown): Profile {
+export function parseProfile(value: unknown): Profile {
   const profile = objectAt(value, "profile");
   return {
     name: stringAt(profile.name, "profile.name"),
@@ -149,7 +156,7 @@ function parseProfile(value: unknown): Profile {
   };
 }
 
-function parseSkill(value: unknown, path: string): Skill {
+export function parseSkill(value: unknown, path = "skill"): Skill {
   const skill = objectAt(value, path);
   return {
     name: stringAt(skill.name, `${path}.name`),
@@ -174,34 +181,23 @@ export const siteContent: SiteContent = parseSiteContent(rawContent);
 
 export const profile: Profile = siteContent.profile;
 
-function byDisplayOrder(a: Item, b: Item): number {
-  if (a.displayOrder !== b.displayOrder) return a.displayOrder - b.displayOrder;
-  return b.startDate.localeCompare(a.startDate);
-}
-
 /** Items that may appear on the public site, in display order. */
 export function getPublicItems(): Item[] {
-  return siteContent.items.filter((item) => item.isPublic).sort(byDisplayOrder);
+  return publicItems(siteContent);
 }
 
 export function getPublicItemsByType(type: ItemType): Item[] {
-  return getPublicItems().filter((item) => item.type === type);
+  return publicItemsByType(siteContent, type);
 }
 
 export function getPublicItemBySlug(slug: string): Item | undefined {
-  return getPublicItems().find((item) => item.slug === slug);
+  return publicItemBySlug(siteContent, slug);
 }
 
 export function getFeaturedProjects(limit = 3): Item[] {
-  return getPublicItemsByType("PROJECT").slice(0, limit);
+  return publicItemsByType(siteContent, "PROJECT").slice(0, limit);
 }
 
 export function getSkillsByCategory(): { category: string; skills: string[] }[] {
-  const groups = new Map<string, string[]>();
-  for (const skill of siteContent.skills) {
-    const skills = groups.get(skill.category);
-    if (skills) skills.push(skill.name);
-    else groups.set(skill.category, [skill.name]);
-  }
-  return [...groups].map(([category, skills]) => ({ category, skills }));
+  return skillsByCategory(siteContent);
 }

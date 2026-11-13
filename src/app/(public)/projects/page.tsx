@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 
 import { ProjectCard } from "@/components/project-card";
-import { getPublicItemsByType } from "@/lib/content";
+import { getPublicItemsByType } from "@/content/repository";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "Selected software projects: what they do, what was hard, and how they were built.",
+  description:
+    "Selected software projects: what they do, what was hard, and how they were built.",
 };
 
-export default function ProjectsPage() {
-  const projects = getPublicItemsByType("PROJECT");
+export default async function ProjectsPage() {
+  const projects = await getPublicItemsByType("PROJECT");
 
   return (
     <div className="py-16 sm:py-24">

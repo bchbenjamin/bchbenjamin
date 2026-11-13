@@ -3,20 +3,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Markdown } from "@/components/markdown";
-import { getPublicItemBySlug, getPublicItemsByType } from "@/lib/content";
+import {
+  getPublicItemBySlug,
+  getPublicItemsByType,
+} from "@/content/repository";
 import { formatRange } from "@/lib/format";
 
 export const revalidate = 3600;
 
-export function generateStaticParams() {
-  return getPublicItemsByType("PROJECT").map((item) => ({ slug: item.slug }));
+export async function generateStaticParams() {
+  const projects = await getPublicItemsByType("PROJECT");
+  return projects.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/projects/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const item = getPublicItemBySlug(slug);
+  const item = await getPublicItemBySlug(slug);
   if (!item) return { title: "Not found" };
   return { title: item.title, description: item.summaryShort };
 }
@@ -25,7 +29,7 @@ export default async function ProjectPage({
   params,
 }: PageProps<"/projects/[slug]">) {
   const { slug } = await params;
-  const item = getPublicItemBySlug(slug);
+  const item = await getPublicItemBySlug(slug);
   if (!item || item.type !== "PROJECT") notFound();
 
   return (

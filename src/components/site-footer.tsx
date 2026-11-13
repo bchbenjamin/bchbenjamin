@@ -1,6 +1,8 @@
-import { profile } from "@/lib/content";
+import { getProfile } from "@/content/repository";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const profile = await getProfile();
+
   return (
     <footer className="border-t border-line/70">
       <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">

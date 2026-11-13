@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
 import { ExperienceEntry } from "@/components/experience-entry";
-import { getPublicItemsByType } from "@/lib/content";
+import { getPublicItemsByType } from "@/content/repository";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Experience",
@@ -16,10 +18,12 @@ function Heading({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function ExperiencePage() {
-  const roles = getPublicItemsByType("EXPERIENCE");
-  const education = getPublicItemsByType("EDUCATION");
-  const achievements = getPublicItemsByType("ACHIEVEMENT");
+export default async function ExperiencePage() {
+  const [roles, education, achievements] = await Promise.all([
+    getPublicItemsByType("EXPERIENCE"),
+    getPublicItemsByType("EDUCATION"),
+    getPublicItemsByType("ACHIEVEMENT"),
+  ]);
 
   return (
     <div className="py-16 sm:py-24">

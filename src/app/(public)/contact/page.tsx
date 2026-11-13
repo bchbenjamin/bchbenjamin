@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 
-import { profile } from "@/lib/content";
+import { getProfile } from "@/content/repository";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "How to get in touch with Benjamin.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const profile = await getProfile();
+
   return (
     <div className="py-16 sm:py-24">
       <header className="max-w-2xl">

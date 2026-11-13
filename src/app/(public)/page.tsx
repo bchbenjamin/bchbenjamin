@@ -6,19 +6,24 @@ import { Section } from "@/components/section";
 import { WaveDivider } from "@/components/wave-divider";
 import {
   getFeaturedProjects,
+  getProfile,
   getPublicItemsByType,
   getSkillsByCategory,
-  profile,
-} from "@/lib/content";
+} from "@/content/repository";
+
+export const revalidate = 3600;
 
 const linkUnderline =
   "border-b border-accent pb-1 text-sm text-fg transition-colors hover:text-accent";
 
-export default function HomePage() {
+export default async function HomePage() {
   const year = new Date().getFullYear();
-  const projects = getFeaturedProjects(2);
-  const experience = getPublicItemsByType("EXPERIENCE").slice(0, 2);
-  const skillGroups = getSkillsByCategory();
+  const [profile, projects, experience, skillGroups] = await Promise.all([
+    getProfile(),
+    getFeaturedProjects(2),
+    getPublicItemsByType("EXPERIENCE"),
+    getSkillsByCategory(),
+  ]);
 
   return (
     <div className="pb-20">
@@ -76,7 +81,7 @@ export default function HomePage() {
 
       <Section index="02" title="Experience">
         <div className="space-y-6">
-          {experience.map((item) => (
+          {experience.slice(0, 2).map((item) => (
             <ExperienceEntry key={item.id} item={item} showBullets={false} />
           ))}
         </div>
