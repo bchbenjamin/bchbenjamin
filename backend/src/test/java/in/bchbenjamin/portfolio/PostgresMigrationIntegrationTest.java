@@ -65,7 +65,7 @@ class PostgresMigrationIntegrationTest {
     @Test
     void adminContentApiIsNotPublic() throws Exception {
         mockMvc.perform(get("/api/v1/admin/content/projects"))
-            .andExpect(status().is3xxRedirection());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -117,6 +117,6 @@ class PostgresMigrationIntegrationTest {
     @Test
     void linkedInDraftQueueIsNotPublic() throws Exception {
         mockMvc.perform(get("/api/v1/admin/linkedin/drafts"))
-            .andExpect(status().is3xxRedirection());
+            .andExpect(status().isUnauthorized());
     }
 }

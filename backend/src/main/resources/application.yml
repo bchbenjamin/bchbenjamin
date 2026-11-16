@@ -59,6 +59,10 @@ spring:
 server:
   port: ${PORT:8080}
   forward-headers-strategy: framework
+  max-http-request-header-size: 16KB
+  tomcat:
+    max-http-form-post-size: 64KB
+    max-swallow-size: 1MB
   error:
     include-message: never
     include-stacktrace: never
@@ -85,6 +89,11 @@ info:
 app:
   linkedin:
     api-version: ${LINKEDIN_API_VERSION:}
+  rate-limit:
+    public-per-minute: ${RATE_LIMIT_PUBLIC_PER_MINUTE:120}
+    agent-per-minute: ${RATE_LIMIT_AGENT_PER_MINUTE:60}
+    admin-per-minute: ${RATE_LIMIT_ADMIN_PER_MINUTE:120}
+    default-per-minute: ${RATE_LIMIT_DEFAULT_PER_MINUTE:60}
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
   security:
     admin-subjects: ${ADMIN_ALLOWED_SUBJECTS:}

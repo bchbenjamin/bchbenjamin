@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.HtmlUtils;
 
 @Service
 public class ResumePdfService {
@@ -150,6 +149,8 @@ public class ResumePdfService {
     }
 
     private static String escape(Object value) {
-        return value == null ? "" : HtmlUtils.htmlEscape(value.toString());
+        if (value == null) return "";
+        return value.toString().replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
     }
 }

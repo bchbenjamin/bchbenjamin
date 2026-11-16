@@ -1,6 +1,7 @@
 package in.bchbenjamin.portfolio.security;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -102,7 +103,7 @@ public class EncryptedLinkedInAuthorizedClientService implements OAuth2Authorize
             """, principalName, registrationId, access.ciphertext(), access.iv(),
             refreshEncrypted == null ? null : refreshEncrypted.ciphertext(),
             refreshEncrypted == null ? null : refreshEncrypted.iv(),
-            client.getAccessToken().getTokenType().getValue(), scopes, issued, expires);
+            client.getAccessToken().getTokenType().getValue(), scopes, issued == null ? null : Timestamp.from(issued), expires == null ? null : Timestamp.from(expires));
     }
 
     @Override

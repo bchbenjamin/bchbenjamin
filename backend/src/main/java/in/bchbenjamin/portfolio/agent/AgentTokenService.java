@@ -1,6 +1,7 @@
 package in.bchbenjamin.portfolio.agent;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -36,7 +37,7 @@ public class AgentTokenService {
         UUID id = jdbc.queryForObject("""
             INSERT INTO agent_api_tokens (token_hash, token_prefix, name, scopes, created_by, expires_at)
             VALUES (?, ?, ?, ?, ?, ?) RETURNING id
-            """, UUID.class, hash, prefix, name.trim(), String.join(",", scopes), createdBy, expiry);
+            """, UUID.class, hash, prefix, name.trim(), String.join(",", scopes), createdBy, Timestamp.from(expiry));
         return new CreatedToken(id, token, prefix, name.trim(), scopes, expiry);
     }
 

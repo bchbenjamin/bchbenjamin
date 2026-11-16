@@ -157,7 +157,7 @@ The Vercel Hobby plan is intended for personal, non-commercial use. The site is 
 | 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and long/short/resume variants | In progress |
 | 6 | LinkedIn OAuth, encrypted token storage, review queue and explicit publishing | In progress |
 | 7 | Scoped REST/MCP agent connectors, hashed API keys and human approval queue | In progress |
-| 8 | OWASP hardening, rate limits, secret handling, logging and recovery checks | Planned |
+| 8 | OWASP hardening, per-instance rate limits, secret handling, dependency updates and recovery checks | In progress |
 | 9 | Production deployment, domain, monitoring and operational verification | Deferred by request |
 
 The detailed implementation plan remains the source of truth for scope, security constraints and phase completion criteria.

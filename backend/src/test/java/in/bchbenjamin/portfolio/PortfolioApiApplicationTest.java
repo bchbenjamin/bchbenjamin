@@ -36,7 +36,7 @@ class PortfolioApiApplicationTest {
     @Test
     void administrativeSessionRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/admin/session"))
-            .andExpect(status().is3xxRedirection());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test

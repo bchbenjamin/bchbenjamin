@@ -36,6 +36,7 @@ public class SecurityConfig {
         AllowlistedOidcUserService oidcUserService,
         ClientRegistrationRepository registrations,
         AgentTokenAuthenticationFilter agentTokenFilter,
+        RateLimitFilter rateLimitFilter,
         @Value("${app.frontend-url:https://bchbenjamin.in}") String frontendUrl
     ) throws Exception {
         var resolver = new DefaultOAuth2AuthorizationRequestResolver(
@@ -59,6 +60,7 @@ public class SecurityConfig {
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/v1/agent/**"))
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/mcp")))
             .addFilterBefore(agentTokenFilter, AnonymousAuthenticationFilter.class)
+            .addFilterAfter(rateLimitFilter, AgentTokenAuthenticationFilter.class)
             .oauth2Login(oauth -> oauth
                 .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(resolver))
                 .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
@@ -73,8 +75,11 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .contentTypeOptions(Customizer.withDefaults())
                 .frameOptions(frame -> frame.deny())
+                .cacheControl(Customizer.withDefaults())
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'"))
                 .referrerPolicy(referrer -> referrer.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .addHeaderWriter(new org.springframework.security.web.header.writers.StaticHeadersWriter("Permissions-Policy", "camera=(), microphone=(), geolocation=()"))
+                .addHeaderWriter(new org.springframework.security.web.header.writers.StaticHeadersWriter("Cross-Origin-Opener-Policy", "same-origin"))
                 .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000)));
         return http.build();
     }
@@ -89,6 +94,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("Accept", "Content-Type", "X-XSRF-TOKEN", "Authorization", "MCP-Protocol-Version"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+        configuration.setExposedHeaders(List.of("X-RateLimit-Limit", "X-RateLimit-Remaining", "Retry-After"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
