@@ -575,3 +575,27 @@ a:hover .arrow-up-right { transform: translate(3px, -3px); }
 @media (max-width: 760px) { .admin-manager-head { align-items: start; flex-direction: column; } .admin-manager-grid { grid-template-columns: 1fr; } .admin-record-list { max-height: 240px; overflow: auto; } }
 .resume-downloads { display: grid; gap: 8px; justify-items: end; }
 @media (max-width: 760px) { .resume-downloads { justify-items: start; } }
+
+.linkedin-panel { width: 100%; margin-top: 30px; padding-top: 28px; border-top: 1px solid var(--color-border); }
+.linkedin-panel .admin-manager-head { margin-bottom: 14px; }
+.linkedin-connection { padding: 7px 9px; border: 1px solid var(--color-border); color: var(--color-subtle); font-size: 8px; letter-spacing: .12em; }
+.linkedin-connection.is-connected { border-color: rgba(154, 215, 178, .45); color: var(--color-positive); }
+.linkedin-connect { margin: 8px 0 12px; }
+.linkedin-composer { display: grid; gap: 8px; margin-top: 18px; color: var(--color-muted); font-size: 10px; }
+.linkedin-composer textarea { width: 100%; min-height: 125px; resize: vertical; padding: 14px; border: 1px solid var(--color-border); background: #0c0d10; color: var(--color-foreground); font: 12px/1.7 var(--font-body); }
+.linkedin-compose-actions, .linkedin-drafts-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 9px; color: var(--color-subtle); font-size: 8px; }
+.linkedin-compose-actions .button { min-height: 38px; }
+.linkedin-drafts-head { margin-top: 25px; padding: 12px 0; border-bottom: 1px solid var(--color-border); letter-spacing: .14em; }
+.linkedin-drafts-head button { border: 1px solid var(--color-border); padding: 6px 9px; background: transparent; color: var(--color-muted); cursor: pointer; }
+.linkedin-drafts { display: grid; gap: 10px; margin-top: 12px; }
+.linkedin-draft { padding: 15px; border: 1px solid var(--color-border); background: rgba(8, 8, 10, .25); }
+.linkedin-draft-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--color-subtle); font-size: 8px; }
+.draft-status { padding: 5px 7px; border: 1px solid var(--color-border); color: var(--color-muted); font-size: 8px; letter-spacing: .08em; }
+.status-approved { border-color: rgba(103, 152, 255, .45); color: var(--color-accent-soft); }
+.status-published { border-color: rgba(154, 215, 178, .45); color: var(--color-positive); }
+.status-publish_failed, .status-rejected { border-color: rgba(220, 130, 130, .4); color: #dca0a0; }
+.linkedin-draft > p { white-space: pre-wrap; color: #d2d1d4; font-size: 11px; line-height: 1.8; }
+.linkedin-draft-actions { display: flex; gap: 8px; margin-top: 12px; }
+.linkedin-draft-actions button { padding: 7px 10px; border: 1px solid var(--color-border); background: transparent; color: var(--color-foreground); font-size: 9px; cursor: pointer; }
+.linkedin-draft-actions button:hover { border-color: var(--color-accent); }
+@media (max-width: 760px) { .linkedin-panel .admin-manager-head { flex-direction: row; align-items: center; } }

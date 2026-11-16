@@ -58,7 +58,7 @@ public class ResumePdfService {
                                     String variant) {
         boolean concise = "short".equals(variant);
         StringBuilder html = new StringBuilder("""
-            <!doctype html><html lang="en"><head><meta charset="utf-8"/><title>Resume</title>
+            <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>Resume</title>
             <style>
             @page { size: A4; margin: 15mm 16mm; }
             body { font-family: 'DejaVu Sans', sans-serif; font-size: 9pt; line-height: 1.45; color: #17191d; }

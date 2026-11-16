@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import LogoutButton from "@/components/LogoutButton";
 import AdminContentManager from "@/components/AdminContentManager";
+import LinkedInPublishingPanel from "@/components/LinkedInPublishingPanel";
 
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 
@@ -49,6 +50,7 @@ export default function AdminGate() {
       <p className="admin-muted">The owner-only content API is active. Changes are audited.</p>
       <LogoutButton />
       <AdminContentManager />
+      <LinkedInPublishingPanel />
     </div>
   );
 }

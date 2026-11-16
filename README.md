@@ -155,7 +155,7 @@ The Vercel Hobby plan is intended for personal, non-commercial use. The site is 
 | 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | Code complete; provider setup pending |
 | 4 | Refined public portfolio experience and database-backed pages | In progress |
 | 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and long/short/resume variants | In progress |
-| 6 | LinkedIn OAuth, reviewed announcements and publishing workflow | Planned |
+| 6 | LinkedIn OAuth, encrypted token storage, review queue and explicit publishing | In progress |
 | 7 | Scoped REST/MCP AI connectors with human approval | Planned |
 | 8 | OWASP hardening, rate limits, secret handling, logging and recovery checks | Planned |
 | 9 | Production deployment, domain, monitoring and operational verification | Deferred by request |
