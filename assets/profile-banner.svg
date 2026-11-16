@@ -1,0 +1,25 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="30" y1="12" x2="1150" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101827"/><stop offset="0.52" stop-color="#17233A"/><stop offset="1" stop-color="#241B3B"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="120" y1="70" x2="1040" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79D7D1"/><stop offset="0.55" stop-color="#91A9FF"/><stop offset="1" stop-color="#C5A2FF"/>
+    </linearGradient>
+    <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" stroke="#A9B9E8" stroke-opacity=".075"/></pattern>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="matrix(410 180 -180 410 1000 55)" gradientUnits="userSpaceOnUse"><stop stop-color="#7B78FF" stop-opacity=".24"/><stop offset="1" stop-color="#7B78FF" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="300" rx="24" fill="url(#bg)"/>
+  <rect width="1200" height="300" rx="24" fill="url(#grid)"/>
+  <rect width="1200" height="300" rx="24" fill="url(#glow)"/>
+  <circle cx="1010" cy="150" r="112" stroke="url(#accent)" stroke-opacity=".28" stroke-width="1.5"/>
+  <circle cx="1010" cy="150" r="78" stroke="url(#accent)" stroke-opacity=".36" stroke-width="1.5"/>
+  <circle cx="1010" cy="150" r="43" stroke="url(#accent)" stroke-opacity=".55" stroke-width="1.5"/>
+  <path d="M895 150H1125M1010 35V265M928 68L1092 232M1092 68L928 232" stroke="url(#accent)" stroke-opacity=".2"/>
+  <circle cx="1010" cy="150" r="7" fill="url(#accent)"/>
+  <circle cx="1125" cy="150" r="4" fill="#79D7D1"/><circle cx="928" cy="68" r="4" fill="#91A9FF"/><circle cx="1092" cy="232" r="4" fill="#C5A2FF"/>
+  <text x="76" y="92" fill="#9BAECF" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="600" letter-spacing="4">SOFTWARE ENGINEERING  /  APPLIED AI  /  EDGE SYSTEMS</text>
+  <text x="72" y="174" fill="#F4F7FF" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="66" font-weight="750" letter-spacing="-2">B C H Benjamin</text>
+  <rect x="76" y="207" width="54" height="3" rx="1.5" fill="url(#accent)"/>
+  <text x="145" y="216" fill="#C0CBE0" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19">Building useful software for complex, real-world problems.</text>
+</svg>

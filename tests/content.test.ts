@@ -22,6 +22,10 @@ describe("portfolio content", () => {
     }
   });
 
+  it("does not publish a source link for the private AI-IDA repository", () => {
+    expect(getProjectBySlug("ai-ida")?.repo).toBeUndefined();
+  });
+
   it("uses the checked-in snapshot when the public API is not configured", async () => {
     expect(await getSiteContent()).toEqual(site);
   });

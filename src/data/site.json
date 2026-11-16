@@ -19,7 +19,12 @@
       "summary": "An AI-powered safety device designed to bring local threat detection and connected alerts to edge hardware.",
       "description": "AWARESPAN explores a modular, on-premise safety system built around a Raspberry Pi node. The current work focuses on local visual threat detection, a separable processing pipeline and a foundation for reliable alerts without requiring the node to expose itself directly to mobile clients.",
       "role": "Core platform and AI integration",
-      "stack": ["Python", "Raspberry Pi", "Computer Vision", "Node Architecture"],
+      "stack": [
+        "Python",
+        "Raspberry Pi",
+        "Computer Vision",
+        "Node Architecture"
+      ],
       "repo": "https://github.com/awarespan/node-core-processing",
       "visual": "awarespan",
       "featured": true
@@ -32,7 +37,12 @@
       "summary": "A role-aware platform with dedicated views for students and guardians, designed around useful information and clear navigation.",
       "description": "Siddhi is a full-stack application being developed with an emphasis on clear role-specific experiences, report views and a consistent application shell. The work includes frontend architecture, database-backed features and the details that make a product feel coherent across screens.",
       "role": "Full-stack development",
-      "stack": ["Next.js", "TypeScript", "React", "Backend Integration"],
+      "stack": [
+        "Next.js",
+        "TypeScript",
+        "React",
+        "Backend Integration"
+      ],
       "repo": "https://github.com/bchbenjamin/siddhi",
       "visual": "siddhi",
       "featured": true
@@ -45,8 +55,12 @@
       "summary": "A detection pipeline for suspicious internship and job opportunities across messaging and email channels.",
       "description": "AI-IDA investigates how structured message metadata and unstructured content can be combined to identify potentially fraudulent opportunities. The approach includes data collection and cleaning, duplicate and forwarded-message handling, text representations, classification and a semantic explanation layer.",
       "role": "Introduction and core AI integration",
-      "stack": ["Python", "NLP", "Logistic Regression", "Transformer Embeddings"],
-      "repo": "https://github.com/bchbenjamin/AI_IDA",
+      "stack": [
+        "Python",
+        "NLP",
+        "Logistic Regression",
+        "Transformer Embeddings"
+      ],
       "visual": "aiida",
       "featured": true
     },
@@ -58,7 +72,11 @@
       "summary": "A lightweight desktop video editor designed to stay usable on low-spec PCs.",
       "description": "ClipZ is a small-footprint video-editing concept with a simple Tkinter interface and a deliberate focus on minimal dependencies and straightforward distribution. The project avoids heavyweight AI features in favour of a practical desktop tool.",
       "role": "Independent design and development",
-      "stack": ["Python", "Tkinter", "Desktop UX"],
+      "stack": [
+        "Python",
+        "Tkinter",
+        "Desktop UX"
+      ],
       "visual": "clipz",
       "featured": true
     }
@@ -73,13 +91,52 @@
     }
   ],
   "achievements": [
-    { "label": "CHESS", "title": "U-19 District Runner-up", "detail": "Bengaluru Urban · Boys · 2024" },
-    { "label": "COMMUNITY", "title": "Chess.com Ambassador", "detail": "Community ambassador" },
-    { "label": "ACADEMICS", "title": "9.00 Semester GPA", "detail": "Semester 4" }
+    {
+      "label": "CHESS",
+      "title": "U-19 District Runner-up",
+      "detail": "Bengaluru Urban · Boys · 2024"
+    },
+    {
+      "label": "COMMUNITY",
+      "title": "Chess.com Ambassador",
+      "detail": "Community ambassador"
+    },
+    {
+      "label": "ACADEMICS",
+      "title": "9.00 Semester GPA",
+      "detail": "Semester 4"
+    }
   ],
   "skillGroups": [
-    { "name": "PRODUCT & WEB", "skills": ["TypeScript", "JavaScript", "React", "Next.js", "HTML", "CSS"] },
-    { "name": "AI & DATA", "skills": ["Python", "Machine Learning", "Natural Language Processing", "Data Analytics"] },
-    { "name": "SYSTEMS & TOOLS", "skills": ["Java", "Linux", "Git", "Raspberry Pi", "Edge Computing"] }
+    {
+      "name": "PRODUCT & WEB",
+      "skills": [
+        "TypeScript",
+        "JavaScript",
+        "React",
+        "Next.js",
+        "HTML",
+        "CSS"
+      ]
+    },
+    {
+      "name": "AI & DATA",
+      "skills": [
+        "Python",
+        "Machine Learning",
+        "Natural Language Processing",
+        "Data Analytics"
+      ]
+    },
+    {
+      "name": "SYSTEMS & TOOLS",
+      "skills": [
+        "Java",
+        "Linux",
+        "Git",
+        "Raspberry Pi",
+        "Edge Computing"
+      ]
+    }
   ]
 }
