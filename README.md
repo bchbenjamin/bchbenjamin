@@ -61,12 +61,16 @@ I value clear interfaces, honest technical trade-offs, small deployable incremen
 
 This is the special GitHub profile repository for **bchbenjamin**, and the source for [bchbenjamin.in](https://bchbenjamin.in).
 
-The website is a single Next.js application. Phase 0 is intentionally static and data-driven; later phases add the database-backed public read path, owner-only admin, ATS resume engine, LinkedIn publishing, AI connectors and Telegram workflow described in the implementation plan.
+The platform is a Next.js application backed by a Java/Spring Boot REST API and PostgreSQL. PostgreSQL is the canonical source of truth for portfolio content; LinkedIn is a publishing destination, not a profile database. The implementation is being delivered in phases so the public site, CMS, authentication, resume publishing and integrations share one coherent data model.
 
 ### Architecture at a glance
 
 ~~~text
 Next.js 16 · App Router · TypeScript
+        │
+        ├── Java 21 · Spring Boot REST API
+        │       │
+        │       └── PostgreSQL · Flyway migrations
         │
         ├── Public routes
         │     ├── /
@@ -104,6 +108,15 @@ npm run dev
 
 Open http://localhost:3000.
 
+The API requires Java 21. To start the local PostgreSQL service and API:
+
+~~~bash
+docker compose -f infra/compose.yaml up -d postgres
+./mvnw -f backend/pom.xml spring-boot:run
+~~~
+
+The API health endpoint is http://localhost:8080/api/v1/health. See [the architecture notes](docs/architecture.md) for the system boundaries and local setup.
+
 ### Quality gates
 
 Run the same checks required before a push:
@@ -134,16 +147,15 @@ The Vercel Hobby plan is intended for personal, non-commercial use. The site is 
 
 | Phase | Scope | State |
 | --- | --- | --- |
-| 0 | Scaffold, public static pages, theme, CI and first deployment | Current |
-| 1 | Neon Postgres, Drizzle, role-separated access and public views | Planned |
-| 2 | Better Auth, provider-subject allowlist and hidden owner login | Planned |
-| 3 | Admin CRUD, audit trail and cache revalidation | Planned |
-| 4 | ATS-first DOCX resume generation and publishing | Planned |
-| 5 | Deterministic job-description matching and editable tailoring | Planned |
-| 6 | LinkedIn OAuth, manual announcement review and publishing | Planned |
-| 7 | Scoped REST and MCP connectors with a human approval queue | Planned |
-| 8 | Telegram webhook and daily Vercel cron | Planned |
-| 9 | Security hardening, restore drill and operational checks | Planned |
+| 1 | Foundation: Next.js, Spring Boot, PostgreSQL, Docker, environment configuration and CI | In progress |
+| 2 | Core CMS: profile, projects, experience, education, skills and achievements CRUD | Planned |
+| 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | Planned |
+| 4 | Refined public portfolio experience and database-backed pages | Planned |
+| 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and tailored variants | Planned |
+| 6 | LinkedIn OAuth, reviewed announcements and publishing workflow | Planned |
+| 7 | Scoped REST/MCP AI connectors with human approval | Planned |
+| 8 | OWASP hardening, rate limits, secret handling, logging and recovery checks | Planned |
+| 9 | Production deployment, domain, monitoring and operational verification | Deferred by request |
 
 The detailed implementation plan remains the source of truth for scope, security constraints and phase completion criteria.
 
