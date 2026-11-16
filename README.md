@@ -1,177 +1,71 @@
-# Benjamin — Software, AI & Systems
-
 <div align="center">
 
-[![Website](https://img.shields.io/badge/WEBSITE-bchbenjamin.in-6798ff?style=flat-square)](https://bchbenjamin.in)
-[![GitHub](https://img.shields.io/badge/GITHUB-bchbenjamin-181717?style=flat-square&logo=github)](https://github.com/bchbenjamin)
-[![CI](https://github.com/bchbenjamin/bchbenjamin/actions/workflows/ci.yml/badge.svg?branch=phase-0-portfolio-foundation)](https://github.com/bchbenjamin/bchbenjamin/actions/workflows/ci.yml)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
+# B C H Benjamin
 
-**Computer Science & Engineering · Applied AI · Data · Edge Computing**
+**Computer Science & Engineering · Software Development · Applied AI · Edge Computing**
 
-*I build useful software for complex, real-world problems.*
+I build practical software, intelligent systems and tools that solve real problems.
+
+[Portfolio](https://bchbenjamin.in) · [GitHub](https://github.com/bchbenjamin) · [Email](mailto:me@bchbenjamin.in)
 
 </div>
 
----
+## About me
 
-## About
+I'm a Computer Science & Engineering student interested in full-stack engineering, applied machine learning, developer tools and efficient edge systems. I enjoy building projects end-to-end: understanding the problem, designing an architecture, writing the code and validating the result.
 
-I’m Benjamin, a Computer Science & Engineering student interested in the space between intelligent systems and thoughtful product engineering.
+## Selected projects
 
-My work spans full-stack applications, applied machine learning, data workflows and edge devices. I enjoy taking a problem from an early idea through architecture, implementation and testing — while keeping the resulting software practical and maintainable.
+| Project | Focus |
+| --- | --- |
+| [AWARESPAN](https://github.com/awarespan/node-core-processing) | AI-powered safety device, on-device threat detection and connected alerts |
+| [Siddhi](https://github.com/bchbenjamin/siddhi) | Role-aware web application with student and guardian experiences |
+| [AI-IDA](https://github.com/bchbenjamin/AI_IDA) | Detecting suspicious internships and job offers with NLP and structured data |
+| ClipZ | Lightweight Python desktop video editor for modest hardware |
 
-I’m especially interested in:
+## What I work with
 
-- **Applied AI:** machine learning and language technologies used to solve concrete problems.
-- **Edge systems:** bringing useful computation closer to the device, within real hardware constraints.
-- **Product engineering:** building dependable applications with clear interfaces and sensible architecture.
-- **Developer tooling:** small, focused tools that make everyday work easier.
+- **Languages:** Java, Python, TypeScript, JavaScript, SQL
+- **Web & backend:** Next.js, React, Spring Boot, REST APIs, PostgreSQL
+- **AI & systems:** NLP, machine learning, Raspberry Pi, Linux, Git
 
-## Selected work
+## Beyond the code
 
-| Project | What it explores | Stack |
-| --- | --- | --- |
-| [AWARESPAN](https://github.com/awarespan/node-core-processing) | An AI-powered safety device with local threat detection and connected alerts on edge hardware. | Python · Raspberry Pi · Computer Vision |
-| [Siddhi](https://github.com/bchbenjamin/siddhi) | A role-aware platform with student and guardian experiences, reports and backend integration. | Next.js · TypeScript · React |
-| [AI-IDA](https://github.com/bchbenjamin/AI_IDA) | Detection of suspicious internship and job opportunities using message metadata and NLP. | Python · NLP · Classification |
-| **ClipZ** | A lightweight desktop video editor designed for low-spec PCs and minimal dependencies. | Python · Tkinter |
+- Bengaluru Urban U-19 district chess runner-up (2024)
+- Chess.com Ambassador
+- Semester 4 SGPA: 9.00
+- OpenFOAM / FOSSEE internship experience
 
-More detail, project notes and current work live on the [portfolio website](https://bchbenjamin.in).
+## Recently updated public repositories
 
-## Engineering interests
+<!-- PROFILE_ACTIVITY_START -->
+- [capstone-CP002-benjamin-yogeetha](https://github.com/bchbenjamin/capstone-CP002-benjamin-yogeetha)
+- [SIP](https://github.com/bchbenjamin/SIP)
+- [BAINB501](https://github.com/bchbenjamin/BAINB501)
+- [hermes](https://github.com/bchbenjamin/hermes) — A personal Quiz website that helps users to learn quizzes well and score well in their 1-credit exams. Scalable for other MCQ-type exam prep
+- [kmac](https://github.com/bchbenjamin/kmac)
+<!-- PROFILE_ACTIVITY_END -->
 
-~~~text
-PRODUCT & WEB     TypeScript · JavaScript · React · Next.js · HTML · CSS
-AI & DATA         Python · Machine Learning · NLP · Data Analytics
-SYSTEMS & TOOLS   Java · Linux · Git · Raspberry Pi · Edge Computing
-~~~
+## Get in touch
 
-I value clear interfaces, honest technical trade-offs, small deployable increments and tests that prove the intended behaviour.
+For collaboration, projects or technical discussions, visit [bchbenjamin.in](https://bchbenjamin.in) or email [me@bchbenjamin.in](mailto:me@bchbenjamin.in).
 
-## A few milestones
+<details>
+<summary>About this repository</summary>
 
-- **Chess:** U-19 Bengaluru Urban District Boys’ runner-up, 2024.
-- **Community:** Chess.com Ambassador.
-- **Academics:** 9.00 SGPA in Semester 4.
-- **Engineering:** OpenFOAM internship through FOSSEE.
+This special GitHub profile repository also contains the source code for my portfolio platform:
 
-## This repository
+- **Frontend:** Next.js 16 / TypeScript, designed for Vercel.
+- **Backend:** Java 21 / Spring Boot, designed for an always-running Java service with PostgreSQL.
+- **Content:** owner-only CMS, published content API, PDF resumes and reviewed agent integrations.
+- **Operations:** GitHub Actions CI and a daily workflow that updates only the recent public repositories section of this README.
 
-This is the special GitHub profile repository for **bchbenjamin**, and the source for [bchbenjamin.in](https://bchbenjamin.in).
+See [architecture](docs/architecture.md), [security operations](docs/security-operations.md), [agent access](docs/agent-access-mcp.md) and [authentication setup](docs/authentication.md).
 
-The platform is a Next.js application backed by a Java/Spring Boot REST API and PostgreSQL. PostgreSQL is the canonical source of truth for portfolio content; LinkedIn is a publishing destination, not a profile database. The implementation is being delivered in phases so the public site, CMS, authentication, resume publishing and integrations share one coherent data model.
+**Local development:** `npm ci && npm run dev`; backend: `docker compose -f infra/compose.yaml up -d postgres && ./mvnw -f backend/pom.xml spring-boot:run`.
 
-### Architecture at a glance
+**Vercel setup:** import this repository with Root Directory `.` and framework Next.js. Set `API_BASE_URL` (server-side backend origin) and `NEXT_PUBLIC_API_BASE_URL` (browser-facing backend origin). `vercel.json` deliberately contains no secrets or backend deployment configuration.
 
-~~~text
-Next.js 16 · App Router · TypeScript
-        │
-        ├── Java 21 · Spring Boot REST API
-        │       │
-        │       └── PostgreSQL · Flyway migrations
-        │
-        ├── Public routes
-        │     ├── /
-        │     ├── /projects
-        │     ├── /projects/[slug]
-        │     ├── /experience
-        │     ├── /resume
-        │     └── /contact
-        │
-        ├── Public content
-        │     ├── Spring Boot published read API
-        │     └── src/data/site.json fallback snapshot
-        │
-        ├── UI and motion
-        │     ├── Tailwind CSS v4 + Dovetail theme tokens
-        │     ├── Framer Motion
-        │     ├── GSAP ScrollTrigger
-        │     ├── Lenis
-        │     └── WebGL hero accent
-        │
-        └── Delivery
-              ├── GitHub Actions quality gates
-              └── Vercel deployment
-~~~
+The AI-screened contact form and outbound email workflow are planned, not yet deployed. Production credentials, domain routing, OAuth setup, database backups and backend hosting remain external deployment tasks.
 
-### Local development
-
-**Requirements:** Node.js 22.12 or newer (Node.js 24 is used in CI).
-
-~~~bash
-git clone https://github.com/bchbenjamin/bchbenjamin.git
-cd bchbenjamin
-npm ci
-npm run dev
-~~~
-
-Open http://localhost:3000.
-
-The API requires Java 21. To start the local PostgreSQL service and API:
-
-~~~bash
-docker compose -f infra/compose.yaml up -d postgres
-./mvnw -f backend/pom.xml spring-boot:run
-~~~
-
-The API health endpoint is http://localhost:8080/api/v1/health. See [the architecture notes](docs/architecture.md) for the system boundaries and local setup.
-
-### Quality gates
-
-Run the same checks required before a push:
-
-~~~bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
-~~~
-
-The GitHub Actions workflow runs the full sequence and a Gitleaks secret scan on pushes and pull requests targeting main.
-
-### Deployment
-
-The project is designed for Vercel and uses the repository root as its build root.
-
-- Framework: Next.js
-- Install: npm ci
-- Build: npm run build
-- Output: Next.js default output
-- Node.js: 24.x
-- Server-side public API origin: `API_BASE_URL`
-- Browser-side admin API origin: `NEXT_PUBLIC_API_BASE_URL`
-- Backend OAuth credentials, exact OIDC subject allowlist, CORS origins and secure cookie settings are documented in `.env.example` and `docs/authentication.md`
-
-The Vercel Hobby plan is intended for personal, non-commercial use. The site is a personal portfolio and does not include ads, sponsorships or paid features.
-
-### Phased implementation
-
-| Phase | Scope | State |
-| --- | --- | --- |
-| 1 | Foundation: Next.js, Spring Boot, PostgreSQL, Docker, environment configuration and CI | Complete |
-| 2 | Core CMS: relational content schema, seed data, public read API and owner-only CRUD | Complete |
-| 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | Code complete; provider setup pending |
-| 4 | Refined public portfolio experience and database-backed pages | In progress |
-| 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and long/short/resume variants | Complete |
-| 6 | LinkedIn OAuth, encrypted token storage, review queue and explicit publishing | Code complete; LinkedIn app approval/config pending |
-| 7 | Scoped REST/MCP agent connectors, hashed API keys and human approval queue | Complete |
-| 8 | OWASP hardening, per-instance rate limits, secret handling, dependency updates and recovery checks | Baseline complete; production backup/gateway setup pending |
-| 9 | Production deployment, domain, monitoring and operational verification | Deferred by request |
-
-The detailed implementation plan remains the source of truth for scope, security constraints and phase completion criteria.
-
-## Contact
-
-- Website: [bchbenjamin.in](https://bchbenjamin.in)
-- GitHub: [@bchbenjamin](https://github.com/bchbenjamin)
-- Email: [me@bchbenjamin.in](mailto:me@bchbenjamin.in)
-
----
-
-<div align="center">
-
-*Thoughtfully built. Constantly iterating.*
-
-</div>
+</details>
