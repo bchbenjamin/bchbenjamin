@@ -5,6 +5,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -76,8 +77,8 @@ public class EncryptedLinkedInAuthorizedClientService implements OAuth2Authorize
             transientClients.put(key(registrationId, principalName), client);
             return;
         }
-        byte[] refresh = client.getRefreshToken() == null ? null : client.getRefreshToken().getToken().getBytes(StandardCharsets.UTF_8);
-        Encrypted access = encrypt(client.getAccessToken().getToken());
+        byte[] refresh = client.getRefreshToken() == null ? null : client.getRefreshToken().getTokenValue().getBytes(StandardCharsets.UTF_8);
+        Encrypted access = encrypt(client.getAccessToken().getTokenValue());
         Encrypted refreshEncrypted = refresh == null ? null : encrypt(new String(refresh, StandardCharsets.UTF_8));
         Instant issued = client.getAccessToken().getIssuedAt();
         Instant expires = client.getAccessToken().getExpiresAt();

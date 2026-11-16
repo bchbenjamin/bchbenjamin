@@ -2,6 +2,8 @@ package in.bchbenjamin.portfolio;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import in.bchbenjamin.portfolio.agent.AgentTokenService;
+import java.util.Set;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -13,6 +15,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +38,7 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Autowired private MockMvc mockMvc;
+    @Autowired private AgentTokenService agentTokens;
 
     @Test
     void flywayCreatesThePortfolioSchemaAndSeedData() throws Exception {
@@ -61,6 +66,52 @@ class PostgresMigrationIntegrationTest {
     void adminContentApiIsNotPublic() throws Exception {
         mockMvc.perform(get("/api/v1/admin/content/projects"))
             .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void agentRestAndMcpRequireBearerTokens() throws Exception {
+        mockMvc.perform(get("/api/v1/agent/projects"))
+            .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/mcp").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void scopedAgentTokenCanReadAndUseMcpTools() throws Exception {
+        var token = agentTokens.create("integration-reader", Set.of("portfolio:read"), 1, "integration-test");
+        mockMvc.perform(get("/api/v1/agent/projects").header("Authorization", "Bearer " + token.token()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].slug").value("awarespan"));
+        mockMvc.perform(post("/mcp").header("Authorization", "Bearer " + token.token())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.protocolVersion").value("2025-03-26"));
+        mockMvc.perform(post("/api/v1/agent/proposals")
+            .header("Authorization", "Bearer " + token.token())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"resource\":\"projects\",\"operation\":\"CREATE\",\"payload\":{\"name\":\"nope\"}}"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void agentChangesBecomeReviewProposalsRatherThanDirectWrites() throws Exception {
+        var token = agentTokens.create("integration-proposer", Set.of("portfolio:propose"), 1, "integration-test");
+        mockMvc.perform(post("/api/v1/agent/proposals")
+            .header("Authorization", "Bearer " + token.token())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"resource\":\"projects\",\"operation\":\"UPDATE\",\"targetId\":\"00000000-0000-0000-0000-000000000001\",\"payload\":{\"summary\":\"Proposed summary\"}}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("PENDING_REVIEW"));
+    }
+
+    @Test
+    void revokedAgentTokenImmediatelyLosesAccess() throws Exception {
+        var token = agentTokens.create("revocation-test", Set.of("portfolio:read"), 1, "integration-test");
+        agentTokens.revoke(token.id());
+        mockMvc.perform(get("/api/v1/agent/projects").header("Authorization", "Bearer " + token.token()))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test

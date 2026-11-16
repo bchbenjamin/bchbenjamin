@@ -1,5 +1,6 @@
 package in.bchbenjamin.portfolio.linkedin;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class LinkedInPublishingService {
     public Map<String, Object> connectionStatus(OidcUser actor) {
         Integer count = jdbc.queryForObject("SELECT count(*) FROM linkedin_authorized_clients WHERE principal_name = ? AND registration_id = 'linkedin-publisher'", Integer.class, actor.getName());
         OAuth2AuthorizedClient client = authorizedClients.loadAuthorizedClient("linkedin-publisher", actor.getName());
-        boolean connected = count != null && count > 0 && client != null && !client.getAccessToken().isExpired();
+        boolean connected = count != null && count > 0 && client != null && (client.getAccessToken().getExpiresAt() == null || client.getAccessToken().getExpiresAt().isAfter(Instant.now()));
         return Map.of("connected", connected, "provider", "LinkedIn", "publishingPermission", "w_member_social");
     }
 
@@ -69,7 +70,7 @@ public class LinkedInPublishingService {
 
     public Map<String, Object> publish(UUID id, OidcUser actor) {
         OAuth2AuthorizedClient client = authorizedClients.loadAuthorizedClient("linkedin-publisher", actor.getName());
-        if (client == null || client.getAccessToken().isExpired()) {
+        if (client == null || (client.getAccessToken().getExpiresAt() != null && !client.getAccessToken().getExpiresAt().isAfter(Instant.now()))) {
             throw new IllegalStateException("Connect or reconnect LinkedIn publishing before publishing");
         }
         if (apiVersion == null || !apiVersion.matches("\\d{6}")) {
@@ -94,7 +95,7 @@ public class LinkedInPublishingService {
         try {
             var response = restClient.post()
                 .uri("https://api.linkedin.com/rest/posts")
-                .header("Authorization", "Bearer " + client.getAccessToken().getToken())
+                .header("Authorization", "Bearer " + client.getAccessToken().getTokenValue())
                 .header("Linkedin-Version", apiVersion)
                 .header("X-Restli-Protocol-Version", "2.0.0")
                 .header("Content-Type", "application/json")

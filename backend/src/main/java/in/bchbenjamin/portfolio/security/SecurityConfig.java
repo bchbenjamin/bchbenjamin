@@ -9,11 +9,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.http.HttpStatus;
+import in.bchbenjamin.portfolio.agent.AgentTokenAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -22,12 +28,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(
         HttpSecurity http,
         AllowlistedOidcUserService oidcUserService,
         ClientRegistrationRepository registrations,
+        AgentTokenAuthenticationFilter agentTokenFilter,
         @Value("${app.frontend-url:https://bchbenjamin.in}") String frontendUrl
     ) throws Exception {
         var resolver = new DefaultOAuth2AuthorizationRequestResolver(
@@ -36,7 +44,8 @@ public class SecurityConfig {
 
         http
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/api/v1/agent/**", "/mcp"))
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation(fixation -> fixation.migrateSession()))
@@ -44,7 +53,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/health", "/api/v1/csrf", "/actuator/health/**", "/oauth2/**", "/login/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/agent/**", "/mcp").hasRole("AGENT")
                 .anyRequest().denyAll())
+            .exceptionHandling(exceptions -> exceptions
+                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/v1/agent/**"))
+                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/mcp")))
+            .addFilterBefore(agentTokenFilter, AnonymousAuthenticationFilter.class)
             .oauth2Login(oauth -> oauth
                 .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(resolver))
                 .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
@@ -72,7 +86,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.stream(origins.split(",")).map(String::trim).filter(value -> !value.isBlank()).toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Accept", "Content-Type", "X-XSRF-TOKEN"));
+        configuration.setAllowedHeaders(List.of("Accept", "Content-Type", "X-XSRF-TOKEN", "Authorization", "MCP-Protocol-Version"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
