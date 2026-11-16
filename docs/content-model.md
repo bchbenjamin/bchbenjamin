@@ -23,12 +23,13 @@ Every mutable content table carries timestamps, publication state where appropri
 - `GET /api/v1/public/skills`
 - `GET /api/v1/public/achievements`
 
-The public read layer queries only published records and uses explicit projections rather than returning persistence entities. Admin write endpoints are intentionally not exposed until the OIDC/session and authorization controls in Phase 3 are in place. This avoids shipping unauthenticated content mutation routes.
+The public read layer queries only published records and uses explicit projections rather than returning persistence entities. The owner-only admin API provides allowlisted CRUD operations across profile, projects, experience, education, skill groups, skills and achievements. Every mutation is recorded in the admin audit table. Spring Security requires the owner role for every `/api/v1/admin/**` route.
 
 ## Migrations
 
 - `V1`: schema metadata marker.
 - `V2`: normalized portfolio content tables and indexes.
 - `V3`: initial public profile, selected projects, experience, achievements and skills.
+- `V4`: admin audit trail and actor/resource indexes.
 
 Education remains empty until verified education details are added; no qualification or dates are fabricated.

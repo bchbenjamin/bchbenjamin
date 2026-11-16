@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LogoutButton from "@/components/LogoutButton";
+import AdminContentManager from "@/components/AdminContentManager";
 
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
 
@@ -44,7 +46,9 @@ export default function AdminGate() {
       <h2>Welcome, {session.name}.</h2>
       <p>{session.email}</p>
       <p className="admin-muted">Identity provider: {new URL(session.issuer).hostname}</p>
-      <p className="admin-muted">The secure CMS API is ready for the content-management interface.</p>
+      <p className="admin-muted">The owner-only content API is active. Changes are audited.</p>
+      <LogoutButton />
+      <AdminContentManager />
     </div>
   );
 }
