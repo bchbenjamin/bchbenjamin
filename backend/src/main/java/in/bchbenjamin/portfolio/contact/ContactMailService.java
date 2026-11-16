@@ -50,7 +50,7 @@ public class ContactMailService {
             helper.setTo(inbox);
             helper.setReplyTo(message.email());
             if (cc != null && !cc.isBlank()) helper.setCc(cc);
-            helper.setSubject("Portfolio enquiry: " + message.subject());
+            helper.setSubject("Portfolio enquiry: " + safeHeader(message.subject()));
             helper.setText("A contact submission passed email verification and moderation.\n\n"
                 + "Name: " + message.name() + "\nOrganisation: " + nullSafe(message.organization())
                 + "\nEmail: " + message.email() + "\nSubject: " + message.subject()
@@ -70,6 +70,7 @@ public class ContactMailService {
             throw new IllegalStateException("Contact SMTP sender and inbox are not configured");
     }
     private static String nullSafe(String value) { return value == null ? "Not supplied" : value; }
+    private static String safeHeader(String value) { return value == null ? "New enquiry" : value.replaceAll("[\\r\\n\\t]", " ").trim(); }
 
     public record ContactMessage(java.util.UUID id, String name, String organization, String email,
         String subject, String body, String aiDecision, int riskScore, String identityAssessment, String aiReason) { }

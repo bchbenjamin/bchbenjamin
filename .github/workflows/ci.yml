@@ -32,6 +32,8 @@ jobs:
           cache: maven
       - name: Verify Spring Boot API
         run: ./mvnw -B -f backend/pom.xml verify
+      - name: Build Render container image
+        run: docker build --file backend/Dockerfile --tag portfolio-api:ci .
 
   quality:
     name: Quality checks
