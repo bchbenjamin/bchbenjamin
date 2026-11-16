@@ -1,10 +1,12 @@
 package in.bchbenjamin.portfolio;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,12 +25,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.flyway.enabled=false",
     "spring.jpa.hibernate.ddl-auto=none",
     "app.contact.maintenance-enabled=false",
-    "spring.session.jdbc.initialize-schema=never",
-    "spring.sql.init.mode=always"
+    "spring.session.jdbc.initialize-schema=never"
 })
 @AutoConfigureMockMvc
 class PortfolioApiApplicationTest {
     @Autowired private MockMvc mockMvc;
+    @Autowired private JdbcTemplate jdbc;
+
+    @BeforeEach
+    void createJdbcSessionTablesForH2() {
+        jdbc.execute("CREATE TABLE IF NOT EXISTS SPRING_SESSION (PRIMARY_ID CHAR(36) NOT NULL PRIMARY KEY, SESSION_ID CHAR(36) NOT NULL UNIQUE, CREATION_TIME BIGINT NOT NULL, LAST_ACCESS_TIME BIGINT NOT NULL, MAX_INACTIVE_INTERVAL INT NOT NULL, EXPIRY_TIME BIGINT NOT NULL, PRINCIPAL_NAME VARCHAR(100))");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS SPRING_SESSION_ATTRIBUTES (SESSION_PRIMARY_ID CHAR(36) NOT NULL, ATTRIBUTE_NAME VARCHAR(200) NOT NULL, ATTRIBUTE_BYTES BLOB NOT NULL, PRIMARY KEY (SESSION_PRIMARY_ID, ATTRIBUTE_NAME), FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE)");
+    }
 
     @Test
     void healthEndpointReturnsServiceStatus() throws Exception {
