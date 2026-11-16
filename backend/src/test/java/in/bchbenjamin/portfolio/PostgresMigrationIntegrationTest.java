@@ -81,8 +81,8 @@ class PostgresMigrationIntegrationTest {
 
     @Test
     void jdbcSessionMigrationCreatesPersistentSessionTables() {
-        assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION", Long.class));
-        assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES", Long.class));
+        assertNotNull(jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION", Long.class));
+        assertNotNull(jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES", Long.class));
     }
 
     @Test

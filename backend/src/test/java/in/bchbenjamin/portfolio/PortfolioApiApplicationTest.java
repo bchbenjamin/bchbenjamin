@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.datasource.password=",
     "spring.flyway.enabled=false",
     "spring.jpa.hibernate.ddl-auto=none",
-    "app.contact.maintenance-enabled=false"
+    "app.contact.maintenance-enabled=false",
+    "spring.session.store-type=none"
 })
 @AutoConfigureMockMvc
 class PortfolioApiApplicationTest {
