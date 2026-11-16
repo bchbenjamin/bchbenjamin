@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,35 +23,71 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/mcp")
 public class McpController {
-    private static final String PROTOCOL_VERSION = "2025-03-26";
+    private static final String CURRENT_VERSION = "2026-07-28";
+    private static final Set<String> LEGACY_VERSIONS = Set.of("2025-11-25", "2025-06-18", "2025-03-26");
     private final ObjectMapper mapper;
     private final JdbcTemplate jdbc;
     private final AgentProposalService proposals;
+    private final Set<String> allowedOrigins;
 
-    public McpController(ObjectMapper mapper, JdbcTemplate jdbc, AgentProposalService proposals) {
+    public McpController(ObjectMapper mapper, JdbcTemplate jdbc, AgentProposalService proposals,
+                         @Value("${app.security.allowed-origins:http://localhost:3000}") String origins) {
         this.mapper = mapper;
         this.jdbc = jdbc;
         this.proposals = proposals;
+        this.allowedOrigins = java.util.Arrays.stream(origins.split(",")).map(String::trim).filter(value -> !value.isBlank()).collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<JsonNode> handle(@RequestBody JsonNode request,
         @RequestHeader(name = "MCP-Protocol-Version", required = false) String requestedVersion,
+        @RequestHeader(name = "Mcp-Method", required = false) String methodHeader,
+        @RequestHeader(name = "Mcp-Name", required = false) String nameHeader,
+        @RequestHeader(name = "Accept", required = false) String accept,
+        @RequestHeader(name = "Origin", required = false) String origin,
         Authentication authentication) {
         JsonNode id = request.get("id");
-        if (!request.has("id")) return ResponseEntity.accepted().build();
-        if (requestedVersion != null && !PROTOCOL_VERSION.equals(requestedVersion)) {
-            return ResponseEntity.badRequest().body(error(id, -32600, "Unsupported MCP protocol version"));
+        if (origin != null && !allowedOrigins.contains(origin)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (accept == null || !accept.contains("application/json") || !accept.contains("text/event-stream")) {
+            return ResponseEntity.badRequest().body(error(id, -32600, "Accept must include application/json and text/event-stream"));
         }
+        if (!"2.0".equals(request.path("jsonrpc").asText())) return ResponseEntity.badRequest().body(error(id, -32600, "jsonrpc must be 2.0"));
+        if (!request.has("id")) return ResponseEntity.accepted().build();
+
         String method = request.path("method").asText();
         JsonNode params = request.path("params");
+        String version = requestedVersion == null || requestedVersion.isBlank() ? "2025-03-26" : requestedVersion;
+        boolean modern = CURRENT_VERSION.equals(version);
+        if (!modern && !LEGACY_VERSIONS.contains(version)) {
+            ObjectNode response = error(id, -32022, "Unsupported protocol version");
+            ((ObjectNode) response.get("error")).putObject("data").putArray("supported").add(CURRENT_VERSION).add("2025-11-25");
+            return ResponseEntity.badRequest().body(response);
+        }
+        if (modern) {
+            String bodyVersion = params.path("_meta").path("io.modelcontextprotocol/protocolVersion").asText();
+            if (!CURRENT_VERSION.equals(bodyVersion) || !CURRENT_VERSION.equals(requestedVersion)) {
+                return ResponseEntity.badRequest().body(error(id, -32020, "MCP-Protocol-Version header does not match request metadata"));
+            }
+            if (methodHeader == null || !method.equals(methodHeader)) {
+                return ResponseEntity.badRequest().body(error(id, -32020, "Mcp-Method header does not match JSON-RPC method"));
+            }
+            if ("tools/call".equals(method) && (nameHeader == null || !nameHeader.equals(params.path("name").asText()))) {
+                return ResponseEntity.badRequest().body(error(id, -32020, "Mcp-Name header does not match tool name"));
+            }
+            if ("initialize".equals(method) || "notifications/initialized".equals(method)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error(id, -32601, "Initialize handshake is not part of the stateless protocol"));
+            }
+        }
+
         try {
-            return ResponseEntity.ok(success(id, switch (method) {
-                case "initialize" -> initialize();
+            Object result = switch (method) {
+                case "initialize" -> initialize(version);
+                case "ping" -> mapper.createObjectNode();
                 case "tools/list" -> tools(authentication);
                 case "tools/call" -> call(params, authentication);
                 default -> throw new McpError(-32601, "Method not found");
-            }));
+            };
+            return ResponseEntity.ok(success(id, result, modern));
         } catch (McpError error) {
             return ResponseEntity.ok(error(id, error.code, error.getMessage()));
         } catch (Exception exception) {
@@ -57,9 +95,9 @@ public class McpController {
         }
     }
 
-    private ObjectNode initialize() {
+    private ObjectNode initialize(String version) {
         ObjectNode result = mapper.createObjectNode();
-        result.put("protocolVersion", PROTOCOL_VERSION);
+        result.put("protocolVersion", version);
         result.putObject("capabilities").putObject("tools").put("listChanged", false);
         result.putObject("serverInfo").put("name", "bchbenjamin-portfolio").put("version", "0.1.0");
         result.put("instructions", "Read published portfolio data. Any requested changes are proposals and require owner review; agents cannot directly mutate portfolio content.");
@@ -136,11 +174,16 @@ public class McpController {
         if (!hasScope(authentication, scope)) throw new McpError(-32003, "Token lacks required scope: " + scope);
     }
 
-    private ObjectNode success(JsonNode id, Object result) {
+    private ObjectNode success(JsonNode id, Object result, boolean modern) {
         ObjectNode response = mapper.createObjectNode();
         response.put("jsonrpc", "2.0");
         response.set("id", id == null ? mapper.getNodeFactory().nullNode() : id);
-        response.set("result", mapper.valueToTree(result));
+        ObjectNode resultNode = mapper.valueToTree(result);
+        if (modern) {
+            ObjectNode metadata = resultNode.putObject("_meta");
+            metadata.putObject("io.modelcontextprotocol/serverInfo").put("name", "bchbenjamin-portfolio").put("version", "0.1.0");
+        }
+        response.set("result", resultNode);
         return response;
     }
 

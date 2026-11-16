@@ -84,6 +84,7 @@ class PostgresMigrationIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].slug").value("awarespan"));
         mockMvc.perform(post("/mcp").header("Authorization", "Bearer " + token.token())
+            .header("Accept", "application/json, text/event-stream")
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}"))
             .andExpect(status().isOk())
@@ -93,6 +94,31 @@ class PostgresMigrationIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"resource\":\"projects\",\"operation\":\"CREATE\",\"payload\":{\"name\":\"nope\"}}"))
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void currentMcpProtocolUsesScopedToolsAndStandardHeaders() throws Exception {
+        var token = agentTokens.create("integration-mcp", Set.of("portfolio:read"), 1, "integration-test");
+        String metadata = "\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\",\"io.modelcontextprotocol/clientInfo\":{\"name\":\"integration-test\",\"version\":\"1\"},\"io.modelcontextprotocol/clientCapabilities\":{}}";
+        mockMvc.perform(post("/mcp")
+            .header("Authorization", "Bearer " + token.token())
+            .header("MCP-Protocol-Version", "2026-07-28")
+            .header("Mcp-Method", "tools/list")
+            .header("Accept", "application/json, text/event-stream")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\",\"params\":{" + metadata + "}}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.tools[0].name").value("portfolio_get_profile"));
+        mockMvc.perform(post("/mcp")
+            .header("Authorization", "Bearer " + token.token())
+            .header("MCP-Protocol-Version", "2026-07-28")
+            .header("Mcp-Method", "tools/call")
+            .header("Mcp-Name", "portfolio_get_profile")
+            .header("Accept", "application/json, text/event-stream")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{" + metadata + ",\"name\":\"portfolio_get_profile\",\"arguments\":{}}}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.structuredContent.full_name").value("Benjamin"));
     }
 
     @Test

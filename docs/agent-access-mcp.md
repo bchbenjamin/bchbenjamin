@@ -24,8 +24,11 @@ A proposal specifies a resource (`profile`, `projects`, `experience`, `education
 
 - URL: `/mcp`
 - Transport: stateless Streamable HTTP-compatible JSON-RPC POST.
-- Protocol version: `2025-03-26`.
+- Current protocol version: `2026-07-28` (stateless request metadata; no initialize handshake).
+- Legacy compatibility: `2025-11-25`, `2025-06-18` and `2025-03-26` initialization flow.
 - Authentication: same scoped bearer token.
+
+For the current protocol, each request includes `_meta.io.modelcontextprotocol/protocolVersion` matching the `MCP-Protocol-Version` header. Send `Mcp-Method` for every request and `Mcp-Name` for `tools/call`. The `Accept` header must include both `application/json` and `text/event-stream`; this implementation returns JSON responses and does not open an SSE stream. Requests with an Origin header must match `ALLOWED_ORIGINS`.
 
 Tools exposed by scope:
 
@@ -33,7 +36,7 @@ Tools exposed by scope:
 - `portfolio_list_projects`
 - `portfolio_create_change_proposal`
 
-The proposal tool creates a pending human-review item; it never mutates the portfolio. The MCP endpoint is stateless and does not issue a session ID. Clients should send `Accept: application/json` and `Content-Type: application/json`, and include `MCP-Protocol-Version: 2025-03-26` after initialization.
+The proposal tool creates a pending human-review item; it never mutates the portfolio. The MCP endpoint is stateless and does not issue a session ID. Clients should send `Accept: application/json, text/event-stream` and `Content-Type: application/json`. Current clients send `MCP-Protocol-Version: 2026-07-28` and the matching protocol-version entry in request `_meta`.
 
 ## Operational notes
 
