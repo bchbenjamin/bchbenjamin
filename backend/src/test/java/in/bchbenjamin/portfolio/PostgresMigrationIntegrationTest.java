@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import org.springframework.http.MediaType;
@@ -80,6 +81,7 @@ class PostgresMigrationIntegrationTest {
     @Test
     void scopedAgentTokenCanReadAndUseMcpTools() throws Exception {
         var token = agentTokens.create("integration-reader", Set.of("portfolio:read"), 1, "integration-test");
+        assertNotNull(agentTokens.authenticate(token.token()));
         mockMvc.perform(get("/api/v1/agent/projects").header("Authorization", "Bearer " + token.token()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].slug").value("awarespan"));

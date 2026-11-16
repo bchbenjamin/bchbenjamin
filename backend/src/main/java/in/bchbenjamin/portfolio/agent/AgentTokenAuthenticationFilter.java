@@ -21,7 +21,7 @@ public class AgentTokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
+        String path = request.getRequestURI().substring(request.getContextPath().length());
         return !path.startsWith("/api/v1/agent/") && !path.equals("/mcp");
     }
 

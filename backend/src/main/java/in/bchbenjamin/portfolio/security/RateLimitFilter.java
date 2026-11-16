@@ -41,13 +41,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return "OPTIONS".equalsIgnoreCase(request.getMethod())
-            || request.getServletPath().startsWith("/actuator/health");
+            || request.getRequestURI().substring(request.getContextPath().length()).startsWith("/actuator/health");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws ServletException, IOException {
-        String path = request.getServletPath();
+        String path = request.getRequestURI().substring(request.getContextPath().length());
         AgentIdentity agent = request.getAttribute("agentIdentity") instanceof AgentIdentity identity ? identity : null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean authenticatedUser = authentication != null && authentication.isAuthenticated()
