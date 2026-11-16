@@ -15,11 +15,12 @@ Vercel's container runtime and multi-service support are currently beta. Contain
 
 ## Vercel setup
 
-1. Merge the implementation PR into `main`.
-2. Import `bchbenjamin/bchbenjamin` into Vercel. In Project Settings → Build and Deployment, set the framework preset to **Services**. Use the repository root; `vercel.json` configures the `frontend` and `backend` services.
-3. Set Node.js 24.x for the Next.js service.
-4. Create a PostgreSQL database. Neon is a good fit for a low-volume serverless API; the Vercel-managed Neon integration provisions it from the Marketplace and injects `DATABASE_URL` (pooled) plus `DATABASE_URL_UNPOOLED` (direct). Runtime queries use the pooled URL; Flyway automatically uses the direct URL for migrations. The backend also supports Render Postgres connection strings.
-5. Configure these project environment variables in Vercel (Preview and Production as appropriate):
+1. Confirm the deployment files are on the GitHub `main` branch. Import `bchbenjamin/bchbenjamin` into Vercel and select `main`.
+2. Keep Root Directory as `./` (the repository root). Do not point the project at `backend/`.
+3. If the New Project import screen initially shows **Other** for Application Preset, complete project creation first. Then open Project Settings → Build & Development Settings → Framework Preset, select **Services**, and save. This is mandatory: Vercel only builds the `services` block when the project Framework Preset is Services. Redeploy the latest `main` commit after changing it.
+4. Confirm the project has two services: `frontend` (Next.js) and `backend` (container built from `backend/Dockerfile.vercel`). Keep Node.js 24.x for the Next.js service.
+5. Create a PostgreSQL database. Neon is a good fit for a low-volume serverless API; the Vercel-managed Neon integration provisions it from the Marketplace and injects `DATABASE_URL` (pooled) plus `DATABASE_URL_UNPOOLED` (direct). Runtime queries use the pooled URL; Flyway automatically uses the direct URL for migrations. The backend also supports Render Postgres connection strings.
+6. Configure these project environment variables in Vercel (Preview and Production as appropriate):
    - `DATABASE_URL`: managed Postgres connection string.
    - `DATABASE_POOL_SIZE=2`: keep per-container database connections modest for a serverless pooler.
    - `DATABASE_URL_UNPOOLED` is injected by Neon for direct Flyway migrations; if your provider uses another name, set `FLYWAY_DATABASE_URL` to its direct JDBC/connection URL.
@@ -36,12 +37,12 @@ Vercel's container runtime and multi-service support are currently beta. Contain
    - `SMTP_USERNAME`, `SMTP_APP_PASSWORD`, optional `CONTACT_FROM_EMAIL`, `CONTACT_INBOX_EMAIL=bchbenjamin@gmail.com`, and optional `CONTACT_NOTIFICATION_CC`.
    - `CONTACT_IP_HASH_SALT`.
    - `CRON_SECRET`: a long random secret. Vercel Cron sends it as `Authorization: Bearer ...`; the Next.js route forwards it to the backend maintenance endpoint.
-6. Configure OAuth redirect URIs exactly:
+7. Configure OAuth redirect URIs exactly:
    - `https://bchbenjamin.in/login/oauth2/code/google`
    - `https://bchbenjamin.in/login/oauth2/code/linkedin`
    - `https://bchbenjamin.in/login/oauth2/code/linkedin-publisher`
-7. Attach `bchbenjamin.in` and `www.bchbenjamin.in` to the Vercel project and configure the DNS records Vercel provides. Choose one canonical hostname.
-8. Deploy a Preview first. Test public routes, database-backed content, OAuth login, session persistence across requests, PDF generation, contact verification, AI moderation, inbox delivery and the admin review queue. Then promote Production.
+8. Attach `bchbenjamin.in` and `www.bchbenjamin.in` to the Vercel project and configure the DNS records Vercel provides. Choose one canonical hostname.
+9. Deploy a Preview first. Test public routes, database-backed content, OAuth login, session persistence across requests, PDF generation, contact verification, AI moderation, inbox delivery and the admin review queue. Then promote Production.
 
 ### Contact mail on Vercel
 

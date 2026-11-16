@@ -61,6 +61,33 @@ I choose tools around the problem rather than forcing every problem into the sam
 - **Academics:** 9.00 SGPA in Semester 4.
 - **Engineering:** OpenFOAM internship through FOSSEE.
 
+## Deploy to Vercel
+
+This repository is configured as **one Vercel Services project** containing the Next.js website and the Java 21 / Spring Boot API. It is not a frontend-only deployment. Both services are built from the same `main` branch and served through `bchbenjamin.in`.
+
+### Create the Vercel project
+
+1. In Vercel, import **`bchbenjamin/bchbenjamin`** and select the **`main`** branch. The deployment configuration is committed to `main`.
+2. Keep the **Root Directory** as `./` (the repository root). Do not set it to `backend/`.
+3. If the import screen initially displays **Other** as the Application Preset, finish creating the project first. Then open **Project Settings → Build & Development Settings → Framework Preset**, select **Services**, and save. Services mode is required for the `services` block in `vercel.json`; leaving the project on Other or Next.js alone will not build both services.
+4. Redeploy the latest `main` commit after changing the preset. The project should show two services: `frontend` (Next.js) and `backend` (Java container using `backend/Dockerfile.vercel`).
+5. Keep the project root at `./`. The root `vercel.json` owns the routing: API, OAuth, MCP and health paths go to Spring Boot; the remaining paths go to Next.js.
+
+### Connect the database and configure environment
+
+1. Provision PostgreSQL (Neon via the Vercel Marketplace is the recommended starting point). Configure the pooled connection as `DATABASE_URL` and the direct connection as `DATABASE_URL_UNPOOLED` so runtime queries and Flyway migrations use the correct connection types.
+2. Add the production environment variables and secrets listed in [`docs/deployment.md`](docs/deployment.md). At minimum, this includes the database URLs, `DATABASE_POOL_SIZE=2`, `PORT=8080`, the public site URLs, session settings, OAuth credentials and allowlist, AI moderation credentials, SMTP credentials, `TOKEN_ENCRYPTION_KEY`, `CONTACT_IP_HASH_SALT` and `CRON_SECRET`. Never commit secret values or expose them through `NEXT_PUBLIC_*`.
+3. Register these OAuth callback URLs with the identity providers:
+   - `https://bchbenjamin.in/login/oauth2/code/google`
+   - `https://bchbenjamin.in/login/oauth2/code/linkedin`
+   - `https://bchbenjamin.in/login/oauth2/code/linkedin-publisher`
+4. Add `bchbenjamin.in` and `www.bchbenjamin.in` to the Vercel project and apply the DNS records Vercel provides.
+5. Deploy and verify the public site, `/actuator/health`, OAuth login and persistent sessions, resume PDF, contact email verification, AI moderation, owner notification and admin review queue before treating the deployment as production-ready.
+
+**Important:** Vercel Services and its container runtime are beta features. They are not a promise of zero-cost hosting; check current usage limits and billing. PostgreSQL is a separate managed service. If you prefer a conventional always-on backend, [`render.yaml`](render.yaml) and the Render fallback in the deployment runbook remain available.
+
+Full environment-variable descriptions, database behavior, SMTP setup, cron behavior and the Render alternative are documented in [`docs/deployment.md`](docs/deployment.md).
+
 ## Recently updated public repositories
 
 <!-- PROFILE_ACTIVITY_START -->
@@ -122,7 +149,7 @@ docker compose -f infra/compose.yaml up -d postgres
 
 ### Deployment
 
-- **Vercel:** import the repository and let `vercel.json` configure the Next.js frontend and Java/Spring Boot container service. The container runtime and multi-service routing are beta features.
+- **Vercel:** import the `main` branch, keep the repository root as `./`, and set the project Framework Preset to **Services** in Project Settings. The import wizard may initially show Other; the Services preset is mandatory for both applications to build. Follow the [deployment steps above](#deploy-to-vercel).
 - **Database:** provide an external PostgreSQL connection string (Neon is a suitable serverless option). JDBC-backed sessions preserve admin logins across container scale-down.
 - **Secrets:** OAuth credentials, AI pipeline key, Gmail SMTP App Password, token-encryption key, cron secret and admin OIDC allowlist belong in Vercel environment secrets.
 - **Domain:** point `bchbenjamin.in` to Vercel. No separate API subdomain is required for the multi-service setup.
