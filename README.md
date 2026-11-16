@@ -4,7 +4,7 @@
 
 [![Website](https://img.shields.io/badge/WEBSITE-bchbenjamin.in-6798ff?style=flat-square)](https://bchbenjamin.in)
 [![GitHub](https://img.shields.io/badge/GITHUB-bchbenjamin-181717?style=flat-square&logo=github)](https://github.com/bchbenjamin)
-[![CI](https://github.com/bchbenjamin/bchbenjamin/actions/workflows/ci.yml/badge.svg)](https://github.com/bchbenjamin/bchbenjamin/actions/workflows/ci.yml)
+[![CI](https://github.com/bchbenjamin/bchbenjamin/actions/workflows/ci.yml/badge.svg?branch=phase-0-portfolio-foundation)](https://github.com/bchbenjamin/bchbenjamin/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 

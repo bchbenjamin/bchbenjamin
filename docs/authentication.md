@@ -31,8 +31,9 @@ Register these exact callback paths with each provider, using the public API ori
 
 - `https://api.bchbenjamin.in/login/oauth2/code/google`
 - `https://api.bchbenjamin.in/login/oauth2/code/linkedin`
+- `https://api.bchbenjamin.in/login/oauth2/code/linkedin-publisher`
 
-For local development use `http://localhost:8080/login/oauth2/code/google` and `http://localhost:8080/login/oauth2/code/linkedin`.
+For local development use `http://localhost:8080/login/oauth2/code/google`, `http://localhost:8080/login/oauth2/code/linkedin` and `http://localhost:8080/login/oauth2/code/linkedin-publisher`.
 
 LinkedIn OIDC product access and provider app approval are external prerequisites. The expected issuer claim is `https://www.linkedin.com`; the documented authorization, token, UserInfo and JWKS endpoints are configured explicitly. Do not treat the LinkedIn sign-in button as production-ready until the provider app has OIDC access and the callback has been verified end-to-end. LinkedIn's OIDC product provides account authentication and profile claims; LinkedIn explicitly cautions that it does not verify a member's real-world identity.
 
