@@ -69,7 +69,7 @@ This repository is configured as **one Vercel Services project** containing the 
 
 1. In Vercel, import **`bchbenjamin/bchbenjamin`** and select the **`main`** branch. The deployment configuration is committed to `main`.
 2. Keep the **Root Directory** as `./` (the repository root). Do not set it to `backend/`.
-3. If the import screen initially displays **Other** as the Application Preset, finish creating the project first. Then open **Project Settings → Build & Development Settings → Framework Preset**, select **Services**, and save. Services mode is required for the `services` block in `vercel.json`; leaving the project on Other or Next.js alone will not build both services.
+3. In **Application Preset**, select **Services** if it is offered in the import wizard. If the wizard only shows **Other**, complete project creation first, then open **Project Settings → Build & Development Settings → Framework Preset**, select **Services**, and save. Services mode is required for the `services` block in `vercel.json`; leaving the project on Other or Next.js alone will not build both services.
 4. Redeploy the latest `main` commit after changing the preset. The project should show two services: `frontend` (Next.js) and `backend` (Java container using `backend/Dockerfile.vercel`).
 5. Keep the project root at `./`. The root `vercel.json` owns the routing: API, OAuth, MCP and health paths go to Spring Boot; the remaining paths go to Next.js.
 
