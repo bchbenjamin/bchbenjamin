@@ -1,0 +1,28 @@
+:root {
+  color-scheme: dark;
+  --color-background: #0b0b0c;
+  --color-surface: #141414;
+  --color-surface-raised: #19191b;
+  --color-border: #313131;
+  --color-border-soft: #242426;
+  --color-foreground: #f1f0ed;
+  --color-muted: #a1a0a4;
+  --color-subtle: #707075;
+  --color-accent: #6798ff;
+  --color-accent-soft: #a9c3ff;
+  --color-positive: #9ad7b2;
+  --font-display: "Iowan Old Style", "Baskerville", "Palatino Linotype", Georgia, serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --shell-width: 1220px;
+}
+
+@theme inline {
+  --color-portfolio-background: var(--color-background);
+  --color-portfolio-surface: var(--color-surface);
+  --color-portfolio-border: var(--color-border);
+  --color-portfolio-foreground: var(--color-foreground);
+  --color-portfolio-muted: var(--color-muted);
+  --color-portfolio-accent: var(--color-accent);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+}

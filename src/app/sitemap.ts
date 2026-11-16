@@ -1,0 +1,18 @@
+import type { MetadataRoute } from "next";
+import { projects } from "@/lib/content";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = "https://bchbenjamin.in";
+  const pages: MetadataRoute.Sitemap = [
+    { url: baseUrl, changeFrequency: "monthly", priority: 1 },
+    { url: baseUrl + "/projects", changeFrequency: "monthly", priority: 0.9 },
+    { url: baseUrl + "/experience", changeFrequency: "monthly", priority: 0.7 },
+    { url: baseUrl + "/resume", changeFrequency: "monthly", priority: 0.7 },
+    { url: baseUrl + "/contact", changeFrequency: "yearly", priority: 0.6 }
+  ];
+  return pages.concat(projects.map((project) => ({
+    url: baseUrl + "/projects/" + project.slug,
+    changeFrequency: "monthly" as const,
+    priority: 0.8
+  })));
+}
