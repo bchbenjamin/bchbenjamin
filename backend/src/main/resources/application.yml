@@ -17,6 +17,21 @@ spring:
     enabled: true
   jackson:
     default-property-inclusion: non_null
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 8000
+          writetimeout: 8000
   security:
     oauth2:
       client:
@@ -94,6 +109,19 @@ app:
     agent-per-minute: ${RATE_LIMIT_AGENT_PER_MINUTE:60}
     admin-per-minute: ${RATE_LIMIT_ADMIN_PER_MINUTE:120}
     default-per-minute: ${RATE_LIMIT_DEFAULT_PER_MINUTE:60}
+    contact-per-minute: ${RATE_LIMIT_CONTACT_PER_MINUTE:4}
+  contact:
+    ai-base-url: ${CONTACT_AI_BASE_URL:}
+    ai-api-key: ${CONTACT_AI_API_KEY:}
+    ai-model: ${CONTACT_AI_MODEL:}
+    ai-path: ${CONTACT_AI_PATH:/v1/chat/completions}
+    smtp-from: ${CONTACT_FROM_EMAIL:${SMTP_USERNAME:}}
+    inbox: ${CONTACT_INBOX_EMAIL:bchbenjamin@gmail.com}
+    notification-cc: ${CONTACT_NOTIFICATION_CC:}
+    ip-hash-salt: ${CONTACT_IP_HASH_SALT:}
+    retention-days: ${CONTACT_RETENTION_DAYS:180}
+    maintenance-enabled: ${CONTACT_MAINTENANCE_ENABLED:true}
+    maintenance-delay-ms: ${CONTACT_MAINTENANCE_DELAY_MS:300000}
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
   security:
     admin-subjects: ${ADMIN_ALLOWED_SUBJECTS:}

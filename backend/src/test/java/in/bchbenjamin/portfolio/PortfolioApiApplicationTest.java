@@ -7,6 +7,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.hamcrest.Matchers.containsString;
@@ -19,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.datasource.username=sa",
     "spring.datasource.password=",
     "spring.flyway.enabled=false",
-    "spring.jpa.hibernate.ddl-auto=none"
+    "spring.jpa.hibernate.ddl-auto=none",
+    "app.contact.maintenance-enabled=false"
 })
 @AutoConfigureMockMvc
 class PortfolioApiApplicationTest {
@@ -45,6 +48,14 @@ class PortfolioApiApplicationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
             .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    void contactEndpointRejectsInvalidSubmissionBeforePersistence() throws Exception {
+        mockMvc.perform(post("/api/v1/public/contact")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"name\":\"\",\"email\":\"not-an-email\",\"subject\":\"x\",\"message\":\"short\"}"))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

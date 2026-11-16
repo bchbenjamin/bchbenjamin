@@ -3,6 +3,7 @@ import HeroShaderLoader from "@/components/HeroShaderLoader";
 import WaveDivider from "@/components/WaveDivider";
 import ProjectVisual from "@/components/ProjectVisual";
 import SectionHeading from "@/components/SectionHeading";
+import ContactForm from "@/components/ContactForm";
 import { getSiteContent } from "@/lib/content";
 
 function Arrow() {
@@ -121,8 +122,12 @@ export default async function HomePage() {
           <h2>Have a thoughtful problem<br />worth solving?</h2>
           <p>I’m always interested in good engineering conversations and worthwhile collaborations.</p>
         </div>
-        <Link className="button button-primary" href="/contact">Start a conversation <Arrow /></Link>
+        <Link className="button button-primary" href="#contact-form">Start a conversation <Arrow /></Link>
         <span className="callout-watermark">BCH</span>
+      </section>
+      <section className="shell home-contact-form" id="contact-form" data-reveal>
+        <div className="home-contact-heading"><p className="eyebrow"><span className="eyebrow-line" /> SEND A NOTE / 05</p><h2>Tell me what you’re<br /><span>thinking about.</span></h2><p>Share a little context. Verified, approved enquiries reach my inbox directly.</p></div>
+        <ContactForm />
       </section>
     </>
   );

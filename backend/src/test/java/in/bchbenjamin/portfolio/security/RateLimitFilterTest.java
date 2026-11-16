@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RateLimitFilterTest {
     @Test
     void appliesFixedWindowLimitAndReturnsRetryAfter() throws Exception {
-        RateLimitFilter filter = new RateLimitFilter(2, 2, 2, 2);
+        RateLimitFilter filter = new RateLimitFilter(2, 2, 2, 2, 2);
         for (int i = 0; i < 2; i++) {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/public/projects");
             request.setServletPath("/api/v1/public/projects");

@@ -80,6 +80,11 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
+    void contactMigrationCreatesTheModerationAndVerificationQueue() {
+        assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM contact_submissions", Long.class));
+    }
+
+    @Test
     void resumePdfIsGeneratedAsARealPdfDocument() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/v1/public/resume.pdf?variant=resume"))
             .andExpect(status().isOk())

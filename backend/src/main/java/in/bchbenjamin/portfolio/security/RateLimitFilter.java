@@ -25,17 +25,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final int agentLimit;
     private final int adminLimit;
     private final int defaultLimit;
+    private final int contactLimit;
 
     public RateLimitFilter(
         @Value("${app.rate-limit.public-per-minute:120}") int publicLimit,
         @Value("${app.rate-limit.agent-per-minute:60}") int agentLimit,
         @Value("${app.rate-limit.admin-per-minute:120}") int adminLimit,
-        @Value("${app.rate-limit.default-per-minute:60}") int defaultLimit
+        @Value("${app.rate-limit.default-per-minute:60}") int defaultLimit,
+        @Value("${app.rate-limit.contact-per-minute:4}") int contactLimit
     ) {
         this.publicLimit = publicLimit;
         this.agentLimit = agentLimit;
         this.adminLimit = adminLimit;
         this.defaultLimit = defaultLimit;
+        this.contactLimit = contactLimit;
     }
 
     @Override
@@ -54,7 +57,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
             && !(authentication instanceof AnonymousAuthenticationToken);
         int limit;
         String key;
-        if (agent != null || path.startsWith("/api/v1/agent/") || "/mcp".equals(path)) {
+        if ("POST".equalsIgnoreCase(request.getMethod()) && "/api/v1/public/contact".equals(path)) {
+            limit = contactLimit;
+            key = "contact-ip:" + request.getRemoteAddr();
+        } else if (agent != null || path.startsWith("/api/v1/agent/") || "/mcp".equals(path)) {
             limit = agentLimit;
             key = agent == null ? "agent-ip:" + request.getRemoteAddr() : "agent:" + agent.id();
         } else if (path.startsWith("/api/v1/admin/")) {

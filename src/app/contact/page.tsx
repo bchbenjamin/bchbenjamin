@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteContent } from "@/lib/content";
+import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -16,18 +17,11 @@ export default async function ContactPage() {
         <h1>Good work starts<br /><span>with a conversation.</span></h1>
         <p>Have a project, an interesting technical problem or an idea worth exploring? Send a note.</p>
       </div>
-      <div className="contact-panel" data-reveal>
-        <div className="contact-panel-copy">
-          <span className="eyebrow">THE SIMPLEST WAY IN</span>
-          <a className="contact-email" href={"mailto:" + site.owner.email}>{site.owner.email}<span>↗</span></a>
-          <p>I usually prefer a clear note with a little context: what you’re building, what you’re trying to solve and where I might fit in.</p>
-        </div>
-        <div className="contact-panel-links">
-          <a href={site.owner.github} target="_blank" rel="noreferrer"><span>GITHUB</span><strong>Explore the code <i>↗</i></strong></a>
-          <Link href="/projects"><span>PORTFOLIO</span><strong>Browse selected work <i>↗</i></strong></Link>
-          <span className="contact-location"><span>LOCATION</span><strong>{site.owner.location}</strong></span>
-        </div>
+      <div className="contact-form-shell" data-reveal>
+        <div className="contact-form-heading"><div><span className="eyebrow">SEND A MESSAGE</span><h2>Tell me what you have in mind.</h2><p>Submissions are screened for spam and verified by email before they reach my inbox.</p></div><span className="contact-form-index">01 / 01</span></div>
+        <ContactForm />
       </div>
+      <div className="contact-alternatives"><span>Prefer email?</span><a href={`mailto:${site.owner.email}`}>{site.owner.email} ↗</a><Link href="/projects">Browse selected work ↗</Link></div>
     </section>
   );
 }
