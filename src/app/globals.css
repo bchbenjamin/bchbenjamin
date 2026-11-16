@@ -573,3 +573,5 @@ a:hover .arrow-up-right { transform: translate(3px, -3px); }
 .admin-editor-actions .button { min-height: 38px; }
 .admin-message { min-height: 34px; margin: 0 !important; padding: 12px 14px; color: var(--color-subtle) !important; font-size: 9px !important; }
 @media (max-width: 760px) { .admin-manager-head { align-items: start; flex-direction: column; } .admin-manager-grid { grid-template-columns: 1fr; } .admin-record-list { max-height: 240px; overflow: auto; } }
+.resume-downloads { display: grid; gap: 8px; justify-items: end; }
+@media (max-width: 760px) { .resume-downloads { justify-items: start; } }

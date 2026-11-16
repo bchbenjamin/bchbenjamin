@@ -10,6 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.web.servlet.MvcResult;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +44,17 @@ class PostgresMigrationIntegrationTest {
         mockMvc.perform(get("/api/v1/public/profile"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.fullName").value("Benjamin"));
+    }
+
+    @Test
+    void resumePdfIsGeneratedAsARealPdfDocument() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/public/resume.pdf?variant=resume"))
+            .andExpect(status().isOk())
+            .andReturn();
+        assertTrue(result.getResponse().getContentType().startsWith("application/pdf"));
+        byte[] bytes = result.getResponse().getContentAsByteArray();
+        assertTrue(bytes.length > 500);
+        assertTrue(new String(bytes, 0, 4).equals("%PDF"));
     }
 
     @Test

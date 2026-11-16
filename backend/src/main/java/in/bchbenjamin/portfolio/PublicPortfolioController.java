@@ -41,7 +41,7 @@ public class PublicPortfolioController {
     @GetMapping("/projects")
     public List<Map<String, Object>> projects() {
         return jdbc.queryForList("""
-            SELECT slug, name, tagline, summary, description, role, status,
+            SELECT slug, name, tagline, summary, description, short_description, resume_description, role, status,
                    repository_url, live_url, featured, started_on, completed_on
             FROM projects WHERE published = TRUE ORDER BY sort_order, name
             """);
@@ -50,7 +50,7 @@ public class PublicPortfolioController {
     @GetMapping("/projects/{slug}")
     public Map<String, Object> project(@PathVariable String slug) {
         return jdbc.query("""
-            SELECT slug, name, tagline, summary, description, role, status,
+            SELECT slug, name, tagline, summary, description, short_description, resume_description, role, status,
                    repository_url, live_url, featured, started_on, completed_on
             FROM projects WHERE published = TRUE AND slug = ?
             """, (rs, rowNum) -> Map.<String, Object>ofEntries(

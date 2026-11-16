@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default async function ResumePage() {
   const site = await getSiteContent();
+  const resumeApiConfigured = Boolean(process.env.API_BASE_URL);
   return (
     <section className="shell inner-page resume-page">
       <div className="page-intro" data-reveal>
@@ -19,7 +20,12 @@ export default async function ResumePage() {
       <div className="resume-sheet" data-reveal>
         <div className="resume-sheet-head">
           <div><p className="eyebrow">CURRICULUM VITAE / 2026</p><h2>{site.owner.name}</h2><p>{site.owner.role}</p></div>
-          <a className="text-link" href={"mailto:" + site.owner.email}>Request current resume ↗</a>
+          {resumeApiConfigured ? (
+            <div className="resume-downloads">
+              <a className="text-link" href="/api/resume?variant=resume">ATS resume PDF ↗</a>
+              <a className="text-link" href="/api/resume?variant=short">Short PDF ↗</a>
+            </div>
+          ) : <a className="text-link" href={"mailto:" + site.owner.email}>Request current resume ↗</a>}
         </div>
         <div className="resume-section">
           <h3>PROFILE</h3>
@@ -51,7 +57,7 @@ export default async function ResumePage() {
         </div>
         <div className="resume-sheet-foot"><span>{site.owner.email}</span><span>{site.owner.website.replace("https://", "")}</span></div>
       </div>
-      <p className="resume-note">The public download will be enabled when the ATS-first resume publishing workflow is implemented. This page currently displays the verified profile snapshot.</p>
+      <p className="resume-note">The PDF renderer creates text-first, ATS-readable documents from published CMS records. Education and other sections appear only when verified records exist; no missing credentials or dates are invented.</p>
     </section>
   );
 }

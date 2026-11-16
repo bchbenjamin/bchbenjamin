@@ -9,7 +9,7 @@ type RecordItem = Record<string, unknown> & { id?: string };
 
 const templates: Record<Resource, Record<string, unknown>> = {
   profile: { fullName: "", headline: "", summary: "", location: "India", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false },
-  projects: { slug: "", name: "", tagline: "", summary: "", description: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, sortOrder: 0, startedOn: null, completedOn: null },
+  projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, sortOrder: 0, startedOn: null, completedOn: null },
   experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, sortOrder: 0 },
   education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, sortOrder: 0 },
   "skill-groups": { name: "", description: "", published: false, sortOrder: 0 },
