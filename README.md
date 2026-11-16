@@ -147,8 +147,8 @@ The Vercel Hobby plan is intended for personal, non-commercial use. The site is 
 
 | Phase | Scope | State |
 | --- | --- | --- |
-| 1 | Foundation: Next.js, Spring Boot, PostgreSQL, Docker, environment configuration and CI | In progress |
-| 2 | Core CMS: profile, projects, experience, education, skills and achievements CRUD | Planned |
+| 1 | Foundation: Next.js, Spring Boot, PostgreSQL, Docker, environment configuration and CI | Complete |
+| 2 | Core CMS: relational content schema, seed data and public read API; protected CRUD follows with Phase 3 auth | In progress |
 | 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | Planned |
 | 4 | Refined public portfolio experience and database-backed pages | Planned |
 | 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and tailored variants | Planned |
