@@ -16,7 +16,8 @@ public class DatabaseUrlConfiguration {
     DataSource dataSource(
         @Value("${spring.datasource.url}") String configuredUrl,
         @Value("${spring.datasource.username:}") String configuredUsername,
-        @Value("${spring.datasource.password:}") String configuredPassword
+        @Value("${spring.datasource.password:}") String configuredPassword,
+        @Value("${app.datasource.maximum-pool-size:5}") int maximumPoolSize
     ) {
         HikariConfig config = new HikariConfig();
         String url = configuredUrl;
@@ -36,8 +37,9 @@ public class DatabaseUrlConfiguration {
         config.setJdbcUrl(url);
         if (username != null && !username.isBlank()) config.setUsername(username);
         if (password != null) config.setPassword(password);
-        config.setMaximumPoolSize(5);
+        config.setMaximumPoolSize(Math.max(1, Math.min(maximumPoolSize, 20)));
         config.setMinimumIdle(0);
+        config.setMaxLifetime(600000);
         config.setConnectionTimeout(10000);
         config.setValidationTimeout(5000);
         return new HikariDataSource(config);

@@ -21,6 +21,7 @@ Vercel's container runtime and multi-service support are currently beta. Contain
 4. Create a PostgreSQL database. Neon is a good fit for a low-volume serverless API; copy its pooled connection string into `DATABASE_URL` and retain `sslmode=require`. The backend also supports Render Postgres connection strings.
 5. Configure these project environment variables in Vercel (Preview and Production as appropriate):
    - `DATABASE_URL`: managed Postgres connection string.
+   - `DATABASE_POOL_SIZE=2`: keep per-container database connections modest for a serverless pooler.
    - `PORT=8080`: non-privileged HTTP port for the backend container.
    - `API_BASE_URL=https://bchbenjamin.in`.
    - `NEXT_PUBLIC_API_BASE_URL` may be left empty; browser requests then use same-origin routes. Setting it to `https://bchbenjamin.in` is also valid.
