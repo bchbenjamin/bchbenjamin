@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -29,5 +31,27 @@ class PortfolioApiApplicationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("ok"))
             .andExpect(jsonPath("$.service").value("portfolio-api"));
+    }
+
+    @Test
+    void administrativeSessionRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/session"))
+            .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void csrfBootstrapIsPublic() throws Exception {
+        mockMvc.perform(get("/api/v1/csrf"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
+            .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    void googleLoginUsesAuthorizationCodeAndPkce() throws Exception {
+        mockMvc.perform(get("/oauth2/authorization/google"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(header().string("Location", containsString("code_challenge=")))
+            .andExpect(header().string("Location", containsString("response_type=code")));
     }
 }
