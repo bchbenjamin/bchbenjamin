@@ -29,7 +29,9 @@ public class AgentTokenAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws ServletException, IOException {
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ") && SecurityContextHolder.getContext().getAuthentication() == null) {
+        var currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean anonymous = currentAuthentication == null || currentAuthentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken;
+        if (header != null && header.startsWith("Bearer ") && anonymous) {
             AgentTokenService.AgentIdentity identity = tokens.authenticate(header.substring(7).trim());
             if (identity != null) {
                 var authorities = new ArrayList<SimpleGrantedAuthority>();

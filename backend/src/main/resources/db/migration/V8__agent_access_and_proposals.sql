@@ -1,6 +1,6 @@
 CREATE TABLE agent_api_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    token_hash CHAR(64) NOT NULL UNIQUE,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
     token_prefix VARCHAR(24) NOT NULL,
     name VARCHAR(120) NOT NULL,
     scopes TEXT NOT NULL,
