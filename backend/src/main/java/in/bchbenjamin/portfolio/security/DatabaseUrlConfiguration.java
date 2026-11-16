@@ -40,6 +40,7 @@ public class DatabaseUrlConfiguration {
         config.setMaximumPoolSize(Math.max(1, Math.min(maximumPoolSize, 20)));
         config.setMinimumIdle(0);
         config.setMaxLifetime(600000);
+        config.setIdleTimeout(300000);
         config.setConnectionTimeout(10000);
         config.setValidationTimeout(5000);
         return new HikariDataSource(config);
