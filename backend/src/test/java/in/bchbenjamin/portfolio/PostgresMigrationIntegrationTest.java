@@ -3,6 +3,27 @@ package in.bchbenjamin.portfolio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import in.bchbenjamin.portfolio.agent.AgentTokenService;
+import in.bchbenjamin.portfolio.linkedin.LinkedInPublishingService;
+import in.bchbenjamin.portfolio.security.EncryptedLinkedInAuthorizedClientService;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.Set;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,10 +57,16 @@ class PostgresMigrationIntegrationTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("app.security.token-encryption-key", () -> Base64.getEncoder().encodeToString(new byte[32]));
+        registry.add("app.linkedin.api-version", () -> "202607");
     }
 
     @Autowired private MockMvc mockMvc;
     @Autowired private AgentTokenService agentTokens;
+    @Autowired private JdbcTemplate jdbc;
+    @Autowired private ClientRegistrationRepository clientRegistrations;
+    @Autowired private EncryptedLinkedInAuthorizedClientService authorizedClients;
+    @Autowired private LinkedInPublishingService linkedInPublishing;
 
     @Test
     void flywayCreatesThePortfolioSchemaAndSeedData() throws Exception {
@@ -61,6 +88,52 @@ class PostgresMigrationIntegrationTest {
         byte[] bytes = result.getResponse().getContentAsByteArray();
         assertTrue(bytes.length > 500);
         assertTrue(new String(bytes, 0, 4).equals("%PDF"));
+        try (var document = PDDocument.load(bytes)) {
+            String extractedText = new PDFTextStripper().getText(document);
+            assertTrue(extractedText.contains("Benjamin"));
+            assertTrue(extractedText.contains("AWARESPAN"));
+        }
+    }
+
+    @Test
+    void linkedInTokensAreEncryptedAtRestAndCanBeDecrypted() {
+        var registration = clientRegistrations.findByRegistrationId("linkedin-publisher");
+        Instant issued = Instant.now();
+        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "access-token-test-secret", issued,
+            issued.plusSeconds(3600), Set.of("openid", "profile", "email", "w_member_social"));
+        var refreshToken = new OAuth2RefreshToken("refresh-token-test-secret", issued);
+        var client = new OAuth2AuthorizedClient(registration, "linkedin-encryption-test", accessToken, refreshToken);
+        authorizedClients.saveAuthorizedClient(client, new UsernamePasswordAuthenticationToken("linkedin-encryption-test", ""));
+
+        Map<String, Object> stored = jdbc.queryForMap("SELECT access_token_ciphertext, refresh_token_ciphertext FROM linkedin_authorized_clients WHERE principal_name = ?", "linkedin-encryption-test");
+        String encryptedBytes = new String((byte[]) stored.get("access_token_ciphertext"), StandardCharsets.UTF_8);
+        assertFalse(encryptedBytes.contains("access-token-test-secret"));
+
+        OAuth2AuthorizedClient restored = authorizedClients.loadAuthorizedClient("linkedin-publisher", "linkedin-encryption-test");
+        assertEquals("access-token-test-secret", restored.getAccessToken().getTokenValue());
+        assertEquals("refresh-token-test-secret", restored.getRefreshToken().getTokenValue());
+        authorizedClients.removeAuthorizedClient("linkedin-publisher", "linkedin-encryption-test");
+    }
+
+    @Test
+    void linkedinDraftMustBeApprovedBeforePublishCanProceed() {
+        OidcUser actor = mock(OidcUser.class);
+        when(actor.getName()).thenReturn("linkedin-review-test");
+        when(actor.getSubject()).thenReturn("linkedin-review-test");
+        var registration = clientRegistrations.findByRegistrationId("linkedin-publisher");
+        Instant issued = Instant.now();
+        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "review-test-access-token", issued,
+            issued.plusSeconds(3600), Set.of("openid", "profile", "email", "w_member_social"));
+        authorizedClients.saveAuthorizedClient(new OAuth2AuthorizedClient(registration, actor.getName(), accessToken),
+            new UsernamePasswordAuthenticationToken(actor.getName(), ""));
+
+        Map<String, Object> draft = linkedInPublishing.createDraft("A post awaiting owner review.", actor);
+        UUID draftId = (UUID) draft.get("id");
+        assertEquals("PENDING_REVIEW", draft.get("status"));
+        assertThrows(IllegalStateException.class, () -> linkedInPublishing.publish(draftId, actor));
+        Map<String, Object> approved = linkedInPublishing.review(draftId, true, actor);
+        assertEquals("APPROVED", approved.get("status"));
+        authorizedClients.removeAuthorizedClient("linkedin-publisher", actor.getName());
     }
 
     @Test

@@ -154,10 +154,10 @@ The Vercel Hobby plan is intended for personal, non-commercial use. The site is 
 | 2 | Core CMS: relational content schema, seed data, public read API and owner-only CRUD | Complete |
 | 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | Code complete; provider setup pending |
 | 4 | Refined public portfolio experience and database-backed pages | In progress |
-| 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and long/short/resume variants | In progress |
-| 6 | LinkedIn OAuth, encrypted token storage, review queue and explicit publishing | In progress |
-| 7 | Scoped REST/MCP agent connectors, hashed API keys and human approval queue | In progress |
-| 8 | OWASP hardening, per-instance rate limits, secret handling, dependency updates and recovery checks | In progress |
+| 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and long/short/resume variants | Complete |
+| 6 | LinkedIn OAuth, encrypted token storage, review queue and explicit publishing | Code complete; LinkedIn app approval/config pending |
+| 7 | Scoped REST/MCP agent connectors, hashed API keys and human approval queue | Complete |
+| 8 | OWASP hardening, per-instance rate limits, secret handling, dependency updates and recovery checks | Baseline complete; production backup/gateway setup pending |
 | 9 | Production deployment, domain, monitoring and operational verification | Deferred by request |
 
 The detailed implementation plan remains the source of truth for scope, security constraints and phase completion criteria.
