@@ -17,6 +17,12 @@ spring:
     enabled: true
   jackson:
     default-property-inclusion: non_null
+  session:
+    store-type: jdbc
+    timeout: 8h
+    jdbc:
+      initialize-schema: never
+      cleanup-cron: "-"
   mail:
     host: ${SMTP_HOST:smtp.gmail.com}
     port: ${SMTP_PORT:587}
@@ -120,8 +126,9 @@ app:
     notification-cc: ${CONTACT_NOTIFICATION_CC:}
     ip-hash-salt: ${CONTACT_IP_HASH_SALT:}
     retention-days: ${CONTACT_RETENTION_DAYS:180}
-    maintenance-enabled: ${CONTACT_MAINTENANCE_ENABLED:true}
+    maintenance-enabled: ${CONTACT_MAINTENANCE_ENABLED:false}
     maintenance-delay-ms: ${CONTACT_MAINTENANCE_DELAY_MS:300000}
+    cron-secret: ${CRON_SECRET:}
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
   security:
     admin-subjects: ${ADMIN_ALLOWED_SUBJECTS:}

@@ -59,7 +59,7 @@ export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((project) => project.slug === slug);
 }
 
-const API_BASE = (process.env.API_BASE_URL ?? "").replace(/\/$/, "");
+const API_BASE = (process.env.API_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "")).replace(/\/$/, "");
 
 async function readPublic<T>(path: string): Promise<T | null> {
   if (!API_BASE) return null;

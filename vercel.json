@@ -1,6 +1,26 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "installCommand": "npm ci"
+  "services": {
+    "frontend": {
+      "root": ".",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "backend/",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/v1/(.*)", "destination": { "service": "backend" } },
+    { "source": "/oauth2/(.*)", "destination": { "service": "backend" } },
+    { "source": "/login/oauth2/code/(.*)", "destination": { "service": "backend" } },
+    { "source": "/logout", "destination": { "service": "backend" } },
+    { "source": "/mcp", "destination": { "service": "backend" } },
+    { "source": "/actuator/(.*)", "destination": { "service": "backend" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
+  ],
+  "crons": [
+    { "path": "/api/cron/contact-maintenance", "schedule": "17 3 * * *" }
+  ]
 }

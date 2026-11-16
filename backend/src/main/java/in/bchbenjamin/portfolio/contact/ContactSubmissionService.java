@@ -33,6 +33,7 @@ public class ContactSubmissionService {
 
     public SubmissionResult submit(ContactRequest request, String remoteAddress, String userAgent) {
         if (request.website() != null && !request.website().isBlank()) return new SubmissionResult("accepted", null);
+        enforceSharedRateLimit(remoteAddress);
         ContactModerationService.Assessment assessment = moderation.assess(request);
         UUID id = UUID.randomUUID();
         byte[] tokenBytes = new byte[32];
@@ -171,6 +172,21 @@ public class ContactSubmissionService {
         return rows.get(0);
     }
     private String currentStatus(UUID id) { return String.valueOf(find(id).get("status")); }
+    private void enforceSharedRateLimit(String remoteAddress) {
+        String ipHash = hashIp(remoteAddress);
+        if (ipHash == null) return;
+        long window = Instant.now().getEpochSecond() / 60;
+        Integer count = jdbc.queryForObject("""
+            INSERT INTO contact_rate_limits (ip_hash, window_start, request_count)
+            VALUES (?, ?, 1)
+            ON CONFLICT (ip_hash, window_start) DO UPDATE
+              SET request_count = contact_rate_limits.request_count + 1
+            RETURNING request_count
+            """, Integer.class, ipHash, window);
+        if (count != null && count > 4)
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Contact submission rate limit exceeded");
+    }
+
     private String hashIp(String ip) { return ip == null || ip.isBlank() ? null : sha256(ipSalt + ":" + ip); }
     private static String sha256(String value) {
         try { return java.util.HexFormat.of().formatHex(MessageDigestHolder.digest(value.getBytes(StandardCharsets.UTF_8))); }

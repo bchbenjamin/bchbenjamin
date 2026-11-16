@@ -12,12 +12,12 @@
 - SQL table and column identifiers used by generic CMS CRUD are fixed allowlists; values are parameterized.
 - Response headers include HSTS, CSP, frame denial, content-type protection, referrer policy, permissions policy and cache controls.
 - Request body size limits are configured at the API server.
-- Fixed-window rate limits are applied per API instance: public 120/minute/IP, agent 60/minute/token, admin 120/minute/identity and default 60/minute/IP. Limits are configurable through environment variables.
+- Fixed-window filter limits are applied per API instance: public 120/minute/IP, agent 60/minute/token, admin 120/minute/identity and default 60/minute/IP. Contact submissions additionally use a PostgreSQL-backed 4/minute/IP bucket shared across instances.
 - GitHub Actions runs Gitleaks, npm audit, frontend tests/type checks/build and backend integration tests. Dependabot monitors npm, Maven and GitHub Actions dependencies.
 
 ## Rate-limit deployment caveat
 
-The current limiter is in-memory and per application instance. It protects a single instance and provides a useful baseline, but limits are not shared across multiple Cloud Run instances or regions. Before scaling horizontally, enforce global quotas at an API gateway/Cloud Armor layer or move counters to a shared Redis-compatible store. Do not describe these in-process limits as a distributed abuse-prevention system.
+The general API filter limiter is in-memory and per application instance; it is a baseline, not a distributed quota. The public contact endpoint also uses a PostgreSQL-backed per-IP bucket shared across instances. Before scaling general API traffic horizontally, enforce global quotas at an API gateway/WAF or move all counters to a shared store. Do not describe the in-memory filter limits as a distributed abuse-prevention system.
 
 ## Secret handling
 
@@ -49,5 +49,5 @@ Then verify Flyway migration state, public profile/project reads, admin access c
 - Generate and securely store a 32-byte base64 `TOKEN_ENCRYPTION_KEY`.
 - Configure LinkedIn OIDC and `w_member_social` access, plus a currently supported `LINKEDIN_API_VERSION`, before enabling publishing.
 - Set production database credentials and managed backups/PITR.
-- Verify rate limits at the gateway if running multiple API instances.
+- Verify general API rate limits at the gateway if running multiple instances; the contact form's separate per-IP quota is database-backed.
 - Perform an isolated database restore drill.

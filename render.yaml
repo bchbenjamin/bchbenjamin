@@ -68,6 +68,8 @@ services:
         value: "4"
       - key: CONTACT_RETENTION_DAYS
         value: "180"
+      - key: CONTACT_MAINTENANCE_ENABLED
+        value: "true"
 
 databases:
   - name: bchbenjamin-portfolio-db

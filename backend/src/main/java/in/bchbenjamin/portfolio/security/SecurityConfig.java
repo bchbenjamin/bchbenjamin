@@ -61,7 +61,7 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/v1/agent/**", "/mcp", "/api/v1/public/contact/**"))
+                .ignoringRequestMatchers("/api/v1/agent/**", "/mcp", "/api/v1/public/contact/**", "/api/v1/internal/maintenance"))
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation(fixation -> fixation.migrateSession()))
@@ -69,6 +69,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/health", "/api/v1/csrf", "/actuator/health/**", "/oauth2/**", "/login/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/public/contact/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/internal/maintenance").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/agent/**", "/mcp").hasRole("AGENT")
                 .anyRequest().denyAll())

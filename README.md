@@ -84,13 +84,13 @@ This is the special GitHub profile repository for **bchbenjamin** and the source
 Visitors
    │
    ▼
-Next.js 16 / TypeScript ─────────────── Vercel
+Next.js 16 / TypeScript ─────────────── Vercel frontend service
    │                                  bchbenjamin.in
-   │ HTTPS API
+   │ Vercel service routing
    ▼
-Java 21 / Spring Boot ──────────────── Render
-   │                                  api.bchbenjamin.in
-   ├── PostgreSQL + Flyway
+Java 21 / Spring Boot ──────────────── Vercel container service
+   │
+   ├── Managed PostgreSQL + Flyway + JDBC sessions
    ├── Owner-only CMS / OIDC
    ├── Resume PDF generation
    ├── Scoped REST + MCP agent access
@@ -122,10 +122,11 @@ docker compose -f infra/compose.yaml up -d postgres
 
 ### Deployment
 
-- **Vercel:** import the repository root (`.`) as a Next.js project. Set `API_BASE_URL` and `NEXT_PUBLIC_API_BASE_URL` to the Render API origin.
-- **Render:** apply the root `render.yaml` Blueprint. It defines the Docker-based Spring Boot API and managed PostgreSQL database. Review paid plans, region and prompted secrets before provisioning.
-- **Backend secrets:** OAuth credentials, AI pipeline key, Gmail SMTP App Password, token-encryption key and admin OIDC allowlist belong only in Render environment secrets.
-- **Domain:** point `bchbenjamin.in` to Vercel and `api.bchbenjamin.in` to Render.
+- **Vercel:** import the repository and let `vercel.json` configure the Next.js frontend and Java/Spring Boot container service. The container runtime and multi-service routing are beta features.
+- **Database:** provide an external PostgreSQL connection string (Neon is a suitable serverless option). JDBC-backed sessions preserve admin logins across container scale-down.
+- **Secrets:** OAuth credentials, AI pipeline key, Gmail SMTP App Password, token-encryption key, cron secret and admin OIDC allowlist belong in Vercel environment secrets.
+- **Domain:** point `bchbenjamin.in` to Vercel. No separate API subdomain is required for the multi-service setup.
+- **Render fallback:** use `render.yaml` if you prefer an always-on API service instead of the Vercel beta container runtime.
 
 See [deployment runbook](docs/deployment.md), [contact workflow](docs/contact-mail-architecture.md), [authentication](docs/authentication.md), [security operations](docs/security-operations.md) and [agent access](docs/agent-access-mcp.md).
 

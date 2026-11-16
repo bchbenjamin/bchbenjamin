@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "https://api.bchbenjamin.in")).replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "")).replace(/\/$/, "");
 
 export default function ContactForm() {
   const [busy, setBusy] = useState(false);
@@ -43,7 +43,7 @@ export default function ContactForm() {
         <label className="contact-form-message">Message<textarea name="message" minLength={20} maxLength={5000} rows={7} required placeholder="A little context helps me understand your enquiry…" /></label>
       </div>
       <label className="contact-honeypot" aria-hidden="true">Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label>
-      <p className="contact-form-privacy">Your email address is used to verify your submission and, if approved, let me reply. AI-assisted screening flags spam and suspicious messages; it does not verify real-world identity.</p>
+      <p className="contact-form-privacy">Your name, contact details and message are processed by the configured AI screening provider and stored for up to 180 days. Email verification confirms mailbox control, not real-world identity.</p>
       <div className="contact-form-footer">
         <button className="button button-primary" type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit enquiry"} <span className="arrow-up-right">↗</span></button>
         {status && <p className={`contact-form-status is-${status.kind}`} role="status">{status.text}</p>}

@@ -80,6 +80,12 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
+    void jdbcSessionMigrationCreatesPersistentSessionTables() {
+        assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION", Long.class));
+        assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES", Long.class));
+    }
+
+    @Test
     void contactMigrationCreatesTheModerationAndVerificationQueue() {
         assertEquals(0L, jdbc.queryForObject("SELECT COUNT(*) FROM contact_submissions", Long.class));
     }

@@ -29,3 +29,12 @@ CREATE INDEX idx_contact_status_created ON contact_submissions(status, created_a
 CREATE INDEX idx_contact_email_created ON contact_submissions(sender_email, created_at DESC);
 CREATE INDEX idx_contact_verification ON contact_submissions(verification_token_hash, verification_expires_at)
     WHERE verification_token_hash IS NOT NULL;
+
+-- Shared per-IP contact quota so rate limits remain effective across serverless container instances.
+CREATE TABLE contact_rate_limits (
+    ip_hash VARCHAR(64) NOT NULL,
+    window_start BIGINT NOT NULL,
+    request_count INTEGER NOT NULL,
+    PRIMARY KEY (ip_hash, window_start)
+);
+CREATE INDEX idx_contact_rate_limits_window ON contact_rate_limits(window_start);
