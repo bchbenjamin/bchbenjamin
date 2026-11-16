@@ -3,13 +3,15 @@ import HeroShaderLoader from "@/components/HeroShaderLoader";
 import WaveDivider from "@/components/WaveDivider";
 import ProjectVisual from "@/components/ProjectVisual";
 import SectionHeading from "@/components/SectionHeading";
-import { featuredProjects, site } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 function Arrow() {
   return <span aria-hidden="true" className="arrow-up-right">↗</span>;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const site = await getSiteContent();
+  const featuredProjects = site.projects.filter((project) => project.featured);
   return (
     <>
       <section className="shell hero-section" id="top">

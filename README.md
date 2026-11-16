@@ -80,8 +80,9 @@ Next.js 16 · App Router · TypeScript
         │     ├── /resume
         │     └── /contact
         │
-        ├── Local content (Phase 0)
-        │     └── src/data/site.json
+        ├── Public content
+        │     ├── Spring Boot published read API
+        │     └── src/data/site.json fallback snapshot
         │
         ├── UI and motion
         │     ├── Tailwind CSS v4 + Dovetail theme tokens
@@ -139,7 +140,9 @@ The project is designed for Vercel and uses the repository root as its build roo
 - Build: npm run build
 - Output: Next.js default output
 - Node.js: 24.x
-- Runtime environment variables: none required for Phase 0
+- Server-side public API origin: `API_BASE_URL`
+- Browser-side admin API origin: `NEXT_PUBLIC_API_BASE_URL`
+- Backend OAuth credentials, exact OIDC subject allowlist, CORS origins and secure cookie settings are documented in `.env.example` and `docs/authentication.md`
 
 The Vercel Hobby plan is intended for personal, non-commercial use. The site is a personal portfolio and does not include ads, sponsorships or paid features.
 
@@ -149,8 +152,8 @@ The Vercel Hobby plan is intended for personal, non-commercial use. The site is 
 | --- | --- | --- |
 | 1 | Foundation: Next.js, Spring Boot, PostgreSQL, Docker, environment configuration and CI | Complete |
 | 2 | Core CMS: relational content schema, seed data, public read API and owner-only CRUD | Complete |
-| 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | In progress |
-| 4 | Refined public portfolio experience and database-backed pages | Planned |
+| 3 | Google/LinkedIn OIDC, Spring Security, sessions, admin authorization and audit logging | Code complete; provider setup pending |
+| 4 | Refined public portfolio experience and database-backed pages | In progress |
 | 5 | ATS-first resume engine, HTML/CSS rendering, PDF generation and tailored variants | Planned |
 | 6 | LinkedIn OAuth, reviewed announcements and publishing workflow | Planned |
 | 7 | Scoped REST/MCP AI connectors with human approval | Planned |

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { site } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Resume",
   description: "A concise overview of Benjamin's engineering focus, experience and selected work."
 };
 
-export default function ResumePage() {
+export default async function ResumePage() {
+  const site = await getSiteContent();
   return (
     <section className="shell inner-page resume-page">
       <div className="page-intro" data-reveal>

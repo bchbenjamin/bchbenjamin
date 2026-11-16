@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ProjectVisual from "@/components/ProjectVisual";
 import SectionHeading from "@/components/SectionHeading";
-import { projects } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Projects",
   description: "Selected software, AI, data and edge-computing projects by Benjamin."
 };
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const { projects } = await getSiteContent();
   return (
     <section className="shell inner-page">
       <div className="page-intro" data-reveal>

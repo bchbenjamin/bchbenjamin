@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { site } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Contact Benjamin about engineering, software and worthwhile collaborations."
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const site = await getSiteContent();
   return (
     <section className="shell inner-page contact-page">
       <div className="page-intro" data-reveal>

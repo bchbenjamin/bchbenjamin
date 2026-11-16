@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import { site } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Experience",
   description: "Experience, milestones and interests from Benjamin's engineering journey."
 };
 
-export default function ExperiencePage() {
+export default async function ExperiencePage() {
+  const site = await getSiteContent();
   return (
     <section className="shell inner-page">
       <div className="page-intro" data-reveal>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { featuredProjects, getProjectBySlug, projects, site } from "../src/lib/content";
+import { featuredProjects, getProjectBySlug, getSiteContent, projects, site } from "../src/lib/content";
 
 describe("portfolio content", () => {
   it("has the owner details required by the public site", () => {
@@ -20,6 +20,10 @@ describe("portfolio content", () => {
       expect(project.stack.length).toBeGreaterThan(0);
       expect(project.description.length).toBeGreaterThan(30);
     }
+  });
+
+  it("uses the checked-in snapshot when the public API is not configured", async () => {
+    expect(await getSiteContent()).toEqual(site);
   });
 
   it("provides a featured portfolio selection", () => {

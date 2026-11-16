@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProjectVisual from "@/components/ProjectVisual";
-import { getProjectBySlug, projects } from "@/lib/content";
+import { getProjectBySlug, getLiveProjectBySlug, projects } from "@/lib/content";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -12,7 +12,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getLiveProjectBySlug(slug) ?? getProjectBySlug(slug);
   if (!project) return {};
   return {
     title: project.name,
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getLiveProjectBySlug(slug) ?? getProjectBySlug(slug);
   if (!project) notFound();
 
   return (
