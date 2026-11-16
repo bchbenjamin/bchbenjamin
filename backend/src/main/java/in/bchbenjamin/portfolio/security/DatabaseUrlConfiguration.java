@@ -33,7 +33,8 @@ public class DatabaseUrlConfiguration {
         @Value("${spring.datasource.password:}") String configuredPassword
     ) {
         String migrationUrl = firstNonBlank(flywayUrl, unpooledUrl, configuredUrl);
-        return createDataSource(migrationUrl, configuredUsername, configuredPassword, 1);
+        // Flyway may hold a metadata/lock connection while opening its migration connection.
+        return createDataSource(migrationUrl, configuredUsername, configuredPassword, 3);
     }
 
     private HikariDataSource createDataSource(String configuredUrl, String configuredUsername,
