@@ -18,10 +18,11 @@ Vercel's container runtime and multi-service support are currently beta. Contain
 1. Merge the implementation PR into `main`.
 2. Import `bchbenjamin/bchbenjamin` into Vercel. In Project Settings → Build and Deployment, set the framework preset to **Services**. Use the repository root; `vercel.json` configures the `frontend` and `backend` services.
 3. Set Node.js 24.x for the Next.js service.
-4. Create a PostgreSQL database. Neon is a good fit for a low-volume serverless API; copy its pooled connection string into `DATABASE_URL` and retain `sslmode=require`. The backend also supports Render Postgres connection strings.
+4. Create a PostgreSQL database. Neon is a good fit for a low-volume serverless API; the Vercel-managed Neon integration provisions it from the Marketplace and injects `DATABASE_URL` (pooled) plus `DATABASE_URL_UNPOOLED` (direct). Runtime queries use the pooled URL; Flyway automatically uses the direct URL for migrations. The backend also supports Render Postgres connection strings.
 5. Configure these project environment variables in Vercel (Preview and Production as appropriate):
    - `DATABASE_URL`: managed Postgres connection string.
    - `DATABASE_POOL_SIZE=2`: keep per-container database connections modest for a serverless pooler.
+   - `DATABASE_URL_UNPOOLED` is injected by Neon for direct Flyway migrations; if your provider uses another name, set `FLYWAY_DATABASE_URL` to its direct JDBC/connection URL.
    - `PORT=8080`: non-privileged HTTP port for the backend container.
    - `API_BASE_URL=https://bchbenjamin.in`.
    - `NEXT_PUBLIC_API_BASE_URL` may be left empty; browser requests then use same-origin routes. Setting it to `https://bchbenjamin.in` is also valid.
