@@ -54,7 +54,8 @@ export { site };
 export const projects = site.projects;
 export const featuredProjects = projects.filter((project) => project.featured);
 export function getProjectBySlug(slug: string): Project | undefined { return projects.find((project) => project.slug === slug); }
-const API_BASE = (process.env.API_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "")).replace(/\/$/, "");
+// VERCEL_URL identifies this frontend deployment, not the backend API. Only an explicit API_BASE_URL enables live-API mode; otherwise serve the reviewed public snapshot bundled with the site.
+const API_BASE = (process.env.API_BASE_URL || "").replace(/\/$/, "");
 
 async function readPublic<T>(path: string): Promise<T | null> {
   if (!API_BASE) return null;

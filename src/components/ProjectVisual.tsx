@@ -5,7 +5,7 @@ type Props = {
 
 export default function ProjectVisual({ variant, name }: Props) {
   return (
-    <div className={"project-visual visual-" + variant} aria-label={name + " visual preview"} role="img">
+    <div className={"project-visual visual-" + variant} data-pointer-tilt aria-label={name + " visual preview"} role="img">
       {variant === "awarespan" && (
         <div className="visual-radar">
           <span className="radar-ring radar-ring-one" />

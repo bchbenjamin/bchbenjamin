@@ -11,6 +11,31 @@ export default function ScrollExperience() {
 
     gsap.registerPlugin(ScrollTrigger);
 
+    const cleanups: Array<() => void> = [];
+
+    // Small, pointer-driven depth cues for the hero artwork and project previews.
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      document.querySelectorAll<HTMLElement>("[data-pointer-tilt]").forEach((element) => {
+        const onMove = (event: PointerEvent) => {
+          const bounds = element.getBoundingClientRect();
+          const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+          const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+          element.style.setProperty("--tilt-x", `${-y * 3.2}deg`);
+          element.style.setProperty("--tilt-y", `${x * 4.2}deg`);
+        };
+        const onLeave = () => {
+          element.style.setProperty("--tilt-x", "0deg");
+          element.style.setProperty("--tilt-y", "0deg");
+        };
+        element.addEventListener("pointermove", onMove);
+        element.addEventListener("pointerleave", onLeave);
+        cleanups.push(() => {
+          element.removeEventListener("pointermove", onMove);
+          element.removeEventListener("pointerleave", onLeave);
+        });
+      });
+    }
+
     const context = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
         gsap.fromTo(element, { opacity: 0, y: 28, filter: "blur(5px)" }, {
@@ -37,6 +62,7 @@ export default function ScrollExperience() {
     });
 
     return () => {
+      cleanups.forEach((cleanup) => cleanup());
       context.revert();
     };
   }, []);

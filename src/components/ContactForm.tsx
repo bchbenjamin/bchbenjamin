@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "")).replace(/\/$/, "");
 
@@ -45,7 +46,14 @@ export default function ContactForm() {
       <label className="contact-honeypot" aria-hidden="true">Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <p className="contact-form-privacy">Your name, contact details and message are processed by the configured AI screening provider and stored for up to 180 days. Email verification confirms mailbox control, not real-world identity.</p>
       <div className="contact-form-footer">
-        <button className="button button-primary" type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit enquiry"} <span className="arrow-up-right">↗</span></button>
+        <button className={`button button-primary contact-submit${busy ? " is-busy" : ""}${status?.kind === "success" ? " is-success" : ""}`} type="submit" disabled={busy}>
+          <span>{busy ? "Submitting" : status?.kind === "success" ? "Enquiry received" : "Submit enquiry"}</span>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.i key={busy ? "busy" : status?.kind === "success" ? "success" : "arrow"} className="contact-submit-icon" aria-hidden="true" initial={{ opacity: 0, scale: 0.65, rotate: -35 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.65, rotate: 35 }} transition={{ duration: 0.2 }}>
+              {busy ? <span className="loading-spinner" /> : status?.kind === "success" ? "✓" : "↗"}
+            </motion.i>
+          </AnimatePresence>
+        </button>
         {status && <p className={`contact-form-status is-${status.kind}`} role="status">{status.text}</p>}
       </div>
     </form>

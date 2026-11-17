@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CopyEmailButton from "@/components/CopyEmailButton";
 import { site } from "@/lib/content";
 
 export default function SiteFooter() {
@@ -13,6 +14,7 @@ export default function SiteFooter() {
         <div className="footer-links">
           <a href={site.owner.github} target="_blank" rel="noreferrer">GitHub ↗</a>
           <a href={"mailto:" + site.owner.email}>Email ↗</a>
+          <CopyEmailButton email={site.owner.email} />
           <Link href="/projects">Selected work ↗</Link>
         </div>
       </div>
