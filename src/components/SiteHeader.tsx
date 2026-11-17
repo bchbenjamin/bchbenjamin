@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/projects", label: "Work" },
-  { href: "/experience", label: "Experience" },
-  { href: "/resume", label: "Resume" }
+  { href: "/experience", label: "Experience" }
 ];
 
 export default function SiteHeader() {

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getProjectBySlug } from "@/lib/content";
+import { getPublicProjectBySlug } from "@/lib/content";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -7,7 +7,7 @@ export const contentType = "image/png";
 
 export default async function ProjectOpenGraphImage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getPublicProjectBySlug(slug);
   const name = project?.name ?? "Project";
   const category = project?.category ?? "SELECTED WORK";
   return new ImageResponse(

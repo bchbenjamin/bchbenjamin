@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Selected software, AI, data and edge-computing projects by Benjamin."
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
   const { projects } = await getSiteContent();
   return (

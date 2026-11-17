@@ -68,10 +68,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/health", "/api/v1/csrf", "/actuator/health/**", "/oauth2/**", "/login/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
+                .requestMatchers("/api/v1/agent/**", "/mcp").denyAll() // MCP remains intentionally disabled pending a separate security review.
                 .requestMatchers(HttpMethod.POST, "/api/v1/public/contact/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/internal/maintenance").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/agent/**", "/mcp").hasRole("AGENT")
                 .anyRequest().denyAll())
             .exceptionHandling(exceptions -> exceptions
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/v1/agent/**"))

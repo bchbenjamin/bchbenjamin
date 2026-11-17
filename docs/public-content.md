@@ -1,15 +1,33 @@
 # Public site data flow
 
-The public Next.js pages read content from the Spring Boot public API at request time when `API_BASE_URL` is configured. The API only returns published rows. If the API is not configured or temporarily unavailable, the site uses the checked-in `src/data/site.json` snapshot so a first deploy can still render and so content outages do not produce a blank portfolio.
+The public site consumes a dedicated Spring Boot read model. It does not fetch private CMS records and does not hide confidential fields in the browser.
 
-The following pages consume the CMS read model:
+## Publication rules
 
-- Home: owner summary, featured projects and skill groups.
-- Project index and project detail: published project descriptions and links.
-- Experience: published experience and achievements.
-- Resume profile preview: owner summary, skills, projects and experience.
-- Contact: published owner contact details and public links.
+- A row must be marked `published` to appear in a public collection.
+- Each field must be explicitly allowed by the row's `public_fields` JSONB object. `{"*":true}` is reserved for compatibility and should not be used for new records.
+- Custom field values are returned only when `public_fields["customFields.<key>"]` is true.
+- The public API excludes internal identifiers, field metadata, custom values by default, audit data and resume-only descriptions.
+- Uploaded assets are private until their visibility is explicitly changed to `PUBLIC`.
+- Gallery images require both a published achievement and a public image asset connected through `media_relationships`.
+- Site configuration is served from `site_configuration.published_config`; draft values are never exposed through public APIs.
 
-`API_BASE_URL` is server-only and is not exposed to browser JavaScript. `NEXT_PUBLIC_API_BASE_URL` is used only by the owner sign-in and CMS interface. Set both to the API origin in hosted environments, for example `https://api.bchbenjamin.in`.
+## Endpoints
 
-The local JSON snapshot also provides presentation-only fields such as custom project artwork and stack labels. New records created in the CMS are still rendered from the database; projects without a matching local artwork entry use the generic project visual until artwork is added.
+- `GET /api/v1/public/profile`
+- `GET /api/v1/public/projects`
+- `GET /api/v1/public/projects/{slug}`
+- `GET /api/v1/public/experience`
+- `GET /api/v1/public/education`
+- `GET /api/v1/public/skills`
+- `GET /api/v1/public/achievements`
+- `GET /api/v1/public/site-configuration`
+- `GET /api/v1/public/media/{id}` (public image assets only)
+
+## Frontend fallback policy
+
+The local `src/data/site.json` is a development fallback only when the application is running without a configured API origin. When an API origin is configured but the live profile cannot be loaded, the public frontend renders an empty safe model. It does not reintroduce stale, previously published content from the static snapshot.
+
+## Owner publishing workflow
+
+The owner edits career records, per-field visibility, custom parameters, media and homepage configuration in `/admin`. Site configuration saves to a draft first; the public site changes only after an explicit publish action.

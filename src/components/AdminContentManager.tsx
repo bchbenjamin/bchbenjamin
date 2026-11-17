@@ -8,13 +8,13 @@ type Resource = (typeof resources)[number];
 type RecordItem = Record<string, unknown> & { id?: string };
 
 const templates: Record<Resource, Record<string, unknown>> = {
-  profile: { fullName: "", headline: "", summary: "", location: "India", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false },
-  projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, sortOrder: 0, startedOn: null, completedOn: null },
-  experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, sortOrder: 0 },
-  education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, sortOrder: 0 },
-  "skill-groups": { name: "", description: "", published: false, sortOrder: 0 },
-  skills: { groupId: "", name: "", proficiency: "", sortOrder: 0 },
-  achievements: { category: "", title: "", detail: "", awardedOn: null, issuer: "", credentialUrl: "", published: false, sortOrder: 0 }
+  profile: { fullName: "", headline: "", summary: "", location: "India", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false, publicFields: { "*": false }, customFields: {} },
+  projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, sortOrder: 0, startedOn: null, completedOn: null, publicFields: { "*": false }, customFields: {} },
+  experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  "skill-groups": { name: "", description: "", published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  skills: { groupId: "", name: "", proficiency: "", sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  achievements: { category: "", title: "", detail: "", awardedOn: null, issuer: "", credentialUrl: "", published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} }
 };
 
 function camelKey(key: string) {
@@ -118,6 +118,32 @@ export default function AdminContentManager() {
     }
   }
 
+  let parsedEditor: Record<string, unknown> = {};
+  try { parsedEditor = JSON.parse(editor) as Record<string, unknown>; } catch { /* Editor validation is shown after save. */ }
+  const publicFields = (parsedEditor.publicFields && typeof parsedEditor.publicFields === "object" ? parsedEditor.publicFields : {}) as Record<string, boolean>;
+  const customKeys = parsedEditor.customFields && typeof parsedEditor.customFields === "object" ? Object.keys(parsedEditor.customFields as Record<string, unknown>).map((key) => `customFields.${key}`) : [];
+  const visibilityFields = [...Object.keys(parsedEditor).filter((key) => !["publicFields", "customFields", "published", "sortOrder"].includes(key) && typeof parsedEditor[key] !== "object"), ...customKeys];
+
+  function setFieldVisibility(field: string, visible: boolean) {
+    try {
+      const body = JSON.parse(editor) as Record<string, unknown>;
+      const next = { ...((body.publicFields as Record<string, boolean> | undefined) ?? {}), [field]: visible };
+      setEditor(JSON.stringify({ ...body, publicFields: next }, null, 2));
+    } catch { setMessage("Fix the JSON before changing field visibility."); }
+  }
+
+  function addCustomField() {
+    const key = window.prompt("Custom field key (for example: toolsUsed)");
+    if (!key || !/^[a-zA-Z][a-zA-Z0-9_]{1,79}$/.test(key)) return;
+    const value = window.prompt("Custom field value");
+    if (value === null) return;
+    try {
+      const body = JSON.parse(editor) as Record<string, unknown>;
+      const fields = (body.customFields && typeof body.customFields === "object" ? body.customFields : {}) as Record<string, unknown>;
+      setEditor(JSON.stringify({ ...body, customFields: { ...fields, [key]: value }, publicFields: { ...((body.publicFields as Record<string, boolean> | undefined) ?? {}), [`customFields.${key}`]: false } }, null, 2));
+    } catch { setMessage("Fix the JSON before adding a custom field."); }
+  }
+
   return (
     <section className="admin-manager" aria-label="Portfolio content manager">
       <div className="admin-manager-head">
@@ -140,6 +166,12 @@ export default function AdminContentManager() {
         <div className="admin-editor">
           <div className="admin-list-top"><span>{selected?.id ? "EDIT RECORD" : "NEW RECORD"}</span><span>JSON</span></div>
           <textarea aria-label="Content record JSON editor" spellCheck={false} value={editor} onChange={(event) => setEditor(event.target.value)} />
+          <div className="field-visibility-panel">
+            <div className="admin-list-top"><strong>Website visibility</strong><span>FIELD LEVEL</span></div>
+            <p>Only checked fields are included in the public API. Unchecked values stay in the private database.</p>
+            <div className="field-visibility-grid">{visibilityFields.map((field) => <label key={field}><input type="checkbox" checked={publicFields[field] ?? publicFields["*"] ?? false} onChange={(event) => setFieldVisibility(field, event.target.checked)} /><span>{field.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`)}</span></label>)}</div>
+            <button type="button" className="text-link" onClick={addCustomField}>＋ Add a custom parameter</button>
+          </div>
           <div className="admin-editor-actions">
             <button className="button button-primary" type="button" disabled={busy} onClick={() => void save()}>{busy ? "Working…" : "Save record"}</button>
             <button className="button button-quiet" type="button" disabled={busy || !selected?.id} onClick={() => void remove()}>Delete</button>

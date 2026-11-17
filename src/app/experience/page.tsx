@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Experience, milestones and interests from Benjamin's engineering journey."
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ExperiencePage() {
   const site = await getSiteContent();
   return (

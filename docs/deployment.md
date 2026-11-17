@@ -6,7 +6,7 @@ The repository now uses **Vercel Services** to deploy both the Next.js frontend 
 
 - `frontend`: Next.js 16, built from the repository root.
 - `backend`: Spring Boot 3 / Java 21 container built from `backend/Dockerfile.vercel`.
-- `vercel.json`: routes `/api/v1/*`, OAuth callbacks, `/mcp` and health requests to the backend container; all other paths go to Next.js.
+- `vercel.json`: routes `/api/v1/*`, OAuth callbacks and health requests to the backend container; all other paths go to Next.js.
 - PostgreSQL: external managed Postgres (Neon is a suitable serverless option; a Render Postgres database also works).
 - Sessions: Spring Session JDBC stores authentication sessions in PostgreSQL, so container replacement and scale-out do not lose logins.
 - Maintenance: Vercel Cron invokes a protected Next.js route daily, which calls the backend maintenance endpoint. It is a scheduled cleanup/recovery task, not a keep-alive ping.
@@ -15,7 +15,7 @@ Vercel's container runtime and multi-service support are currently beta. Contain
 
 ## Vercel setup
 
-1. Confirm the deployment files are on the GitHub `main` branch. Import `bchbenjamin/bchbenjamin` into Vercel and select `main`.
+1. Confirm the deployment files are on the GitHub `main` branch. Import the private `bchbenjamin/portfolio-platform` repository into Vercel and select `main`. The public `bchbenjamin/bchbenjamin` repository is reserved for the GitHub profile README and must not be used as the website deployment source.
 2. Keep Root Directory as `./` (the repository root). Do not point the project at `backend/`.
 3. In the import wizard, choose **Services** as the Application Preset if it is available. If the wizard only offers **Other**, complete project creation first; then open Project Settings → Build & Development Settings → Framework Preset, select **Services**, and save. This is mandatory: Vercel only builds the `services` block when the project Framework Preset is Services. Redeploy the latest `main` commit after changing it.
 4. Confirm the project has two services: `frontend` (Next.js) and `backend` (container built from `backend/Dockerfile.vercel`). Keep Node.js 24.x for the Next.js service.
@@ -34,6 +34,7 @@ Vercel's container runtime and multi-service support are currently beta. Contain
    - `ADMIN_ALLOWED_SUBJECTS`: exact immutable OIDC `issuer|sub` allowlist.
    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_API_VERSION`.
    - `CONTACT_AI_BASE_URL`, `CONTACT_AI_API_KEY`, `CONTACT_AI_MODEL`, and optionally `CONTACT_AI_PATH=/v1/chat/completions`.
+   - `RESUME_AI_BASE_URL`, `RESUME_AI_API_KEY`, `RESUME_AI_MODEL` for JD-specific resume evidence selection (optional; the local deterministic selector is used when unset).
    - `SMTP_USERNAME`, `SMTP_APP_PASSWORD`, optional `CONTACT_FROM_EMAIL`, `CONTACT_INBOX_EMAIL=bchbenjamin@gmail.com`, and optional `CONTACT_NOTIFICATION_CC`.
    - `CONTACT_IP_HASH_SALT`.
    - `CRON_SECRET`: a long random secret. Vercel Cron sends it as `Authorization: Bearer ...`; the Next.js route forwards it to the backend maintenance endpoint.
@@ -42,7 +43,7 @@ Vercel's container runtime and multi-service support are currently beta. Contain
    - `https://bchbenjamin.in/login/oauth2/code/linkedin`
    - `https://bchbenjamin.in/login/oauth2/code/linkedin-publisher`
 8. Attach `bchbenjamin.in` and `www.bchbenjamin.in` to the Vercel project and configure the DNS records Vercel provides. Choose one canonical hostname.
-9. Deploy a Preview first. Test public routes, database-backed content, OAuth login, session persistence across requests, PDF generation, contact verification, AI moderation, inbox delivery and the admin review queue. Then promote Production.
+9. Deploy a Preview first. Test public routes, database-backed content, OAuth login, session persistence across requests, private Resume Studio generation/download, contact verification, AI moderation, inbox delivery and the admin review queue. Then promote Production.
 
 ### Contact mail on Vercel
 
@@ -69,8 +70,8 @@ You do not need a new Render account. Use the existing Render workspace if choos
 
 ## Shared production checks
 
-- Flyway applies migrations V1–V10 on API startup. Never edit the live schema manually.
-- Keep `TOKEN_ENCRYPTION_KEY`, AI API key, Gmail App Password, OAuth secrets, database credentials and `CRON_SECRET` out of Git and browser-visible `NEXT_PUBLIC_*` variables.
+- Flyway applies migrations V1–V12 on API startup. Never edit the live schema manually.
+- Keep `TOKEN_ENCRYPTION_KEY`, resume/contact AI API keys, Gmail App Password, OAuth secrets, database credentials and `CRON_SECRET` out of Git and browser-visible `NEXT_PUBLIC_*` variables.
 - Back up the encryption key separately; losing it makes stored LinkedIn tokens unrecoverable.
 - Configure managed Postgres backups/PITR and perform an isolated restore drill.
 - Contact moderation is a risk/spam assessment, not identity proof. Email verification proves control of the mailbox, not legal identity.

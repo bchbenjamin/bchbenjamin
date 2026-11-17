@@ -1,6 +1,10 @@
 spring:
   application:
     name: portfolio-api
+  servlet:
+    multipart:
+      max-file-size: 12MB
+      max-request-size: 13MB
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/portfolio}
     username: ${DATABASE_USERNAME:portfolio}
@@ -116,6 +120,10 @@ app:
     admin-per-minute: ${RATE_LIMIT_ADMIN_PER_MINUTE:120}
     default-per-minute: ${RATE_LIMIT_DEFAULT_PER_MINUTE:60}
     contact-per-minute: ${RATE_LIMIT_CONTACT_PER_MINUTE:4}
+  resume:
+    ai-base-url: ${RESUME_AI_BASE_URL:}
+    ai-api-key: ${RESUME_AI_API_KEY:}
+    ai-model: ${RESUME_AI_MODEL:}
   contact:
     ai-base-url: ${CONTACT_AI_BASE_URL:}
     ai-api-key: ${CONTACT_AI_API_KEY:}

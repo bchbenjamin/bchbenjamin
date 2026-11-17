@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import in.bchbenjamin.portfolio.agent.AgentTokenService;
 import in.bchbenjamin.portfolio.linkedin.LinkedInPublishingService;
+import in.bchbenjamin.portfolio.resume.ResumePdfService;
 import in.bchbenjamin.portfolio.security.EncryptedLinkedInAuthorizedClientService;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -67,6 +68,7 @@ class PostgresMigrationIntegrationTest {
     @Autowired private ClientRegistrationRepository clientRegistrations;
     @Autowired private EncryptedLinkedInAuthorizedClientService authorizedClients;
     @Autowired private LinkedInPublishingService linkedInPublishing;
+    @Autowired private ResumePdfService resumePdfService;
 
     @Test
     void flywayCreatesThePortfolioSchemaAndSeedData() throws Exception {
@@ -91,12 +93,13 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
-    void resumePdfIsGeneratedAsARealPdfDocument() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/v1/public/resume.pdf?variant=resume"))
-            .andExpect(status().isOk())
-            .andReturn();
-        assertTrue(result.getResponse().getContentType().startsWith("application/pdf"));
-        byte[] bytes = result.getResponse().getContentAsByteArray();
+    void resumePdfIsNeverPublicAndPrivateAdminEndpointRequiresOwnerSession() throws Exception {
+        mockMvc.perform(get("/api/v1/public/resume.pdf?variant=resume"))
+            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/admin/resumes"))
+            .andExpect(status().isUnauthorized());
+
+        byte[] bytes = resumePdfService.render("resume");
         assertTrue(bytes.length > 500);
         assertTrue(new String(bytes, 0, 4).equals("%PDF"));
         try (var document = PDDocument.load(bytes)) {
@@ -104,6 +107,24 @@ class PostgresMigrationIntegrationTest {
             assertTrue(extractedText.contains("Benjamin"));
             assertTrue(extractedText.contains("AWARESPAN"));
         }
+    }
+
+    @Test
+    void publicProjectProjectionNeverExposesResumeOnlyOrStorageMetadata() throws Exception {
+        mockMvc.perform(get("/api/v1/public/projects"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].resumeDescription").doesNotExist())
+            .andExpect(jsonPath("$[0].customFields").doesNotExist())
+            .andExpect(jsonPath("$[0].publicFields").doesNotExist());
+    }
+
+    @Test
+    void publicMediaRouteDoesNotRevealPrivateAssets() throws Exception {
+        UUID id = jdbc.queryForObject("""
+            INSERT INTO media_assets (original_filename, content_type, byte_size, visibility, file_bytes, uploaded_by)
+            VALUES ('private.png', 'image/png', 8, 'PRIVATE', decode('89504e470d0a1a0a', 'hex'), 'integration-test') RETURNING id
+            """, UUID.class);
+        mockMvc.perform(get("/api/v1/public/media/" + id)).andExpect(status().isNotFound());
     }
 
     @Test

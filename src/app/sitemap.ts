@@ -1,13 +1,15 @@
 import type { MetadataRoute } from "next";
-import { projects } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { projects } = await getSiteContent();
   const baseUrl = "https://bchbenjamin.in";
   const pages: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "monthly", priority: 1 },
     { url: baseUrl + "/projects", changeFrequency: "monthly", priority: 0.9 },
     { url: baseUrl + "/experience", changeFrequency: "monthly", priority: 0.7 },
-    { url: baseUrl + "/resume", changeFrequency: "monthly", priority: 0.7 },
     { url: baseUrl + "/contact", changeFrequency: "yearly", priority: 0.6 }
   ];
   return pages.concat(projects.map((project) => ({

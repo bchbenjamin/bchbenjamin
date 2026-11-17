@@ -14,29 +14,39 @@ public class ResumePdfService {
     public ResumePdfService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
     public byte[] render(String variant) {
-        Map<String, Object> profile = jdbc.queryForMap("SELECT full_name, headline, summary, email, website_url, github_url, location FROM profile WHERE published = TRUE ORDER BY updated_at DESC LIMIT 1");
+        return render(variant, ResumeSelection.all());
+    }
+
+    public byte[] render(String variant, ResumeSelection selection) {
+        // Resume source data is private. Do not filter by the public-site publication flag.
+        Map<String, Object> profile = jdbc.queryForMap("SELECT full_name, headline, summary, email, website_url, github_url, location FROM profile ORDER BY updated_at DESC LIMIT 1");
         List<Map<String, Object>> projects = jdbc.queryForList("""
-            SELECT name, tagline, summary, description, short_description, resume_description,
+            SELECT id, name, tagline, summary, description, short_description, resume_description,
                    repository_url, live_url
-            FROM projects WHERE published = TRUE ORDER BY featured DESC, sort_order, name
+            FROM projects ORDER BY featured DESC, sort_order, name
             """);
         List<Map<String, Object>> experience = jdbc.queryForList("""
-            SELECT role_title, organization, employment_type, description, started_on, ended_on, is_current
-            FROM experience WHERE published = TRUE ORDER BY sort_order, started_on DESC
+            SELECT id, role_title, organization, employment_type, description, started_on, ended_on, is_current
+            FROM experience ORDER BY sort_order, started_on DESC
             """);
         List<Map<String, Object>> education = jdbc.queryForList("""
-            SELECT institution, qualification, field_of_study, location, description, started_on, ended_on, grade
-            FROM education WHERE published = TRUE ORDER BY sort_order, started_on DESC
+            SELECT id, institution, qualification, field_of_study, location, description, started_on, ended_on, grade
+            FROM education ORDER BY sort_order, started_on DESC
             """);
         List<Map<String, Object>> skills = jdbc.queryForList("""
-            SELECT g.name AS group_name, s.name AS skill_name
+            SELECT s.id, g.name AS group_name, s.name AS skill_name
             FROM skill_groups g LEFT JOIN skills s ON s.group_id = g.id
-            WHERE g.published = TRUE ORDER BY g.sort_order, s.sort_order, s.name
+            ORDER BY g.sort_order, s.sort_order, s.name
             """);
         List<Map<String, Object>> achievements = jdbc.queryForList("""
-            SELECT category, title, detail, issuer, awarded_on
-            FROM achievements WHERE published = TRUE ORDER BY sort_order, awarded_on DESC
+            SELECT id, category, title, detail, issuer, awarded_on
+            FROM achievements ORDER BY sort_order, awarded_on DESC
             """);
+        projects = applySelection(projects, selection.projects(), selection.includeAll());
+        experience = applySelection(experience, selection.experience(), selection.includeAll());
+        education = applySelection(education, selection.education(), selection.includeAll());
+        skills = applySelection(skills, selection.skills(), selection.includeAll());
+        achievements = applySelection(achievements, selection.achievements(), selection.includeAll());
         String html = buildHtml(profile, projects, experience, education, skills, achievements, variant);
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
@@ -49,6 +59,16 @@ public class ResumePdfService {
         } catch (Exception exception) {
             throw new IllegalStateException("Could not render the resume PDF", exception);
         }
+    }
+
+    private static List<Map<String, Object>> applySelection(List<Map<String, Object>> rows, List<java.util.UUID> ids, boolean includeAll) {
+        if (includeAll) return rows;
+        if (ids == null || ids.isEmpty()) return List.of();
+        java.util.Map<String, Integer> rank = new java.util.HashMap<>();
+        for (int i = 0; i < ids.size(); i++) rank.put(ids.get(i).toString(), i);
+        return rows.stream().filter(row -> row.get("id") != null && rank.containsKey(row.get("id").toString()))
+            .sorted(java.util.Comparator.comparingInt(row -> rank.get(row.get("id").toString())))
+            .toList();
     }
 
     private static String buildHtml(Map<String, Object> profile, List<Map<String, Object>> projects,
