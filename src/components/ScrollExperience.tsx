@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -11,18 +10,6 @@ export default function ScrollExperience() {
     if (reduceMotion) return;
 
     gsap.registerPlugin(ScrollTrigger);
-
-    const lenis = new Lenis({
-      duration: 1.05,
-      smoothWheel: true,
-      wheelMultiplier: 0.85
-    });
-
-    lenis.on("scroll", ScrollTrigger.update);
-
-    const raf = (time: number) => lenis.raf(time * 1000);
-    gsap.ticker.add(raf);
-    gsap.ticker.lagSmoothing(0);
 
     const context = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
@@ -40,12 +27,6 @@ export default function ScrollExperience() {
         });
       });
 
-      gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((element) => {
-        gsap.to(element, { yPercent: -9, ease: "none", scrollTrigger: {
-          trigger: element, start: "top bottom", end: "bottom top", scrub: 0.8
-        }});
-      });
-
       const hero = document.querySelector<HTMLElement>(".hero-copy");
       if (hero) {
         gsap.fromTo(hero.querySelectorAll(".eyebrow, h1, .hero-intro, .hero-actions, .hero-meta"),
@@ -57,8 +38,6 @@ export default function ScrollExperience() {
 
     return () => {
       context.revert();
-      gsap.ticker.remove(raf);
-      lenis.destroy();
     };
   }, []);
 

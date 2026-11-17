@@ -1,19 +1,19 @@
 :root {
-  color-scheme: dark;
-  --color-background: #0b0b0c;
-  --color-surface: #141414;
-  --color-surface-raised: #19191b;
-  --color-border: #313131;
-  --color-border-soft: #242426;
-  --color-foreground: #f1f0ed;
-  --color-muted: #a1a0a4;
-  --color-subtle: #707075;
-  --color-accent: #6798ff;
-  --color-accent-soft: #a9c3ff;
-  --color-positive: #9ad7b2;
-  --font-display: "Iowan Old Style", "Baskerville", "Palatino Linotype", Georgia, serif;
-  --font-body: Arial, Helvetica, sans-serif;
-  --shell-width: 1220px;
+  color-scheme: light;
+  --color-background: #f6f5f0;
+  --color-surface: #fffefa;
+  --color-surface-raised: #ffffff;
+  --color-border: #d9d8d0;
+  --color-border-soft: #e8e6de;
+  --color-foreground: #20211f;
+  --color-muted: #666a68;
+  --color-subtle: #868984;
+  --color-accent: #3156d8;
+  --color-accent-soft: #3156d8;
+  --color-positive: #278365;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: Inter, "Segoe UI", Arial, sans-serif;
+  --shell-width: 1280px;
 }
 
 @theme inline {
