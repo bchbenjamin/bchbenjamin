@@ -1,0 +1,146 @@
+/* Strict AMOLED palette. Motion and interaction styles remain in editorial.css. */
+:root {
+  color-scheme: dark;
+  --paper: #000000;
+  --paper-white: #090909;
+  --ink: #f5f5f5;
+  --blue: #8b9cff;
+  --blue-pale: #151a32;
+  --coral: #ff9478;
+  --line: #262626;
+  --color-background: #000000;
+  --color-surface: #090909;
+  --color-surface-raised: #111111;
+  --color-border: #262626;
+  --color-border-soft: #1a1a1a;
+  --color-foreground: #f5f5f5;
+  --color-muted: #a1a1aa;
+  --color-subtle: #71717a;
+  --color-accent: #8b9cff;
+  --color-accent-soft: #29346f;
+  --color-positive: #5bc69b;
+}
+
+html, body { background:#000 !important; color:#f5f5f5; color-scheme:dark; }
+body { background:#000 !important; }
+::selection { color:#000; background:#a8b5ff; }
+
+/* Navigation, masthead and page chrome */
+.site-header { background:rgba(0,0,0,.86) !important; border-color:#222 !important; backdrop-filter:blur(18px); }
+.site-logo, .nav-link, .header-contact, .site-footer, .footer-bottom { color:#f4f4f5; }
+.header-contact { border-color:#383838 !important; background:#090909 !important; }
+.header-contact:hover { border-color:#a1afff !important; background:#171d3a !important; color:#fff !important; }
+.site-footer { background:#050505 !important; border-color:#242424 !important; }
+.footer-bottom { border-color:#242424 !important; color:#777 !important; }
+
+/* Hero and blueprint artwork */
+.hero-art-frame { background:#080808 !important; border-color:#262626 !important; }
+.hero-art-top, .hero-art-footer, .hero-art-meta, .hero-art-frame small { color:#a1a1aa !important; }
+.hero-core { background:#17214b !important; color:#f5f5f5 !important; box-shadow:0 13px 32px rgba(76,101,255,.2) !important; }
+.blueprint-orbit, .blueprint-ring { border-color:rgba(139,156,255,.18) !important; }
+.blueprint-card { background:rgba(12,12,14,.94) !important; border-color:#30303a !important; color:#e4e4e7 !important; box-shadow:0 10px 25px rgba(0,0,0,.5) !important; }
+.blueprint-card span, .blueprint-card small { color:#a1a1aa !important; }
+.blueprint-node { border-color:#000 !important; }
+.blueprint-route { background:linear-gradient(90deg,transparent,rgba(139,156,255,.22),rgba(139,156,255,.8),rgba(139,156,255,.18),transparent) !important; }
+
+/* Cards, project previews, skills and detail panels */
+.project-card, .project-card-content, .detail-facts, .skill-group, .timeline-content,
+.about-panel, .contact-panel, .contact-details, .achievement-gallery-stage,
+.achievement-gallery-rail, .achievement-feature, .home-contact-form, .contact-form-panel {
+  background:#080808 !important; border-color:#242424 !important; color:#ededed;
+}
+.project-card-bottom, .project-card-content, .project-card-meta, .detail-facts,
+.timeline-content, .achievement-feature-bottom { border-color:#252525 !important; }
+.project-visual { background:#0c0c0f !important; border-color:#282a34 !important; }
+.visual-awarespan { background:radial-gradient(circle at 50% 50%,#182044 0%,#0b0d16 62%,#080808 100%) !important; }
+.visual-siddhi { background:linear-gradient(145deg,#111b1e,#101018 72%,#080808) !important; }
+.visual-aiida { background:linear-gradient(145deg,#20130f,#12100e 68%,#080808) !important; }
+.visual-clipz { background:linear-gradient(145deg,#171528,#100f16 68%,#080808) !important; }
+.visual-radar { background:repeating-radial-gradient(circle,transparent 0 27px,rgba(139,156,255,.14) 28px 29px) !important; }
+.visual-dashboard, .visual-editor { background:#101014 !important; border-color:#30303a !important; }
+.mini-sidebar { background:#09090c !important; border-color:#272730 !important; }
+.mini-stat-row b, .classifier-node, .classifier-output { background:#15151c !important; border-color:#34364a !important; color:#d8ddff !important; }
+.mini-chart, .mini-chart i, .timeline-track i { border-color:#353b5b !important; }
+.editor-screen { background:linear-gradient(130deg,transparent 30%,rgba(139,156,255,.12),transparent 70%),linear-gradient(45deg,#14141c,#0c0c0c) !important; color:#c8d0ff !important; }
+
+/* Editorial sections, text and achievement media */
+.section-heading, .about-heading, .page-intro, .achievement-gallery-heading,
+.project-detail, .contact-page, .journey-page { color:#f4f4f5; }
+.achievement-feature-media, .achievement-art-fallback { background:#111 !important; }
+.achievement-gallery-rail { background:#090909 !important; }
+.gallery-rail-item { color:#a1a1aa !important; }
+.gallery-rail-item.active { color:#fff !important; background:#121212 !important; }
+.gallery-controls button { background:#0b0b0b !important; border-color:#333 !important; color:#e4e4e7 !important; }
+.gallery-controls button:hover { background:#1a2144 !important; border-color:#8b9cff !important; color:#fff !important; }
+
+/* Forms and inputs */
+.contact-form input, .contact-form textarea, .contact-form select,
+.contact-form-heading, .form-field input, .form-field textarea,
+input:not([type="checkbox"]), textarea, select {
+  color:#f4f4f5;
+}
+.contact-form input, .contact-form textarea, .contact-form select,
+.contact-form-heading, .form-field input, .form-field textarea {
+  background:#090909 !important; border-color:#303030 !important;
+}
+input::placeholder, textarea::placeholder { color:#71717a !important; }
+input:focus, textarea:focus, select:focus { border-color:#8b9cff !important; }
+
+/* Accent buttons */
+.button-primary { background:#8b9cff !important; border-color:#8b9cff !important; color:#050505 !important; }
+.button-primary:hover { background:#aab5ff !important; border-color:#aab5ff !important; color:#000 !important; }
+.button-primary .arrow-up-right { color:#050505 !important; }
+.button-quiet { color:#e4e4e7 !important; }
+.text-link, .arrow-up-right, .headline-accent, .about-heading h2 span,
+.achievement-gallery-heading h2 span, .detail-overview h2 span,
+.timeline-meta strong, .contact-email { color:#a3b0ff !important; }
+
+/* Contact callout stays dark too; no white/light panel. */
+.contact-callout { background:linear-gradient(120deg,#111a3d,#171d38 75%,#20264a) !important; }
+.contact-callout h2, .contact-callout p { color:#f8f8ff !important; }
+.contact-callout .button-primary { background:#e8ebff !important; border-color:#e8ebff !important; color:#101323 !important; }
+.contact-callout .button-primary .arrow-up-right { color:#101323 !important; }
+
+/* Owner console */
+.owner-console-head { background:linear-gradient(120deg,#101a43,#171f47 75%,#202750) !important; }
+.owner-console-nav, .admin-module, .site-section-row, .field-visibility-panel,
+.site-content-editor, .resume-builder-panel, .resume-history-panel,
+.resume-template-card, .resume-jd-input textarea, .resume-history-item,
+.media-upload-panel, .media-dropzone, .media-asset-card, .media-asset-preview,
+.media-library-toolbar, .custom-field-list article {
+  background:#090909 !important; border-color:#282828 !important; color:#ededed !important;
+}
+.site-section-row.enabled, .resume-mode-switch button.active { background:#141a31 !important; border-color:#3d4b8a !important; }
+.site-section-row button, .resume-mode-switch button, .resume-history-item > button,
+.media-asset-info button, .media-upload-fields input, .media-library-toolbar select,
+.site-content-grid input, .site-content-grid textarea {
+  background:#101010 !important; border-color:#333 !important; color:#e5e5e5 !important;
+}
+.site-section-row .section-switch { background:#414141 !important; }
+.site-section-row.enabled .section-switch { background:#7186ff !important; }
+.section-switch::after { background:#f5f5f5 !important; }
+.media-dropzone.is-dragging, .media-dropzone.has-file { background:#111a36 !important; border-color:#7186ff !important; }
+.media-dropzone.is-complete { background:#0b1711 !important; border-color:#28583e !important; }
+.media-asset-preview { background:#101014 !important; }
+.asset-visibility-track { background:#444 !important; }
+.asset-visibility-toggle.is-public .asset-visibility-track { background:#7186ff !important; }
+.private-chip, .private-chip, .site-section-number { color:#a3b0ff !important; }
+.admin-message, .media-empty { color:#a1a1aa !important; }
+
+/* Saved-project and copy controls */
+.project-save-button { background:rgba(12,12,14,.94) !important; border-color:#383838 !important; color:#d4d4d8 !important; }
+.project-save-button.is-saved { background:#171d39 !important; border-color:#5265bd !important; color:#b5c0ff !important; }
+.project-save-count { border-color:#343434 !important; color:#a1a1aa !important; }
+.copy-email-icon i { background:#050505 !important; }
+.copy-email-button { color:#a1a1aa !important; }
+.copy-email-button.is-copied { color:#5bc69b !important; }
+
+/* Keep scrollbars dark and native controls consistent with AMOLED. */
+* { scrollbar-color:#383838 #000; }
+::-webkit-scrollbar { width:10px; height:10px; }
+::-webkit-scrollbar-track { background:#000; }
+::-webkit-scrollbar-thumb { background:#333; border:2px solid #000; border-radius:99px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+}
