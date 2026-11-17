@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import WaveDivider from "@/components/WaveDivider";
-import ProjectVisual from "@/components/ProjectVisual";
+import ProjectArtwork from "@/components/ProjectArtwork";
 import SectionHeading from "@/components/SectionHeading";
 import ContactForm from "@/components/ContactForm";
 import AchievementGallery from "@/components/AchievementGallery";
 import SaveProjectButton from "@/components/SaveProjectButton";
+import HomeImageGallery from "@/components/HomeImageGallery";
 import { getSiteContent } from "@/lib/content";
 
 function Arrow() { return <span aria-hidden="true" className="arrow-up-right">↗</span>; }
@@ -17,6 +18,7 @@ export default async function HomePage() {
   const featuredProjects = site.projects.filter((project) => project.featured);
 
   const sections: Record<string, ReactNode> = {
+    "image-gallery": <HomeImageGallery projects={site.projects} />,
     hero: <section className="shell hero-section" id="top">
       <div className="hero-copy">
         <p className="eyebrow"><span className="status-pulse" /> {site.homeContent.heroEyebrow}</p>
@@ -30,7 +32,7 @@ export default async function HomePage() {
     </section>,
     principles: <div className="shell principles-strip" data-reveal><span>THINK IN SYSTEMS</span><i /><span>BUILD WITH INTENT</span><i /><span>SHIP, LEARN, ITERATE</span><i /><span>KEEP IT USEFUL</span></div>,
     "achievement-gallery": <AchievementGallery achievements={site.achievements} />,
-    projects: <section className="shell section-block work-section" id="work"><SectionHeading eyebrow="SELECTED WORK / 01" title={site.homeContent.projectsTitle} description={site.homeContent.projectsDescription} action={<Link className="text-link" href="/projects">All projects <Arrow /></Link>} /><div className="project-grid" data-animate-stagger>{featuredProjects.map((project, index) => <article className={"project-card project-card-" + project.visual} key={project.slug} data-reveal><Link className="project-card-link" href={"/projects/" + project.slug} aria-label={"View " + project.name + " project"}><ProjectVisual variant={project.visual} name={project.name} /><div className="project-card-content"><div className="project-card-topline"><span>{project.category}</span><span>0{index + 1}</span></div><div className="project-card-title-row"><h3>{project.name}</h3><span className="card-arrow"><Arrow /></span></div><p>{project.summary}</p><div className="project-card-bottom"><span className="status-label"><i />{project.status}</span><span className="project-stack">{project.stack.slice(0, 2).join(" · ")}</span></div></div></Link><SaveProjectButton slug={project.slug} name={project.name} /></article>)}</div></section>,
+    projects: <section className="shell section-block work-section" id="work"><SectionHeading eyebrow="SELECTED WORK / 02" title={site.homeContent.projectsTitle} description={site.homeContent.projectsDescription} action={<Link className="text-link" href="/projects">All projects <Arrow /></Link>} /><div className="project-grid" data-animate-stagger>{featuredProjects.map((project, index) => <article className={"project-card project-card-" + project.visual} key={project.slug} data-reveal><Link className="project-card-link" href={"/projects/" + project.slug} aria-label={"View " + project.name + " project"}><ProjectArtwork project={project} /><div className="project-card-content"><div className="project-card-topline"><span>{project.category}</span><span>0{index + 1}</span></div><div className="project-card-title-row"><h3>{project.name}</h3><span className="card-arrow"><Arrow /></span></div><p>{project.summary}</p><div className="project-card-bottom"><span className="status-label"><i />{project.status}</span><span className="project-stack">{project.stack.slice(0, 2).join(" · ")}</span></div></div></Link><SaveProjectButton slug={project.slug} name={project.name} /></article>)}</div></section>,
     about: <section className="about-band" id="about"><WaveDivider /><div className="shell about-grid"><div className="about-heading" data-reveal><p className="eyebrow"><span className="eyebrow-line" /> A LITTLE ABOUT ME / 02</p><h2>{site.homeContent.aboutTitle.split("\n").map((line, i) => <span key={line}>{i > 0 && <br />}{i === 0 ? line : <em>{line}</em>}</span>)}</h2></div><div className="about-copy" data-reveal>{site.homeContent.aboutParagraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<Link className="text-link" href="/experience">More about my journey <Arrow /></Link></div></div></section>,
     skills: <section className="shell section-block capability-section" id="skills"><SectionHeading eyebrow="TOOLS & INTERESTS / 03" title={site.homeContent.skillsTitle} description={site.homeContent.skillsDescription} /><div className="skill-grid" data-animate-stagger>{site.skillGroups.map((group, index) => <div className="skill-group" key={group.name} data-reveal><div className="skill-group-head"><span>0{index + 1}</span><h3>{group.name}</h3></div><div className="skill-pills">{group.skills.map((skill) => <span key={skill}>{skill}</span>)}</div></div>)}</div></section>,
     contact: <><section className="shell contact-callout" data-reveal><div><p className="eyebrow"><span className="eyebrow-line" /> OPEN CHANNEL / 04</p><h2>{site.homeContent.contactTitle}</h2><p>{site.homeContent.contactDescription}</p></div><Link className="button button-primary" href="#contact-form">Start a conversation <Arrow /></Link><span className="callout-watermark">BCH</span></section><section className="shell home-contact-form" id="contact-form" data-reveal><div className="home-contact-heading"><p className="eyebrow"><span className="eyebrow-line" /> SEND A NOTE / 05</p><h2>Tell me what you’re<br /><span>thinking about.</span></h2><p>Share a little context. Verified, approved enquiries reach my inbox directly.</p></div><ContactForm /></section></>

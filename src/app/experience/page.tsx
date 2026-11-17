@@ -17,7 +17,7 @@ export default async function ExperiencePage() {
       <div className="page-intro" data-reveal>
         <p className="eyebrow"><span className="eyebrow-line" /> BACKGROUND / EXPERIENCE</p>
         <h1>Learning by<br /><span>building things.</span></h1>
-        <p>My journey is shaped by coursework, internships, independent projects and the habit of going deeper than the first working solution.</p>
+        <p>Selected experience, education and technical work, based on the details in my current résumé.</p>
       </div>
 
       <SectionHeading eyebrow="EXPERIENCE / 01" title="Where I’ve spent time." />
@@ -30,12 +30,28 @@ export default async function ExperiencePage() {
               <h2>{entry.title}</h2>
               <div className="timeline-meta"><strong>{entry.organization}</strong><span>{entry.period}</span></div>
               <p>{entry.description}</p>
+              {entry.repo && <a className="text-link" href={entry.repo} target="_blank" rel="noreferrer">View related source ↗</a>}
             </div>
           </article>
         ))}
       </div>
 
-      <SectionHeading eyebrow="MILESTONES / 02" title="A few things worth noting." />
+      <SectionHeading eyebrow="EDUCATION / 02" title="Where I’ve studied." />
+      <div className="timeline education-timeline">
+        {site.education.map((entry, index) => (
+          <article className="timeline-entry" key={entry.qualification + entry.institution} data-reveal>
+            <div className="timeline-marker"><span>0{index + 1}</span><i /></div>
+            <div className="timeline-content">
+              <p className="eyebrow">{entry.period}</p>
+              <h2>{entry.qualification}</h2>
+              <div className="timeline-meta"><strong>{entry.institution}</strong>{entry.fieldOfStudy && <span>{entry.fieldOfStudy}</span>}</div>
+              {entry.description && <p>{entry.description}</p>}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <SectionHeading eyebrow="MILESTONES / 03" title="A few things worth noting." />
       <div className="achievement-grid">
         {site.achievements.map((item, index) => (
           <article className="achievement-card" key={item.title} data-reveal>

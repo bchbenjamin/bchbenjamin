@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import in.bchbenjamin.portfolio.agent.AgentTokenService;
 import in.bchbenjamin.portfolio.linkedin.LinkedInPublishingService;
 import in.bchbenjamin.portfolio.resume.ResumePdfService;
+import in.bchbenjamin.portfolio.resume.ResumeGenerationService;
 import in.bchbenjamin.portfolio.security.EncryptedLinkedInAuthorizedClientService;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -69,16 +70,17 @@ class PostgresMigrationIntegrationTest {
     @Autowired private EncryptedLinkedInAuthorizedClientService authorizedClients;
     @Autowired private LinkedInPublishingService linkedInPublishing;
     @Autowired private ResumePdfService resumePdfService;
+    @Autowired private ResumeGenerationService resumeGenerationService;
 
     @Test
     void flywayCreatesThePortfolioSchemaAndSeedData() throws Exception {
         mockMvc.perform(get("/api/v1/public/projects"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(4))
-            .andExpect(jsonPath("$[0].slug").value("awarespan"));
+            .andExpect(jsonPath("$.length()").value(7))
+            .andExpect(jsonPath("$[0].slug").value("ease-health"));
         mockMvc.perform(get("/api/v1/public/profile"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.fullName").value("Benjamin"));
+            .andExpect(jsonPath("$.fullName").value("B C H Benjamin"));
     }
 
     @Test
@@ -104,8 +106,9 @@ class PostgresMigrationIntegrationTest {
         assertTrue(new String(bytes, 0, 4).equals("%PDF"));
         try (var document = PDDocument.load(bytes)) {
             String extractedText = new PDFTextStripper().getText(document);
-            assertTrue(extractedText.contains("Benjamin"));
-            assertTrue(extractedText.contains("AWARESPAN"));
+            assertTrue(extractedText.contains("B C H Benjamin"));
+            assertTrue(extractedText.contains("Ease Health"));
+            assertFalse(extractedText.contains("AWARESPAN"));
         }
     }
 
@@ -115,7 +118,37 @@ class PostgresMigrationIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].resumeDescription").doesNotExist())
             .andExpect(jsonPath("$[0].customFields").doesNotExist())
-            .andExpect(jsonPath("$[0].publicFields").doesNotExist());
+            .andExpect(jsonPath("$[0].publicFields").doesNotExist())
+            .andExpect(jsonPath("$[0].resumeIncluded").doesNotExist())
+            .andExpect(jsonPath("$[0].resume_included").doesNotExist());
+    }
+
+    @Test
+    void resumeGeneratorUsesOnlyCuratedRecordsForGeneralAndJobSpecificPdfs() throws Exception {
+        var general = resumeGenerationService.generate("general", null, "ats");
+        assertEquals("GENERAL", general.mode());
+        byte[] generalPdf = resumeGenerationService.download(general.id());
+        try (var document = PDDocument.load(generalPdf)) {
+            String extracted = new PDFTextStripper().getText(document);
+            assertTrue(extracted.contains("B C H Benjamin"));
+            assertTrue(extracted.contains("Ease Health"));
+            assertTrue(extracted.contains("FOSSEE"));
+            assertFalse(extracted.contains("AWARESPAN"));
+        }
+
+        String jobDescription = "Build healthcare appointment scheduling software with Python FastAPI, MySQL, bcrypt authentication and natural-language booking using Groq or LLaMA 3. Deliver patient and doctor workflows.";
+        var tailored = resumeGenerationService.generate("job", jobDescription, "ats");
+        assertEquals("JOB_DESCRIPTION", tailored.mode());
+        assertFalse(tailored.matchReport().get("projects") == null);
+        assertFalse(((java.util.List<?>) tailored.matchReport().get("projects")).isEmpty());
+        byte[] tailoredPdf = resumeGenerationService.download(tailored.id());
+        try (var document = PDDocument.load(tailoredPdf)) {
+            String extracted = new PDFTextStripper().getText(document);
+            assertTrue(extracted.contains("Ease Health"));
+            assertFalse(extracted.contains("Breach & Defend"));
+        }
+        resumeGenerationService.delete(general.id());
+        resumeGenerationService.delete(tailored.id());
     }
 
     @Test

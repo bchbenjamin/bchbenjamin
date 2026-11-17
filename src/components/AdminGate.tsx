@@ -10,7 +10,7 @@ import SiteBuilder from "@/components/SiteBuilder";
 import CustomFieldDefinitions from "@/components/CustomFieldDefinitions";
 import AdminContactPanel from "@/components/AdminContactPanel";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
 type Session = { authenticated: boolean; name: string; email: string; issuer: string };
 

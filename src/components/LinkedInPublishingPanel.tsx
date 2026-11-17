@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 type Draft = { id: string; content: string; status: string; linkedin_post_id?: string | null; failure_code?: string | null; created_at?: string };
 
 async function getCsrf() {

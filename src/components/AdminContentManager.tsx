@@ -2,19 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 const resources = ["profile", "projects", "experience", "education", "skill-groups", "skills", "achievements"] as const;
 type Resource = (typeof resources)[number];
 type RecordItem = Record<string, unknown> & { id?: string };
 
 const templates: Record<Resource, Record<string, unknown>> = {
   profile: { fullName: "", headline: "", summary: "", location: "India", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false, publicFields: { "*": false }, customFields: {} },
-  projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, sortOrder: 0, startedOn: null, completedOn: null, publicFields: { "*": false }, customFields: {} },
-  experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
-  education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, resumeIncluded: true, sortOrder: 0, startedOn: null, completedOn: null, publicFields: { "*": false }, customFields: {} },
+  experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
   "skill-groups": { name: "", description: "", published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
-  skills: { groupId: "", name: "", proficiency: "", sortOrder: 0, publicFields: { "*": false }, customFields: {} },
-  achievements: { category: "", title: "", detail: "", awardedOn: null, issuer: "", credentialUrl: "", published: false, sortOrder: 0, publicFields: { "*": false }, customFields: {} }
+  skills: { groupId: "", name: "", proficiency: "", resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
+  achievements: { category: "", title: "", detail: "", awardedOn: null, issuer: "", credentialUrl: "", published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} }
 };
 
 function camelKey(key: string) {
@@ -122,7 +122,14 @@ export default function AdminContentManager() {
   try { parsedEditor = JSON.parse(editor) as Record<string, unknown>; } catch { /* Editor validation is shown after save. */ }
   const publicFields = (parsedEditor.publicFields && typeof parsedEditor.publicFields === "object" ? parsedEditor.publicFields : {}) as Record<string, boolean>;
   const customKeys = parsedEditor.customFields && typeof parsedEditor.customFields === "object" ? Object.keys(parsedEditor.customFields as Record<string, unknown>).map((key) => `customFields.${key}`) : [];
-  const visibilityFields = [...Object.keys(parsedEditor).filter((key) => !["publicFields", "customFields", "published", "sortOrder"].includes(key) && typeof parsedEditor[key] !== "object"), ...customKeys];
+  const visibilityFields = [...Object.keys(parsedEditor).filter((key) => !["id", "createdAt", "updatedAt", "publicFields", "customFields", "published", "resumeIncluded", "sortOrder"].includes(key) && typeof parsedEditor[key] !== "object"), ...customKeys];
+
+  function setResumeIncluded(included: boolean) {
+    try {
+      const body = JSON.parse(editor) as Record<string, unknown>;
+      setEditor(JSON.stringify({ ...body, resumeIncluded: included }, null, 2));
+    } catch { setMessage("Fix the JSON before changing résumé inclusion."); }
+  }
 
   function setFieldVisibility(field: string, visible: boolean) {
     try {
@@ -172,6 +179,7 @@ export default function AdminContentManager() {
             <div className="field-visibility-grid">{visibilityFields.map((field) => <label key={field}><input type="checkbox" checked={publicFields[field] ?? publicFields["*"] ?? false} onChange={(event) => setFieldVisibility(field, event.target.checked)} /><span>{field.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`)}</span></label>)}</div>
             <button type="button" className="text-link" onClick={addCustomField}>＋ Add a custom parameter</button>
           </div>
+          {resource !== "profile" && resource !== "skill-groups" && <label className="resume-inclusion-control"><input type="checkbox" checked={parsedEditor.resumeIncluded !== false} onChange={(event) => setResumeIncluded(event.target.checked)} /><span><strong>Include in generated résumé</strong><small>Separate from website visibility. Private records can still be included in your résumé.</small></span></label>}
           <div className="admin-editor-actions">
             <button className="button button-primary" type="button" disabled={busy} onClick={() => void save()}>{busy ? "Working…" : "Save record"}</button>
             <button className="button button-quiet" type="button" disabled={busy || !selected?.id} onClick={() => void remove()}>Delete</button>

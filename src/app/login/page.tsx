@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false }
 };
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
 export default function LoginPage() {
   return (

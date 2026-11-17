@@ -15,7 +15,7 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="shell header-inner">
-        <Link className="brand" href="/" aria-label="Benjamin — home">
+        <Link className="brand" href="/" aria-label="B C H Benjamin — home">
           <span className="brand-mark">BCH</span>
           <span className="brand-name">benjamin<span className="brand-dot">.</span></span>
         </Link>
@@ -36,7 +36,7 @@ export default function SiteHeader() {
           })}
         </nav>
 
-        <Link className="header-contact" href="/contact" aria-label="Contact Benjamin">
+        <Link className="header-contact" href="/contact" aria-label="Contact B C H Benjamin">
           <span>Let’s talk</span>
           <span aria-hidden="true" className="arrow-up-right">↗</span>
         </Link>

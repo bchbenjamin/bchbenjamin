@@ -17,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1/public")
 public class PublicPortfolioController {
-    private static final List<String> PRIVATE_COLUMNS = List.of("id", "public_fields", "custom_fields", "created_at", "updated_at", "published", "sort_order", "gallery_image_url");
+    private static final List<String> PRIVATE_COLUMNS = List.of("id", "public_fields", "custom_fields", "created_at", "updated_at", "published", "sort_order", "gallery_image_url", "resume_included");
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
 
@@ -35,8 +35,14 @@ public class PublicPortfolioController {
 
     @GetMapping("/projects")
     public List<Map<String, Object>> projects() {
-        return jdbc.queryForList("SELECT * FROM projects WHERE published = TRUE ORDER BY sort_order, name")
-            .stream().map(this::toPublicMap).filter(row -> row.containsKey("name") && row.containsKey("slug")).toList();
+        List<Map<String, Object>> visible = new ArrayList<>();
+        for (Map<String, Object> source : jdbc.queryForList("SELECT * FROM projects WHERE published = TRUE ORDER BY sort_order, name")) {
+            Map<String, Object> project = toPublicMap(source);
+            if (!project.containsKey("name") || !project.containsKey("slug")) continue;
+            project.put("media", mediaFor("project", source.get("id")));
+            visible.add(project);
+        }
+        return visible;
     }
 
     @GetMapping("/projects/{slug}")

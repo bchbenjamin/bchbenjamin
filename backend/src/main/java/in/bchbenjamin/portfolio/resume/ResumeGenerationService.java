@@ -102,11 +102,11 @@ public class ResumeGenerationService {
     private Map<String, Object> loadSourceSnapshot() {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("profile", firstOrEmpty(jdbc.queryForList("SELECT full_name, headline, summary, email, location, website_url, github_url, linkedin_url FROM profile ORDER BY updated_at DESC LIMIT 1")));
-        result.put("projects", jdbc.queryForList("SELECT id, name, tagline, summary, resume_description FROM projects ORDER BY featured DESC, sort_order, name"));
-        result.put("experience", jdbc.queryForList("SELECT id, role_title, organization, employment_type, description, started_on, ended_on, is_current FROM experience ORDER BY sort_order, started_on DESC"));
-        result.put("education", jdbc.queryForList("SELECT id, institution, qualification, field_of_study, description, started_on, ended_on, grade FROM education ORDER BY sort_order, started_on DESC"));
-        result.put("skills", jdbc.queryForList("SELECT s.id, g.name AS group_name, s.name FROM skill_groups g JOIN skills s ON s.group_id = g.id ORDER BY g.sort_order, s.sort_order, s.name"));
-        result.put("achievements", jdbc.queryForList("SELECT id, category, title, detail, issuer, awarded_on FROM achievements ORDER BY sort_order, awarded_on DESC"));
+        result.put("projects", jdbc.queryForList("SELECT id, name, tagline, summary, resume_description FROM projects WHERE resume_included = TRUE ORDER BY featured DESC, sort_order, name"));
+        result.put("experience", jdbc.queryForList("SELECT id, role_title, organization, employment_type, description, started_on, ended_on, is_current FROM experience WHERE resume_included = TRUE ORDER BY sort_order, started_on DESC"));
+        result.put("education", jdbc.queryForList("SELECT id, institution, qualification, field_of_study, description, started_on, ended_on, grade FROM education WHERE resume_included = TRUE ORDER BY sort_order, started_on DESC"));
+        result.put("skills", jdbc.queryForList("SELECT s.id, g.name AS group_name, s.name FROM skill_groups g JOIN skills s ON s.group_id = g.id WHERE s.resume_included = TRUE ORDER BY g.sort_order, s.sort_order, s.name"));
+        result.put("achievements", jdbc.queryForList("SELECT id, category, title, detail, issuer, awarded_on FROM achievements WHERE resume_included = TRUE ORDER BY sort_order, awarded_on DESC"));
         return result;
     }
 

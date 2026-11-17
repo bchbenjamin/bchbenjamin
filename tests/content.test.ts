@@ -22,8 +22,21 @@ describe("portfolio content", () => {
     }
   });
 
-  it("does not publish a source link for the private AI-IDA repository", () => {
-    expect(getProjectBySlug("ai-ida")?.repo).toBeUndefined();
+  it("limits public projects to the entries in the current résumé", () => {
+    expect(projects.map((project) => project.slug)).toEqual([
+      "ease-health", "bengaluruduru", "street-safety-device", "hermes-the-quizzer",
+      "academic-result-management-system", "peer-management-platform", "breach-defend"
+    ]);
+    expect(getProjectBySlug("awarespan")).toBeUndefined();
+  });
+
+  it("places the horizontal project gallery before the home hero", () => {
+    expect(site.homeSections[0]).toMatchObject({ id: "image-gallery", enabled: true, order: 1 });
+  });
+
+  it("contains résumé-backed education and experience records", () => {
+    expect(site.education).toHaveLength(3);
+    expect(site.experience.some((item) => item.organization.includes("FOSSEE"))).toBe(true);
   });
 
   it("uses the checked-in snapshot when the public API is not configured", async () => {
@@ -36,7 +49,7 @@ describe("portfolio content", () => {
   });
 
   it("resolves existing projects and rejects unknown slugs", () => {
-    expect(getProjectBySlug("awarespan")?.name).toBe("AWARESPAN");
+    expect(getProjectBySlug("ease-health")?.name).toContain("Ease Health");
     expect(getProjectBySlug("not-a-project")).toBeUndefined();
   });
 });

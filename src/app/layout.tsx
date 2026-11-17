@@ -10,25 +10,25 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(site.owner.website),
   title: {
-    default: "Benjamin — Software, AI & Systems",
-    template: "%s — Benjamin"
+    default: "B C H Benjamin — Computer Science Portfolio",
+    template: "%s — B C H Benjamin"
   },
-  description: "The portfolio of Benjamin — Computer Science & Engineering student building across full-stack software, applied AI, data and edge systems.",
-  applicationName: "Benjamin — Portfolio",
-  creator: "Benjamin",
-  publisher: "Benjamin",
+  description: "Portfolio of B C H Benjamin, a 5th-semester Computer Science student focused on Python development, data engineering, artificial intelligence and technical research.",
+  applicationName: "B C H Benjamin — Portfolio",
+  creator: "B C H Benjamin",
+  publisher: "B C H Benjamin",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: site.owner.website,
-    siteName: "Benjamin — Portfolio",
-    title: "Benjamin — Software, AI & Systems",
-    description: "Practical software at the intersection of intelligent systems and thoughtful product engineering."
+    siteName: "B C H Benjamin — Portfolio",
+    title: "B C H Benjamin — Computer Science Portfolio",
+    description: "Python development, data engineering, artificial intelligence and technical research."
   },
   twitter: {
     card: "summary_large_image",
-    title: "Benjamin — Software, AI & Systems",
-    description: "Building useful software for complex, real-world problems."
+    title: "B C H Benjamin — Computer Science Portfolio",
+    description: "Computer Science · Python Development · Data Engineering · Artificial Intelligence"
   }
 };
 

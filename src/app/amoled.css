@@ -144,3 +144,21 @@ input:focus, textarea:focus, select:focus { border-color:#8b9cff !important; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior:auto; }
 }
+
+/* The opening image gallery follows the portfolio's mandatory AMOLED palette. */
+.home-image-gallery { background:#000 !important; border-color:#1a1a1a !important; }
+.home-gallery-heading h2,.home-gallery-title { color:#f5f5f5 !important; }
+.home-gallery-heading h2 span,.home-gallery-title i { color:#a4b1ff !important; }
+.home-gallery-controls,.home-gallery-number,.home-gallery-summary,.home-gallery-foot { color:#8b8b95 !important; }
+.home-gallery-controls button { border-color:#303038 !important; background:#080808 !important; color:#f5f5f5 !important; }
+.home-gallery-controls button:hover { border-color:#8798ff !important; background:#252d57 !important; }
+.home-gallery-card { border-color:#25252b !important; background:#090909 !important; color:#f5f5f5 !important; }
+.home-gallery-card:hover { border-color:#697be2 !important; box-shadow:0 18px 42px rgba(0,0,0,.65) !important; }
+.home-gallery-card .project-visual { border-color:#24242b !important; }
+.resume-inclusion-control { border-color:#292930 !important; background:#090909 !important; color:#f5f5f5 !important; }
+.resume-inclusion-control small { color:#9696a0 !important; }
+
+.media-attach-targets label { color:#9696a0 !important; }
+.media-attach-targets select { border-color:#2a2a32 !important; background:#090909 !important; color:#f5f5f5 !important; }
+.project-visual-image { background:#090909 !important; }
+.project-period-label { color:#9696a0 !important; }

@@ -19,28 +19,28 @@ public class ResumePdfService {
 
     public byte[] render(String variant, ResumeSelection selection) {
         // Resume source data is private. Do not filter by the public-site publication flag.
-        Map<String, Object> profile = jdbc.queryForMap("SELECT full_name, headline, summary, email, website_url, github_url, location FROM profile ORDER BY updated_at DESC LIMIT 1");
+        Map<String, Object> profile = jdbc.queryForMap("SELECT full_name, headline, summary, email, website_url, github_url, linkedin_url, location FROM profile ORDER BY updated_at DESC LIMIT 1");
         List<Map<String, Object>> projects = jdbc.queryForList("""
             SELECT id, name, tagline, summary, description, short_description, resume_description,
                    repository_url, live_url
-            FROM projects ORDER BY featured DESC, sort_order, name
+            FROM projects WHERE resume_included = TRUE ORDER BY featured DESC, sort_order, name
             """);
         List<Map<String, Object>> experience = jdbc.queryForList("""
             SELECT id, role_title, organization, employment_type, description, started_on, ended_on, is_current
-            FROM experience ORDER BY sort_order, started_on DESC
+            FROM experience WHERE resume_included = TRUE ORDER BY sort_order, started_on DESC
             """);
         List<Map<String, Object>> education = jdbc.queryForList("""
             SELECT id, institution, qualification, field_of_study, location, description, started_on, ended_on, grade
-            FROM education ORDER BY sort_order, started_on DESC
+            FROM education WHERE resume_included = TRUE ORDER BY sort_order, started_on DESC
             """);
         List<Map<String, Object>> skills = jdbc.queryForList("""
             SELECT s.id, g.name AS group_name, s.name AS skill_name
-            FROM skill_groups g LEFT JOIN skills s ON s.group_id = g.id
+            FROM skill_groups g LEFT JOIN skills s ON s.group_id = g.id AND s.resume_included = TRUE
             ORDER BY g.sort_order, s.sort_order, s.name
             """);
         List<Map<String, Object>> achievements = jdbc.queryForList("""
             SELECT id, category, title, detail, issuer, awarded_on
-            FROM achievements ORDER BY sort_order, awarded_on DESC
+            FROM achievements WHERE resume_included = TRUE ORDER BY sort_order, awarded_on DESC
             """);
         projects = applySelection(projects, selection.projects(), selection.includeAll());
         experience = applySelection(experience, selection.experience(), selection.includeAll());
@@ -100,7 +100,8 @@ public class ResumePdfService {
             .append("<div class='contact'>").append(escape(profile.get("email"))).append(" · ")
             .append(escape(profile.get("location"))).append(" · ")
             .append(link(profile.get("website_url"))).append(" · ")
-            .append(link(profile.get("github_url"))).append("</div>");
+            .append(link(profile.get("github_url"))).append(" · ")
+            .append(link(profile.get("linkedin_url"))).append("</div>");
         html.append("<h2>Profile</h2><p>").append(escape(profile.get("summary"))).append("</p>");
 
         if (!skills.isEmpty()) {
@@ -124,8 +125,8 @@ public class ResumePdfService {
                 html.append("<div class='item'><h3>").append(escape(item.get("role_title"))).append(" — ")
                     .append(escape(item.get("organization"))).append("</h3><p class='meta'>")
                     .append(escape(item.get("employment_type"))).append(" · ")
-                    .append(escape(item.get("started_on"))).append(" – ")
-                    .append(Boolean.TRUE.equals(item.get("is_current")) ? "Present" : escape(item.get("ended_on")))
+                    .append(escape(dateLabel(item.get("started_on")))).append(" – ")
+                    .append(Boolean.TRUE.equals(item.get("is_current")) ? "Present" : escape(dateLabel(item.get("ended_on"))))
                     .append("</p><p>").append(escape(item.get("description"))).append("</p></div>");
             }
         }
@@ -135,7 +136,7 @@ public class ResumePdfService {
                 html.append("<div class='item'><h3>").append(escape(item.get("qualification"))).append(" — ")
                     .append(escape(item.get("institution"))).append("</h3><p class='meta'>")
                     .append(escape(item.get("field_of_study"))).append(" · ")
-                    .append(escape(item.get("started_on"))).append(" – ").append(escape(item.get("ended_on")))
+                    .append(escape(dateLabel(item.get("started_on")))).append(" – ").append(escape(dateLabel(item.get("ended_on"))))
                     .append(" · ").append(escape(item.get("grade"))).append("</p><p>")
                     .append(escape(item.get("description"))).append("</p></div>");
             }
@@ -160,6 +161,14 @@ public class ResumePdfService {
             html.append("</ul>");
         }
         return html.append("</body></html>").toString();
+    }
+
+    private static String dateLabel(Object value) {
+        if (value == null) return "";
+        try {
+            java.time.LocalDate date = value instanceof java.sql.Date sqlDate ? sqlDate.toLocalDate() : java.time.LocalDate.parse(value.toString());
+            return date.getMonth().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.ENGLISH) + " " + date.getYear();
+        } catch (Exception ignored) { return value.toString(); }
     }
 
     private static String link(Object value) {

@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 type MediaAsset = { id: string; original_filename: string; content_type: string; byte_size: number; alt_text: string; caption: string; visibility: "PUBLIC" | "PRIVATE"; uploaded_at: string };
 type AchievementOption = { id: string; title: string; detail?: string };
+type ProjectOption = { id: string; name: string; slug: string };
+type MediaResourceType = "project" | "achievement";
 const acceptedTypes = ["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"];
 const maxFileSize = 12 * 1024 * 1024;
 async function csrfToken() { const r = await fetch(`${apiBase}/api/v1/csrf`, { credentials: "include" }); if (!r.ok) throw new Error("Could not initialise a secure request."); return (await r.json() as { token: string }).token; }
@@ -13,7 +15,9 @@ async function csrfToken() { const r = await fetch(`${apiBase}/api/v1/csrf`, { c
 export default function MediaLibrary() {
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [achievements, setAchievements] = useState<AchievementOption[]>([]);
-  const [achievementId, setAchievementId] = useState("");
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [resourceType, setResourceType] = useState<MediaResourceType>("project");
+  const [resourceId, setResourceId] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [altText, setAltText] = useState("");
   const [caption, setCaption] = useState("");
@@ -24,15 +28,18 @@ export default function MediaLibrary() {
   const [message, setMessage] = useState("Original uploads are private until you explicitly publish them.");
 
   const load = useCallback(async () => {
-    const [mediaResponse, achievementResponse] = await Promise.all([
+    const [mediaResponse, achievementResponse, projectResponse] = await Promise.all([
       fetch(`${apiBase}/api/v1/admin/media`, { credentials: "include", cache: "no-store" }),
-      fetch(`${apiBase}/api/v1/admin/content/achievements`, { credentials: "include", cache: "no-store" })
+      fetch(`${apiBase}/api/v1/admin/content/achievements`, { credentials: "include", cache: "no-store" }),
+      fetch(`${apiBase}/api/v1/admin/content/projects`, { credentials: "include", cache: "no-store" })
     ]);
-    if (!mediaResponse.ok || !achievementResponse.ok) throw new Error("Could not load the media library.");
+    if (!mediaResponse.ok || !achievementResponse.ok || !projectResponse.ok) throw new Error("Could not load the media library.");
     setAssets(await mediaResponse.json() as MediaAsset[]);
-    const rows = await achievementResponse.json() as AchievementOption[];
-    setAchievements(rows); if (!achievementId && rows[0]?.id) setAchievementId(rows[0].id);
-  }, [achievementId]);
+    const [achievementRows, projectRows] = await Promise.all([achievementResponse.json() as Promise<AchievementOption[]>, projectResponse.json() as Promise<ProjectOption[]>]);
+    setAchievements(achievementRows); setProjects(projectRows);
+    const options = resourceType === "project" ? projectRows : achievementRows;
+    if (!resourceId && options[0]?.id) setResourceId(options[0].id);
+  }, [resourceId, resourceType]);
   useEffect(() => { let active = true; void Promise.resolve().then(() => active ? load() : undefined).catch((error: unknown) => { if (active) setMessage(error instanceof Error ? error.message : "Could not load media."); }); return () => { active = false; }; }, [load]);
 
   function chooseFile(next: File | undefined) {
@@ -81,14 +88,18 @@ export default function MediaLibrary() {
   }
 
   async function attach(asset: MediaAsset) {
-    if (!achievementId) { setMessage("Create an achievement first, then attach this image."); return; }
+    const targetName = resourceType === "project"
+      ? projects.find((item) => item.id === resourceId)?.name
+      : achievements.find((item) => item.id === resourceId)?.title;
+    if (!targetName) { setMessage("Choose a project or achievement first."); return; }
     try {
       const token = await csrfToken();
-      const response = await fetch(`${apiBase}/api/v1/admin/media/${asset.id}/link`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": token }, body: JSON.stringify({ resourceType: "achievement", resourceId: achievementId, purpose: "gallery", sortOrder: 0 }) });
+      const response = await fetch(`${apiBase}/api/v1/admin/media/${asset.id}/link`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": token }, body: JSON.stringify({ resourceType, resourceId, purpose: resourceType === "project" ? "project-gallery" : "gallery", sortOrder: 0 }) });
       if (!response.ok) throw new Error(`Could not attach ${asset.original_filename}.`);
-      setMessage("Image linked to the selected achievement. It appears publicly only when both the asset and achievement are published.");
+      setMessage(`Image linked to ${targetName}. It appears publicly only when both the asset and record are published.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not attach media."); }
   }
+
 
   return (
     <section className="media-library admin-module" aria-label="Media library">
@@ -108,7 +119,7 @@ export default function MediaLibrary() {
         </label>
         <div className="media-upload-fields"><label>Alt text<input value={altText} onChange={(event) => setAltText(event.target.value)} placeholder="Describe the image" /></label><label>Caption<input value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Optional caption" /></label><button className={`button button-primary upload-action${busy ? " is-busy" : ""}`} disabled={busy || !file} onClick={() => void upload()} type="button"><span>{busy ? `Uploading ${uploadProgress}%` : "Upload privately"}</span><i aria-hidden="true">{busy ? "" : "↗"}</i></button></div>
       </div>
-      <div className="media-library-toolbar"><div><span className="eyebrow">YOUR ASSETS / {assets.length}</span><h3>Asset collection</h3></div><label>Attach to achievement<select value={achievementId} onChange={(event) => setAchievementId(event.target.value)}><option value="">Choose an achievement</option>{achievements.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></div>
+      <div className="media-library-toolbar"><div><span className="eyebrow">YOUR ASSETS / {assets.length}</span><h3>Asset collection</h3></div><div className="media-attach-targets"><label>Gallery<select value={resourceType} onChange={(event) => { const next = event.target.value as MediaResourceType; setResourceType(next); const options = next === "project" ? projects : achievements; setResourceId(options[0]?.id ?? ""); }}><option value="project">Project image gallery</option><option value="achievement">Achievement gallery</option></select></label><label>{resourceType === "project" ? "Project" : "Achievement"}<select value={resourceId} onChange={(event) => setResourceId(event.target.value)}><option value="">Choose a {resourceType}</option>{resourceType === "project" ? projects.map((item) => <option key={item.id} value={item.id}>{item.name}</option>) : achievements.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></div></div>
       <div className="media-asset-grid">{assets.map((asset) => <article className="media-asset-card" key={asset.id}><div className="media-asset-preview">{asset.content_type.startsWith("image/") ? <Image unoptimized fill sizes="(max-width: 700px) 100vw, 25vw" crossOrigin="use-credentials" src={`${apiBase}/api/v1/admin/media/${asset.id}/file`} alt={asset.alt_text || asset.original_filename} /> : <span>PDF</span>}<span className={asset.visibility === "PUBLIC" ? "asset-status public" : "asset-status"}>{asset.visibility}</span></div><div className="media-asset-info"><strong>{asset.original_filename}</strong><span>{Math.max(1, Math.round(asset.byte_size / 1024))} KB · {asset.content_type}</span><div><button type="button" onClick={() => void attach(asset)}>Feature in gallery</button><button className={`asset-visibility-toggle${asset.visibility === "PUBLIC" ? " is-public" : ""}`} type="button" aria-pressed={asset.visibility === "PUBLIC"} onClick={() => void updateVisibility(asset)}><span className="asset-visibility-track" aria-hidden="true"><i /></span><span>{asset.visibility === "PUBLIC" ? "Public" : "Private"}</span></button></div></div></article>)}</div>
       {assets.length === 0 && <div className="media-empty">Your media library is empty. Upload a certificate, screenshot or project photograph to start.</div>}
       <p className="admin-message" role="status">{message}</p>

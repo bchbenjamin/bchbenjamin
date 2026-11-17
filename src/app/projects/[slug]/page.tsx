@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ProjectVisual from "@/components/ProjectVisual";
+import ProjectArtwork from "@/components/ProjectArtwork";
 import { getPublicProjectBySlug } from "@/lib/content";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -32,7 +32,8 @@ export default async function ProjectDetailPage({ params }: Props) {
         <div className="detail-title-row"><h1>{project.name}<span>.</span></h1><span className="status-label"><i />{project.status}</span></div>
         <p className="detail-summary">{project.summary}</p>
       </div>
-      <ProjectVisual variant={project.visual} name={project.name} />
+      {project.period && <p className="project-period-label">{project.period}</p>}
+      <ProjectArtwork project={project} priority />
       <div className="detail-content-grid">
         <div className="detail-overview" data-reveal>
           <p className="eyebrow">OVERVIEW / THE WHY</p>
@@ -40,9 +41,10 @@ export default async function ProjectDetailPage({ params }: Props) {
           <p>{project.description}</p>
         </div>
         <aside className="detail-facts" data-reveal>
-          <div><span>MY ROLE</span><strong>{project.role}</strong></div>
+          {project.role && <div><span>MY ROLE</span><strong>{project.role}</strong></div>}
           <div><span>TECHNOLOGY</span><div className="skill-pills">{project.stack.map((item) => <span key={item}>{item}</span>)}</div></div>
           {project.repo && <a className="text-link" href={project.repo} target="_blank" rel="noreferrer">Explore repository ↗</a>}
+          {project.liveUrl && <a className="text-link" href={project.liveUrl} target="_blank" rel="noreferrer">Open live demo ↗</a>}
         </aside>
       </div>
       <div className="detail-next"><span>KEEP EXPLORING</span><Link className="text-link" href="/projects">More projects ↗</Link></div>

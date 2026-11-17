@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 type ResumeItem = { id: string; mode: string; template_id: string; job_description_preview?: string; model_used?: string; created_at: string; pdf_bytes: number };
 type Generated = { id: string; mode: string; templateId: string; modelUsed?: string; createdAt: string; matchReport?: Record<string, unknown> };
 

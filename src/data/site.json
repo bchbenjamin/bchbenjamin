@@ -1,141 +1,326 @@
 {
   "owner": {
-    "name": "Benjamin",
+    "name": "B C H Benjamin",
     "monogram": "BCH",
-    "role": "Computer Science & Engineering undergraduate",
-    "location": "India",
-    "email": "me@bchbenjamin.in",
+    "role": "B.E. Computer Science · Batch of 2028",
+    "location": "Bengaluru, India",
+    "email": "bchbenjamin@gmail.com",
     "website": "https://bchbenjamin.in",
     "github": "https://github.com/bchbenjamin",
-    "headline": "I build useful software for complex, real-world problems.",
-    "intro": "I’m a Computer Science & Engineering student interested in the space between intelligent systems and thoughtful product engineering. I work across full-stack applications, applied machine learning, data workflows and edge devices — with a bias toward practical things that can be tested, shipped and improved."
+    "linkedin": "https://linkedin.com/in/bchbenjamin",
+    "headline": "5th-semester B.E. Computer Science student · Batch of 2028",
+    "intro": "5th-semester B.E. Computer Science student (Batch of 2028) with a strong foundation in Python Development, Data Engineering and Technical Research. At FOSSEE, IIT Bombay, I develop Python automation and Blender/OpenFOAM tooling and prepare technical documentation. Recognized with a perfect 10/10 grade for software implementation, I am interested in AI/ML solutions, technical research, automation and data-driven software engineering."
   },
   "projects": [
     {
-      "slug": "awarespan",
-      "name": "AWARESPAN",
-      "category": "EDGE AI / SAFETY SYSTEMS",
-      "status": "IN DEVELOPMENT",
-      "summary": "An AI-powered safety device designed to bring local threat detection and connected alerts to edge hardware.",
-      "description": "AWARESPAN explores a modular, on-premise safety system built around a Raspberry Pi node. The current work focuses on local visual threat detection, a separable processing pipeline and a foundation for reliable alerts without requiring the node to expose itself directly to mobile clients.",
-      "role": "Core platform and AI integration",
+      "slug": "ease-health",
+      "name": "Ease Health — Patient Care Management",
+      "category": "INFOSYS SPRINGBOARD · PERSONAL",
+      "status": "SELECTED WORK",
+      "summary": "An AI-integrated healthcare management platform with patient, doctor and administrator portals.",
+      "description": "AI-integrated healthcare management platform with patient, doctor, and administrator portals. Built with FastAPI, Jinja2 and MySQL/TiDB, with bcrypt authentication, natural-language appointment booking using Groq/LLaMA 3, and healthcare scheduling workflows.",
+      "role": "",
       "stack": [
-        "Python",
-        "Raspberry Pi",
-        "Computer Vision",
-        "Node Architecture"
+        "FastAPI",
+        "Jinja2",
+        "MySQL / TiDB",
+        "Groq / LLaMA 3",
+        "bcrypt"
       ],
-      "repo": "https://github.com/awarespan/node-core-processing",
-      "visual": "awarespan",
-      "featured": true
+      "repo": "https://github.com/bchbenjamin/Integrated-Patient-Care-Management-System",
+      "visual": "siddhi",
+      "featured": true,
+      "period": "2026"
     },
     {
-      "slug": "siddhi",
-      "name": "Siddhi",
-      "category": "FULL-STACK / PRODUCT ENGINEERING",
-      "status": "ACTIVE BUILD",
-      "summary": "A role-aware platform with dedicated views for students and guardians, designed around useful information and clear navigation.",
-      "description": "Siddhi is a full-stack application being developed with an emphasis on clear role-specific experiences, report views and a consistent application shell. The work includes frontend architecture, database-backed features and the details that make a product feel coherent across screens.",
-      "role": "Full-stack development",
+      "slug": "bengaluruduru",
+      "name": "BengaluruDuru",
+      "category": "AI CIVIC GOVERNANCE PLATFORM · PERSONAL",
+      "status": "SELECTED WORK",
+      "summary": "An AI-powered civic issue reporting platform for structured reporting, routing and resolution verification.",
+      "description": "AI-powered civic issue reporting platform using Gemini 2.5 Flash. Implements structured issue extraction, automated categorization and routing, geographic duplicate detection, AI-assisted resolution verification, multilingual support, and map-based reporting.",
+      "role": "",
+      "stack": [
+        "Gemini 2.5 Flash",
+        "Issue extraction",
+        "Geographic duplicate detection",
+        "Multilingual support",
+        "Map-based reporting"
+      ],
+      "repo": "https://github.com/bchbenjamin/bfb.2.2",
+      "visual": "aiida",
+      "featured": true,
+      "period": "Mar 2026"
+    },
+    {
+      "slug": "street-safety-device",
+      "name": "AI-Powered Street Safety Device",
+      "category": "IOT RESEARCH · ATRIA IMPACT PROJECT",
+      "status": "SELECTED WORK",
+      "summary": "An IoT-based safety monitoring device using Raspberry Pi for real-time threat detection and edge computing.",
+      "description": "IoT-based safety monitoring device using Raspberry Pi. Focused on real-time threat detection, edge computing, hardware integration, and embedded-system documentation.",
+      "role": "",
+      "stack": [
+        "Raspberry Pi",
+        "IoT",
+        "Real-time threat detection",
+        "Edge computing",
+        "Hardware integration"
+      ],
+      "liveUrl": "https://kev-ai-device.vercel.app/",
+      "visual": "awarespan",
+      "featured": true,
+      "period": "Oct 2025 — Present"
+    },
+    {
+      "slug": "hermes-the-quizzer",
+      "name": "Hermes the Quizzer",
+      "category": "FULL STACK WEB APPLICATION · PERSONAL",
+      "status": "SELECTED WORK",
+      "summary": "A React/Vite and Express MCQ platform with PostgreSQL, JWT authentication and timed or untimed quizzes.",
+      "description": "React/Vite and Express-based MCQ platform with PostgreSQL. Includes JWT authentication with refresh tokens, rate limiting, timed and untimed quizzes, priority-based question selection, post-quiz review, admin CRUD, JSON import/export, and responsive dark/light themes.",
+      "role": "",
+      "stack": [
+        "React",
+        "Vite",
+        "Express",
+        "PostgreSQL",
+        "JWT"
+      ],
+      "repo": "https://github.com/bchbenjamin/hermes",
+      "visual": "clipz",
+      "featured": true,
+      "period": "2026"
+    },
+    {
+      "slug": "academic-result-management-system",
+      "name": "Academic Result Management System",
+      "category": "JAVA HACKATHON · PERSONAL",
+      "status": "SELECTED WORK",
+      "summary": "A Java 17 desktop application for role-based academic result workflows and automated performance metrics.",
+      "description": "Java 17/Maven desktop application backed by MariaDB. Replaces flat-file workflows with role-based student, evaluator, and administrator access, automated performance metrics, inline CRUD, and a 1v1 gauntlet leaderboard with multi-subject tie-breaking. Built with Java Swing and FlatLaf.",
+      "role": "",
+      "stack": [
+        "Java 17",
+        "Maven",
+        "MariaDB",
+        "Java Swing",
+        "FlatLaf"
+      ],
+      "repo": "https://github.com/bchbenjamin/results",
+      "visual": "siddhi",
+      "featured": false,
+      "period": "2026"
+    },
+    {
+      "slug": "peer-management-platform",
+      "name": "Peer Management Platform",
+      "category": "STUDENT COORDINATION SYSTEM · PERSONAL",
+      "status": "SELECTED WORK",
+      "summary": "A student coordination platform for attendance, lookup, feedback, account management and Excel reporting.",
+      "description": "Next.js and Prisma-based coordination platform using a Neon-backed database. Supports attendance, student lookup, group-discussion feedback, account management, TOTP/QR authentication, and Excel report generation.",
+      "role": "",
       "stack": [
         "Next.js",
-        "TypeScript",
-        "React",
-        "Backend Integration"
+        "Prisma",
+        "Neon",
+        "TOTP / QR authentication",
+        "Excel report generation"
       ],
-      "repo": "https://github.com/bchbenjamin/siddhi",
+      "repo": "https://github.com/bchbenjamin/peer-management",
       "visual": "siddhi",
-      "featured": true
+      "featured": false,
+      "period": "2026"
     },
     {
-      "slug": "ai-ida",
-      "name": "AI-IDA",
-      "category": "NLP / INTELLIGENT DATA ANALYTICS",
-      "status": "ACADEMIC PROJECT",
-      "summary": "A detection pipeline for suspicious internship and job opportunities across messaging and email channels.",
-      "description": "AI-IDA investigates how structured message metadata and unstructured content can be combined to identify potentially fraudulent opportunities. The approach includes data collection and cleaning, duplicate and forwarded-message handling, text representations, classification and a semantic explanation layer.",
-      "role": "Introduction and core AI integration",
+      "slug": "breach-defend",
+      "name": "Breach & Defend",
+      "category": "MULTIPLAYER CODING GAME · AWS STUDENT BUILDER GROUP",
+      "status": "SELECTED WORK",
+      "summary": "A LAN-hosted real-time social-deduction coding game with synchronized multiplayer matches and coding-puzzle grading.",
+      "description": "LAN-hosted real-time social-deduction coding game built with Next.js and Socket.io. Implements developer, hacker, and firewall roles, synchronized matches, coding-puzzle grading, difficulty-based task pools, persistent game state, and an administrative control panel.",
+      "role": "",
       "stack": [
-        "Python",
-        "NLP",
-        "Logistic Regression",
-        "Transformer Embeddings"
+        "Next.js",
+        "Socket.io",
+        "LAN networking",
+        "Real-time multiplayer",
+        "Coding-puzzle grading"
       ],
+      "repo": "https://github.com/bchbenjamin/aws-vigyaanrang",
       "visual": "aiida",
-      "featured": true
-    },
-    {
-      "slug": "clipz",
-      "name": "ClipZ",
-      "category": "PYTHON / DESKTOP SOFTWARE",
-      "status": "INDEPENDENT PROJECT",
-      "summary": "A lightweight desktop video editor designed to stay usable on low-spec PCs.",
-      "description": "ClipZ is a small-footprint video-editing concept with a simple Tkinter interface and a deliberate focus on minimal dependencies and straightforward distribution. The project avoids heavyweight AI features in favour of a practical desktop tool.",
-      "role": "Independent design and development",
-      "stack": [
-        "Python",
-        "Tkinter",
-        "Desktop UX"
-      ],
-      "visual": "clipz",
-      "featured": true
+      "featured": false,
+      "period": "Mar 2026"
     }
   ],
   "experience": [
     {
-      "label": "ENGINEERING INTERNSHIP",
-      "title": "OpenFOAM",
-      "organization": "FOSSEE",
-      "period": "Internship",
-      "description": "Worked with OpenFOAM during a technical internship, gaining hands-on experience with an engineering simulation tool alongside university coursework."
+      "label": "SUMMER INTERNSHIP",
+      "title": "FOSSEE Summer Intern",
+      "organization": "FOSSEE · IIT Bombay",
+      "repo": "https://github.com/bchbenjamin/classy_blender_mesh",
+      "period": "Feb 2026 — Aug 2026",
+      "description": "Contributed to open-source Python software. Developed a Blender add-on integrating classy_blocks for structured OpenFOAM hexahedral meshing, including geometry-driven mesh generation and validation workflows. Drafted technical presentation materials and delivered production-ready Python code with rigorous test coverage."
+    },
+    {
+      "label": "PLACEMENT INTERNSHIP",
+      "title": "CDC Student Placement Intern",
+      "organization": "Atria Institute of Technology",
+      "period": "May 2026 — Present",
+      "description": "Managed campus recruitment drives and technical coordination. Communicated project statuses clearly to cross-functional stakeholders and synthesized technical feedback for continuous improvement."
+    },
+    {
+      "label": "FULL-STACK INTERNSHIP",
+      "title": "Full Stack Web Dev Intern",
+      "organization": "Rotaract & CS&E Department",
+      "repo": "https://github.com/bchbenjamin/kevlify-auth",
+      "period": "Nov 2025 — Jan 2026",
+      "description": "Engineered a secure web-based authenticator application. Handled HTTP requests, API routing, authentication, database integrations, and rigorous testing. Awarded a perfect 10/10 grade for robust use-case execution."
+    },
+    {
+      "label": "CAMPUS AMBASSADOR",
+      "title": "Campus Ambassador",
+      "organization": "Chess.com",
+      "period": "Sep 2026 — Present",
+      "description": "Campus ambassador supporting Chess.com engagement and chess-related community outreach."
+    },
+    {
+      "label": "CLUB / TECHNICAL ROLE",
+      "title": "Technical Developer",
+      "organization": "Cybersecurity Club · Atria IT",
+      "period": "Apr 2026 — Present",
+      "description": "Engaged in security operations and threat intelligence research. Drafted comprehensive vulnerability analysis reports, technical use-cases, and awareness campaigns."
+    },
+    {
+      "label": "LEADERSHIP",
+      "title": "Technical & Development Lead",
+      "organization": "AWS Student Builder Group · Atria IT",
+      "period": "Mar 2026 — Present",
+      "description": "Event Head for Breach & Defend 2026. Led development of the LAN-hosted multiplayer coding game, contributed technical tooling, and coordinated secure event-lab deployments."
+    },
+    {
+      "label": "CLUB / TECHNICAL ROLE",
+      "title": "Technical Team Member",
+      "organization": "Atria Code Committee · Atria IT",
+      "period": "Jan 2026 — Apr 2026",
+      "description": "Led code quality initiatives, peer code reviews, and design discussions. Fostered technical writing standards and rapid collaborative problem-solving."
+    }
+  ],
+  "education": [
+    {
+      "qualification": "Bachelor of Engineering",
+      "fieldOfStudy": "Computer Science",
+      "institution": "Atria Institute of Technology",
+      "period": "2024 — 2028",
+      "description": "B.E. Computer Science · Batch of 2028"
+    },
+    {
+      "qualification": "ISC (Class XII)",
+      "fieldOfStudy": "",
+      "institution": "Bishop Cotton Boys’ School",
+      "period": "2022 — 2024",
+      "description": "SAT: 1340"
+    },
+    {
+      "qualification": "ICSE (Class X)",
+      "fieldOfStudy": "",
+      "institution": "St Ann’s High School",
+      "period": "2012 — 2022",
+      "description": ""
     }
   ],
   "achievements": [
     {
+      "label": "AWARD",
+      "title": "Best Project Award (10/10 Grade)",
+      "detail": "Web-Based TOTP Authenticator"
+    },
+    {
+      "label": "AWARD",
+      "title": "Highest Score",
+      "detail": "Full-Stack Internship"
+    },
+    {
       "label": "CHESS",
-      "title": "U-19 District Runner-up",
-      "detail": "Bengaluru Urban · Boys · 2024"
+      "title": "Peak Chess.com Rating: 2200",
+      "detail": "Peak rating on chess.com"
+    },
+    {
+      "label": "CERTIFICATION",
+      "title": "Responsive Web Design Developer",
+      "detail": "freeCodeCamp · 300 hours"
+    },
+    {
+      "label": "CERTIFICATION",
+      "title": "NPTEL DSA in Java",
+      "detail": "NPTEL certification"
+    },
+    {
+      "label": "CERTIFICATION",
+      "title": "OOP using Python",
+      "detail": "Certification / fundamentals"
+    },
+    {
+      "label": "CERTIFICATION",
+      "title": "DBMS Part 1",
+      "detail": "Certification / fundamentals"
+    },
+    {
+      "label": "CERTIFICATION",
+      "title": "Agile Scrum",
+      "detail": "Certification / fundamentals"
+    },
+    {
+      "label": "CLOUD",
+      "title": "20+ GCP Skills Badges",
+      "detail": "Including Pub/Sub, Cloud Functions, and API Gateway"
     },
     {
       "label": "COMMUNITY",
-      "title": "Chess.com Ambassador",
-      "detail": "Community ambassador"
+      "title": "GDG Campus Member",
+      "detail": "Google Developer Groups campus community"
     },
     {
-      "label": "ACADEMICS",
-      "title": "9.00 Semester GPA",
-      "detail": "Semester 4"
+      "label": "COMMUNITY",
+      "title": "AWS Cloud Club Core Team",
+      "detail": "Campus cloud community"
     }
   ],
   "skillGroups": [
     {
-      "name": "PRODUCT & WEB",
-      "skills": [
-        "TypeScript",
-        "JavaScript",
-        "React",
-        "Next.js",
-        "HTML",
-        "CSS"
-      ]
-    },
-    {
-      "name": "AI & DATA",
+      "name": "PROGRAMMING",
       "skills": [
         "Python",
-        "Machine Learning",
-        "Natural Language Processing",
-        "Data Analytics"
+        "Java",
+        "C++",
+        "JavaScript",
+        "TypeScript"
       ]
     },
     {
-      "name": "SYSTEMS & TOOLS",
+      "name": "FRAMEWORKS & BACKEND",
       "skills": [
-        "Java",
-        "Linux",
-        "Git",
-        "Raspberry Pi",
-        "Edge Computing"
+        "React",
+        "Node.js",
+        "FastAPI"
+      ]
+    },
+    {
+      "name": "DATABASES & TOOLS",
+      "skills": [
+        "PostgreSQL",
+        "MySQL",
+        "MongoDB",
+        "Git"
+      ]
+    },
+    {
+      "name": "AREAS OF FOCUS",
+      "skills": [
+        "Python Development",
+        "Data Engineering",
+        "Artificial Intelligence",
+        "Technical Research & Documentation"
       ]
     }
   ]

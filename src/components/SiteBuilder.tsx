@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 type Section = { id: string; type: string; enabled: boolean; order: number };
 type HomeContent = { heroEyebrow: string; focus: string; aboutTitle: string; aboutParagraphs: string[]; projectsTitle: string; projectsDescription: string; skillsTitle: string; skillsDescription: string; contactTitle: string; contactDescription: string };
-const labels: Record<string, string> = { hero: "Opening hero", principles: "Principles strip", "achievement-gallery": "Achievement gallery", projects: "Selected projects", about: "About", skills: "Skills and tools", contact: "Contact" };
+const labels: Record<string, string> = { "image-gallery": "Horizontal project image gallery", hero: "Opening hero", principles: "Principles strip", "achievement-gallery": "Achievement gallery", projects: "Selected projects", about: "About", skills: "Skills and tools", contact: "Contact" };
 async function csrfToken() { const r = await fetch(`${apiBase}/api/v1/csrf`, { credentials: "include" }); if (!r.ok) throw new Error("Could not initialise a secure request."); return (await r.json() as { token: string }).token; }
 
 export default function SiteBuilder() {

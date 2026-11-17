@@ -13,13 +13,14 @@ export default function SiteFooter() {
         <p className="footer-note">Thoughtfully built. Constantly iterating.</p>
         <div className="footer-links">
           <a href={site.owner.github} target="_blank" rel="noreferrer">GitHub ↗</a>
+          <a href={site.owner.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</a>
           <a href={"mailto:" + site.owner.email}>Email ↗</a>
           <CopyEmailButton email={site.owner.email} />
           <Link href="/projects">Selected work ↗</Link>
         </div>
       </div>
       <div className="shell footer-bottom">
-        <span>© {new Date().getFullYear()} Benjamin</span>
+        <span>© {new Date().getFullYear()} B C H Benjamin</span>
         <span>Designed and built with care.</span>
         <a href="#top">Back to top ↑</a>
       </div>

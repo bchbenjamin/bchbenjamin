@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 type Definition = { id: string; field_key: string; label: string; field_type: string; public_by_default: boolean; sort_order: number };
 const resources = ["profile", "project", "experience", "education", "skill-group", "skill", "achievement"];
 const types = ["text", "long-text", "url", "date", "number", "boolean", "select", "multi-select", "rich-text", "media"];

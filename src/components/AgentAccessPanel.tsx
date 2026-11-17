@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 type TokenRow = { id: string; token_prefix: string; name: string; scopes: string; created_at: string; expires_at: string; last_used_at?: string | null; revoked_at?: string | null };
 type ProposalRow = { id: string; resource: string; operation: string; status: string; created_by: string; payload: unknown; created_at: string; review_note?: string | null };
 

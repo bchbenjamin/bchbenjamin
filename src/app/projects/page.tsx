@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ProjectVisual from "@/components/ProjectVisual";
+import ProjectArtwork from "@/components/ProjectArtwork";
 import SectionHeading from "@/components/SectionHeading";
 import { getSiteContent } from "@/lib/content";
 
@@ -26,7 +26,7 @@ export default async function ProjectsPage() {
         {projects.map((project, index) => (
           <article className={"project-card project-card-" + project.visual} key={project.slug} data-reveal>
             <Link className="project-card-link" href={"/projects/" + project.slug}>
-              <ProjectVisual variant={project.visual} name={project.name} />
+              <ProjectArtwork project={project} />
               <div className="project-card-content">
                 <div className="project-card-topline"><span>{project.category}</span><span>0{index + 1}</span></div>
                 <div className="project-card-title-row"><h3>{project.name}</h3><span className="card-arrow">↗</span></div>

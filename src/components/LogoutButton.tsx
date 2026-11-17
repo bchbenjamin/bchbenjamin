@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
 export default function LogoutButton() {
   const [csrf, setCsrf] = useState("");

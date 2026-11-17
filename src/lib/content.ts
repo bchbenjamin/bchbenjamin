@@ -10,10 +10,15 @@ export interface Project {
   role: string;
   stack: string[];
   repo?: string;
+  liveUrl?: string;
+  period?: string;
+  imageUrl?: string;
+  imageAlt?: string;
   visual: "awarespan" | "siddhi" | "aiida" | "clipz";
   featured: boolean;
 }
-export interface ExperienceEntry { label: string; title: string; organization: string; period: string; description: string; }
+export interface ExperienceEntry { label: string; title: string; organization: string; period: string; description: string; repo?: string; }
+export interface EducationEntry { qualification: string; fieldOfStudy: string; institution: string; period: string; description: string; }
 export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; }
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
@@ -23,9 +28,10 @@ export interface HomeContent {
   contactTitle: string; contactDescription: string;
 }
 export interface SiteContent {
-  owner: { name: string; monogram: string; role: string; location: string; email: string; website: string; github: string; headline: string; intro: string; };
+  owner: { name: string; monogram: string; role: string; location: string; email: string; website: string; github: string; linkedin: string; headline: string; intro: string; };
   projects: Project[];
   experience: ExperienceEntry[];
+  education: EducationEntry[];
   achievements: Achievement[];
   skillGroups: SkillGroup[];
   homeSections: HomeSection[];
@@ -33,6 +39,7 @@ export interface SiteContent {
 }
 
 const DEFAULT_HOME_SECTIONS: HomeSection[] = [
+  { id: "image-gallery", type: "image-gallery", enabled: true, order: 1 },
   { id: "hero", type: "hero", enabled: true, order: 10 },
   { id: "principles", type: "principles", enabled: true, order: 15 },
   { id: "achievement-gallery", type: "achievement-gallery", enabled: true, order: 20 },
@@ -42,12 +49,12 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
 const DEFAULT_HOME_CONTENT: HomeContent = {
-  heroEyebrow: "INDEPENDENT BUILDER / SOFTWARE & SYSTEMS", focus: "AI · Data · Edge · Web",
-  aboutTitle: "Curious by default.\nPractical by design.",
-  aboutParagraphs: ["I enjoy working where software meets the physical world: an application that people can rely on, a model that runs within a real hardware budget, or a data pipeline that turns messy inputs into something useful.", "I care about the details behind the interface too — architecture, performance, maintainability and the trade-offs that make a product dependable."],
-  projectsTitle: "Projects with a purpose.", projectsDescription: "A snapshot of things I’m building, exploring and learning from.",
-  skillsTitle: "A toolkit that keeps evolving.", skillsDescription: "I choose tools around the problem, not the other way around.",
-  contactTitle: "Have a thoughtful problem worth solving?", contactDescription: "I’m always interested in good engineering conversations and worthwhile collaborations."
+  heroEyebrow: "5TH-SEMESTER B.E. COMPUTER SCIENCE / BATCH OF 2028", focus: "Python Development · Data Engineering · Artificial Intelligence · Technical Research & Documentation",
+  aboutTitle: "Technical curiosity.\nPractical engineering.",
+  aboutParagraphs: ["I am a 5th-semester B.E. Computer Science student (Batch of 2028) with a strong foundation in Python Development, Data Engineering and Technical Research.", "At FOSSEE, IIT Bombay, I contributed to open-source Python software, Blender/OpenFOAM tooling, geometry-driven mesh generation and validation workflows. I value rigorous implementation, clear technical documentation and solutions that can be tested."],
+  projectsTitle: "Selected projects.", projectsDescription: "Software, AI, data and systems work documented in my résumé.",
+  skillsTitle: "Technologies and tools.", skillsDescription: "Languages, frameworks, databases and technical focus areas.",
+  contactTitle: "Have a worthwhile engineering problem?", contactDescription: "Get in touch to discuss software, AI, data engineering or technical research."
 };
 const site = { ...(siteData as SiteContent), homeSections: DEFAULT_HOME_SECTIONS, homeContent: DEFAULT_HOME_CONTENT };
 export { site };
@@ -73,18 +80,19 @@ function periodLabel(start?: string | null, end?: string | null, current?: boole
 }
 function emptyLiveSite(): SiteContent {
   return {
-    owner: { name: "", monogram: "BCH", role: "", location: "", email: "", website: "", github: "", headline: "", intro: "" },
+    owner: { name: "", monogram: "BCH", role: "", location: "", email: "", website: "", github: "", linkedin: "", headline: "", intro: "" },
     homeContent: DEFAULT_HOME_CONTENT,
-    projects: [], experience: [], achievements: [], skillGroups: [], homeSections: site.homeSections ?? []
+    projects: [], experience: [], education: [], achievements: [], skillGroups: [], homeSections: site.homeSections ?? []
   };
 }
 
 export async function getSiteContent(): Promise<SiteContent> {
   if (!API_BASE) return site;
-  const [profile, projectRows, experienceRows, achievementRows, skillRows, siteConfig] = await Promise.all([
+  const [profile, projectRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = await Promise.all([
     readPublic<Record<string, unknown>>("profile"),
     readPublic<Record<string, unknown>[]>("projects"),
     readPublic<Record<string, unknown>[]>("experience"),
+    readPublic<Record<string, unknown>[]>("education"),
     readPublic<Record<string, unknown>[]>("achievements"),
     readPublic<Record<string, unknown>[]>("skills"),
     readPublic<Record<string, unknown>>("site-configuration")
@@ -105,16 +113,31 @@ export async function getSiteContent(): Promise<SiteContent> {
       summary: String(row.summary ?? ""),
       description: String(row.description ?? ""),
       role: String(row.role ?? ""),
-      stack: [],
+      stack: Array.isArray(row.stack) ? row.stack.map(String) : [],
       repo: row.repositoryUrl || row.repository_url ? String(row.repositoryUrl ?? row.repository_url) : undefined,
-      visual: local?.visual ?? "clipz",
+      liveUrl: row.liveUrl ? String(row.liveUrl) : undefined,
+      period: row.displayPeriod ? String(row.displayPeriod) : undefined,
+      imageUrl: Array.isArray(row.media) && row.media.length ? (() => {
+        const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
+        return image?.url ? `${API_BASE}${String(image.url)}` : undefined;
+      })() : undefined,
+      imageAlt: Array.isArray(row.media) && row.media.length ? (() => {
+        const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
+        return image?.alt_text ? String(image.alt_text) : undefined;
+      })() : undefined,
+      visual: (row.visual === "awarespan" || row.visual === "siddhi" || row.visual === "aiida" || row.visual === "clipz" ? row.visual : local?.visual) ?? "clipz",
       featured: Boolean(row.featured)
     };
   });
   const liveExperience: ExperienceEntry[] = (experienceRows ?? []).filter((row) => row.roleTitle && row.organization).map((row) => ({
     label: String(row.employmentType ?? "EXPERIENCE").toUpperCase(),
     title: String(row.roleTitle), organization: String(row.organization),
-    period: periodLabel(row.startedOn as string | null, row.endedOn as string | null, Boolean(row.isCurrent)),
+    period: String(row.displayPeriod ?? periodLabel(row.startedOn as string | null, row.endedOn as string | null, Boolean(row.isCurrent))),
+    description: String(row.description ?? ""), repo: row.repositoryUrl ? String(row.repositoryUrl) : undefined
+  }));
+  const liveEducation: EducationEntry[] = (educationRows ?? []).filter((row) => row.institution && row.qualification).map((row) => ({
+    qualification: String(row.qualification), fieldOfStudy: String(row.fieldOfStudy ?? ""), institution: String(row.institution),
+    period: String(row.displayPeriod ?? periodLabel(row.startedOn as string | null, row.endedOn as string | null, false)),
     description: String(row.description ?? "")
   }));
   const liveAchievements: Achievement[] = (achievementRows ?? []).filter((row) => row.title).map((row) => ({
@@ -141,11 +164,12 @@ export async function getSiteContent(): Promise<SiteContent> {
     owner: {
       name: String(profile.fullName ?? ""), monogram: "BCH", role: String(profile.headline ?? ""),
       location: String(profile.location ?? ""), email: String(profile.email ?? ""),
-      website: String(profile.websiteUrl ?? ""), github: String(profile.githubUrl ?? ""),
+      website: String(profile.websiteUrl ?? ""), github: String(profile.githubUrl ?? ""), linkedin: String(profile.linkedinUrl ?? ""),
       headline: String(profile.headline ?? ""), intro: String(profile.summary ?? "")
     },
     projects: liveProjects,
     experience: liveExperience,
+    education: liveEducation,
     achievements: liveAchievements,
     skillGroups: Array.from(groups, ([name, skills]) => ({ name, skills })),
     homeSections,
