@@ -184,18 +184,16 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
-    void scopedAgentTokenCanReadAndUseMcpTools() throws Exception {
+    void scopedAgentTokenCannotAccessDisabledAgentOrMcpRoutes() throws Exception {
         var token = agentTokens.create("integration-reader", Set.of("portfolio:read"), 1, "integration-test");
         assertNotNull(agentTokens.authenticate(token.token()));
         mockMvc.perform(get("/api/v1/agent/projects").header("Authorization", "Bearer " + token.token()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].slug").value("awarespan"));
+            .andExpect(status().isForbidden());
         mockMvc.perform(post("/mcp").header("Authorization", "Bearer " + token.token())
             .header("Accept", "application/json, text/event-stream")
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.result.protocolVersion").value("2025-03-26"));
+            .andExpect(status().isForbidden());
         mockMvc.perform(post("/api/v1/agent/proposals")
             .header("Authorization", "Bearer " + token.token())
             .contentType(MediaType.APPLICATION_JSON)
@@ -204,7 +202,7 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
-    void currentMcpProtocolUsesScopedToolsAndStandardHeaders() throws Exception {
+    void currentMcpProtocolIsRejectedWhileMcpIsDisabled() throws Exception {
         var token = agentTokens.create("integration-mcp", Set.of("portfolio:read"), 1, "integration-test");
         String metadata = "\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\",\"io.modelcontextprotocol/clientInfo\":{\"name\":\"integration-test\",\"version\":\"1\"},\"io.modelcontextprotocol/clientCapabilities\":{}}";
         mockMvc.perform(post("/mcp")
@@ -214,29 +212,17 @@ class PostgresMigrationIntegrationTest {
             .header("Accept", "application/json, text/event-stream")
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\",\"params\":{" + metadata + "}}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.result.tools[0].name").value("portfolio_get_profile"));
-        mockMvc.perform(post("/mcp")
-            .header("Authorization", "Bearer " + token.token())
-            .header("MCP-Protocol-Version", "2026-07-28")
-            .header("Mcp-Method", "tools/call")
-            .header("Mcp-Name", "portfolio_get_profile")
-            .header("Accept", "application/json, text/event-stream")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{" + metadata + ",\"name\":\"portfolio_get_profile\",\"arguments\":{}}}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.result.structuredContent.full_name").value("Benjamin"));
+            .andExpect(status().isForbidden());
     }
 
     @Test
-    void agentChangesBecomeReviewProposalsRatherThanDirectWrites() throws Exception {
+    void agentChangesCannotBeSubmittedWhileAgentAccessIsDisabled() throws Exception {
         var token = agentTokens.create("integration-proposer", Set.of("portfolio:propose"), 1, "integration-test");
         mockMvc.perform(post("/api/v1/agent/proposals")
             .header("Authorization", "Bearer " + token.token())
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"resource\":\"projects\",\"operation\":\"UPDATE\",\"targetId\":\"00000000-0000-0000-0000-000000000001\",\"payload\":{\"summary\":\"Proposed summary\"}}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("PENDING_REVIEW"));
+            .andExpect(status().isForbidden());
     }
 
     @Test
