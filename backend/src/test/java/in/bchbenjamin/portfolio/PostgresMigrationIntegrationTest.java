@@ -149,7 +149,7 @@ class PostgresMigrationIntegrationTest {
                 .map(String::valueOf).map(id -> jdbc.queryForObject("SELECT name FROM projects WHERE id = ?::uuid", String.class, id)).toList();
             var selectedExperienceNames = ((java.util.List<?>) tailored.matchReport().get("experience")).stream()
                 .map(String::valueOf).map(id -> jdbc.queryForObject("SELECT role_title FROM experience WHERE id = ?::uuid", String.class, id)).toList();
-            assertFalse(extracted.contains("Breach & Defend"), "selected projects=" + selectedProjectNames + "; selected experience=" + selectedExperienceNames + "; PDF text=" + extracted);
+            assertFalse(extracted.contains("Breach & Defend"), "selected projects=" + selectedProjectNames + "; selected experience=" + selectedExperienceNames);
         }
         resumeGenerationService.delete(general.id());
         resumeGenerationService.delete(tailored.id());

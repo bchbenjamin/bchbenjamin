@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 @Service
 public class ResumeGenerationService {
     private static final Set<String> GENERIC_MATCH_TERMS = Set.of(
+        "and", "the", "for", "are", "was", "were", "has", "have", "had", "all", "any", "our", "you", "can", "not", "but", "yet", "its", "who", "how", "why", "one", "two", "per", "via", "etc",
         "software", "system", "systems", "application", "applications", "platform", "platforms",
         "build", "built", "building", "deliver", "delivered", "delivery", "provide", "provided",
         "implement", "implemented", "implementation", "develop", "developed", "developer", "development",
@@ -227,9 +228,11 @@ public class ResumeGenerationService {
     }
 
     private static int overlap(String text, Set<String> terms) {
-        // Generic résumé/job-description vocabulary creates false positives across unrelated
-        // records. Score only discriminative terms such as named languages, frameworks and domains.
-        return (int) terms.stream().filter(term -> !GENERIC_MATCH_TERMS.contains(term) && text.contains(term)).count();
+        // Compare whole normalized tokens, not substrings (e.g. "api" inside an unrelated word).
+        // Generic résumé/job-description vocabulary must not make every record look relevant.
+        Set<String> evidence = Pattern.compile("[a-zA-Z][a-zA-Z0-9+#.]{2,}").matcher(text).results()
+            .map(MatchResult -> MatchResult.group()).collect(Collectors.toSet());
+        return (int) terms.stream().filter(term -> !GENERIC_MATCH_TERMS.contains(term) && evidence.contains(term)).count();
     }
 
     private static List<Map<String, Object>> castRows(Object value) {
