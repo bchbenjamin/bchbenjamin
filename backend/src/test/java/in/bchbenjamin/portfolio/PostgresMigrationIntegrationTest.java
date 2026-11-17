@@ -145,7 +145,11 @@ class PostgresMigrationIntegrationTest {
         try (var document = PDDocument.load(tailoredPdf)) {
             String extracted = new PDFTextStripper().getText(document);
             assertTrue(extracted.contains("Ease Health"));
-            assertFalse(extracted.contains("Breach & Defend"));
+            var selectedProjectNames = ((java.util.List<?>) tailored.matchReport().get("projects")).stream()
+                .map(String::valueOf).map(id -> jdbc.queryForObject("SELECT name FROM projects WHERE id = ?::uuid", String.class, id)).toList();
+            var selectedExperienceNames = ((java.util.List<?>) tailored.matchReport().get("experience")).stream()
+                .map(String::valueOf).map(id -> jdbc.queryForObject("SELECT role_title FROM experience WHERE id = ?::uuid", String.class, id)).toList();
+            assertFalse(extracted.contains("Breach & Defend"), "selected projects=" + selectedProjectNames + "; selected experience=" + selectedExperienceNames + "; PDF text=" + extracted);
         }
         resumeGenerationService.delete(general.id());
         resumeGenerationService.delete(tailored.id());
