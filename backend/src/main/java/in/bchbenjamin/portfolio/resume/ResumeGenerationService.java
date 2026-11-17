@@ -22,6 +22,17 @@ import org.springframework.http.HttpStatus;
 
 @Service
 public class ResumeGenerationService {
+    private static final Set<String> GENERIC_MATCH_TERMS = Set.of(
+        "software", "system", "systems", "application", "applications", "platform", "platforms",
+        "build", "built", "building", "deliver", "delivered", "delivery", "provide", "provided",
+        "implement", "implemented", "implementation", "develop", "developed", "developer", "development",
+        "using", "used", "use", "with", "without", "from", "this", "that", "these", "those",
+        "into", "onto", "their", "there", "where", "which", "while", "when", "what", "your",
+        "work", "works", "working", "workflow", "workflows", "project", "projects", "team", "teams",
+        "experience", "role", "roles", "technical", "technology", "technologies", "skill", "skills",
+        "solution", "solutions", "based", "including", "include", "includes", "support", "supports",
+        "service", "services", "management", "manage", "managed", "real", "time"
+    );
     public record GeneratedResume(UUID id, String mode, String templateId, String modelUsed,
                                   Instant createdAt, Map<String, Object> matchReport) { }
 
@@ -216,7 +227,9 @@ public class ResumeGenerationService {
     }
 
     private static int overlap(String text, Set<String> terms) {
-        return (int) terms.stream().filter(term -> text.contains(term)).count();
+        // Generic résumé/job-description vocabulary creates false positives across unrelated
+        // records. Score only discriminative terms such as named languages, frameworks and domains.
+        return (int) terms.stream().filter(term -> !GENERIC_MATCH_TERMS.contains(term) && text.contains(term)).count();
     }
 
     private static List<Map<String, Object>> castRows(Object value) {
