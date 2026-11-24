@@ -127,11 +127,11 @@ A lightweight desktop video editor designed to stay usable on low-spec PCs, with
 ## Recent public activity
 
 <!-- PROFILE_ACTIVITY_START -->
+- [agent](https://github.com/bchbenjamin/agent)
 - [capstone-CP002-benjamin-yogeetha](https://github.com/bchbenjamin/capstone-CP002-benjamin-yogeetha)
 - [SIP](https://github.com/bchbenjamin/SIP)
 - [BAINB501](https://github.com/bchbenjamin/BAINB501)
 - [hermes](https://github.com/bchbenjamin/hermes) — A personal Quiz website that helps users to learn quizzes well and score well in their 1-credit exams. Scalable for other MCQ-type exam prep
-- [kmac](https://github.com/bchbenjamin/kmac)
 <!-- PROFILE_ACTIVITY_END -->
 
 ---
