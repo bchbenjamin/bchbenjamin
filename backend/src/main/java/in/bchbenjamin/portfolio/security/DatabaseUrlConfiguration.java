@@ -52,6 +52,9 @@ public class DatabaseUrlConfiguration {
         config.setMaximumPoolSize(Math.max(1, Math.min(maximumPoolSize, 20)));
         config.setMinimumIdle(0);
         config.setConnectionTimeout(10000);
+        // Let the container bind its HTTP port before opening a database socket.
+        // The first request acquires a connection on demand.
+        config.setInitializationFailTimeout(-1);
         config.setValidationTimeout(5000);
         config.setMaxLifetime(600000);
         config.setIdleTimeout(300000);

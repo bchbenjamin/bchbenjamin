@@ -10,7 +10,7 @@ spring:
     username: ${DATABASE_USERNAME:portfolio}
     password: ${DATABASE_PASSWORD:portfolio_dev_only}
   flyway:
-    enabled: true
+    enabled: ${FLYWAY_ENABLED:true}
   jackson:
     default-property-inclusion: non_null
   session:
