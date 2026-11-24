@@ -43,6 +43,11 @@ describe("portfolio content", () => {
     expect(await getSiteContent()).toEqual(site);
   });
 
+  it("defaults the launcher to the Micromax A110 water wallpaper and an empty media gallery", () => {
+    expect(site.launcher.wallpaper).toBe("water");
+    expect(site.gallery).toEqual([]);
+  });
+
   it("provides a featured portfolio selection", () => {
     expect(featuredProjects.length).toBeGreaterThan(0);
     expect(featuredProjects.every((project) => project.featured)).toBe(true);

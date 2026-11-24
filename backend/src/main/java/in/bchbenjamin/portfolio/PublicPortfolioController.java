@@ -111,6 +111,39 @@ public class PublicPortfolioController {
         }).filter(row -> row.containsKey("title")).toList();
     }
 
+    @GetMapping("/gallery")
+    public List<Map<String, Object>> gallery() {
+        return jdbc.queryForList("""
+            SELECT m.id, m.original_filename, m.content_type, m.alt_text, m.caption,
+                   '/api/v1/public/media/' || m.id::text AS url,
+                   source.source_type, source.source_title, source.source_caption, m.uploaded_at
+            FROM media_assets m
+            LEFT JOIN LATERAL (
+                SELECT mr.resource_type AS source_type,
+                    CASE mr.resource_type
+                        WHEN 'project' THEN (SELECT p.name FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE)
+                        WHEN 'achievement' THEN (SELECT a.title FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE)
+                        WHEN 'experience' THEN (SELECT e.role_title FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE)
+                        WHEN 'education' THEN (SELECT d.qualification FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE)
+                        WHEN 'profile' THEN (SELECT pr.full_name FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE)
+                    END AS source_title,
+                    CASE mr.resource_type
+                        WHEN 'project' THEN (SELECT p.summary FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE)
+                        WHEN 'achievement' THEN (SELECT a.detail FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE)
+                        WHEN 'experience' THEN (SELECT e.description FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE)
+                        WHEN 'education' THEN (SELECT d.description FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE)
+                        WHEN 'profile' THEN (SELECT pr.headline FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE)
+                    END AS source_caption
+                FROM media_relationships mr
+                WHERE mr.media_id = m.id
+                ORDER BY mr.sort_order, mr.created_at
+                LIMIT 1
+            ) source ON TRUE
+            WHERE m.visibility = 'PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%')
+            ORDER BY m.uploaded_at DESC
+            """);
+    }
+
     @GetMapping("/site-configuration")
     public Map<String, Object> siteConfiguration() {
         String json = jdbc.queryForObject("SELECT published_config::text FROM site_configuration WHERE id = 1", String.class);

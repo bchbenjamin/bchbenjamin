@@ -1,6 +1,7 @@
 import siteData from "../data/site.json";
 
-export interface ProjectMedia { id: string; original_filename: string; content_type: string; alt_text?: string; caption?: string; url: string; }
+export interface ProjectMedia { id: string; original_filename: string; content_type: string; alt_text?: string; caption?: string; url: string; source_type?: string; source_title?: string; source_caption?: string; uploaded_at?: string; }
+export interface GalleryMedia extends ProjectMedia { source_type?: string; source_title?: string; source_caption?: string; }
 export interface Project {
   slug: string;
   name: string;
@@ -24,7 +25,7 @@ export interface EducationEntry { qualification: string; fieldOfStudy: string; i
 export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; }
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
-export interface LauncherConfig { wallpaper: "microbes" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; }
+export interface LauncherConfig { wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; }
 export interface HomeContent {
   heroEyebrow: string; focus: string; aboutTitle: string; aboutParagraphs: string[];
   projectsTitle: string; projectsDescription: string; skillsTitle: string; skillsDescription: string;
@@ -33,6 +34,7 @@ export interface HomeContent {
 export interface SiteContent {
   owner: { name: string; monogram: string; role: string; location: string; email: string; website: string; github: string; linkedin: string; headline: string; intro: string; };
   projects: Project[];
+  gallery: GalleryMedia[];
   experience: ExperienceEntry[];
   education: EducationEntry[];
   achievements: Achievement[];
@@ -52,7 +54,7 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "skills", type: "skills", enabled: true, order: 50 },
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
-const DEFAULT_LAUNCHER: LauncherConfig = { wallpaper: "microbes", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true };
+const DEFAULT_LAUNCHER: LauncherConfig = { wallpaper: "water", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true };
 const DEFAULT_HOME_CONTENT: HomeContent = {
   heroEyebrow: "5TH-SEMESTER B.E. COMPUTER SCIENCE / BATCH OF 2028", focus: "Python Development · Data Engineering · Artificial Intelligence · Technical Research & Documentation",
   aboutTitle: "Technical curiosity.\nPractical engineering.",
@@ -61,7 +63,7 @@ const DEFAULT_HOME_CONTENT: HomeContent = {
   skillsTitle: "Technologies and tools.", skillsDescription: "Languages, frameworks, databases and technical focus areas.",
   contactTitle: "Have a worthwhile engineering problem?", contactDescription: "Get in touch to discuss software, AI, data engineering or technical research."
 };
-const site = { ...(siteData as SiteContent), homeSections: DEFAULT_HOME_SECTIONS, homeContent: DEFAULT_HOME_CONTENT, launcher: DEFAULT_LAUNCHER };
+const site = { ...(siteData as SiteContent), gallery: [], homeSections: DEFAULT_HOME_SECTIONS, homeContent: DEFAULT_HOME_CONTENT, launcher: DEFAULT_LAUNCHER };
 export { site };
 export const projects = site.projects;
 export const featuredProjects = projects.filter((project) => project.featured);
@@ -88,15 +90,16 @@ function emptyLiveSite(): SiteContent {
     owner: { name: "", monogram: "BCH", role: "", location: "", email: "", website: "", github: "", linkedin: "", headline: "", intro: "" },
     homeContent: DEFAULT_HOME_CONTENT,
     launcher: DEFAULT_LAUNCHER,
-    projects: [], experience: [], education: [], achievements: [], skillGroups: [], homeSections: site.homeSections ?? []
+    projects: [], gallery: [], experience: [], education: [], achievements: [], skillGroups: [], homeSections: site.homeSections ?? []
   };
 }
 
 export async function getSiteContent(): Promise<SiteContent> {
   if (!API_BASE) return site;
-  const [profile, projectRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = await Promise.all([
+  const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = await Promise.all([
     readPublic<Record<string, unknown>>("profile"),
     readPublic<Record<string, unknown>[]>("projects"),
+    readPublic<Record<string, unknown>[]>("gallery"),
     readPublic<Record<string, unknown>[]>("experience"),
     readPublic<Record<string, unknown>[]>("education"),
     readPublic<Record<string, unknown>[]>("achievements"),
@@ -136,6 +139,14 @@ export async function getSiteContent(): Promise<SiteContent> {
       featured: Boolean(row.featured)
     };
   });
+  const liveGallery: GalleryMedia[] = (galleryRows ?? []).map(row => ({
+    id: String(row.id), original_filename: String(row.original_filename ?? ""), content_type: String(row.content_type ?? ""),
+    alt_text: String(row.alt_text ?? ""), caption: String(row.caption ?? ""), url: `${API_BASE}${String(row.url ?? "")}`,
+    source_type: row.source_type ? String(row.source_type) : undefined,
+    source_title: row.source_title ? String(row.source_title) : undefined,
+    source_caption: row.source_caption ? String(row.source_caption) : undefined,
+    uploaded_at: row.uploaded_at ? String(row.uploaded_at) : undefined
+  }));
   const liveExperience: ExperienceEntry[] = (experienceRows ?? []).filter((row) => row.roleTitle && row.organization).map((row) => ({
     label: String(row.employmentType ?? "EXPERIENCE").toUpperCase(),
     title: String(row.roleTitle), organization: String(row.organization),
@@ -167,7 +178,7 @@ export async function getSiteContent(): Promise<SiteContent> {
     if (parsed?.home?.sections) homeSections = parsed.home.sections;
     if (parsed?.home?.content) homeContent = { ...DEFAULT_HOME_CONTENT, ...parsed.home.content };
     const launcher = { ...DEFAULT_LAUNCHER, ...parsed?.launcher };
-    launcher.wallpaper = launcher.wallpaper === "android-default" || launcher.wallpaper === "custom" ? launcher.wallpaper : "microbes";
+    launcher.wallpaper = launcher.wallpaper === "android-default" || launcher.wallpaper === "custom" ? launcher.wallpaper : "water";
     launcher.microbeCount = Math.max(12, Math.min(38, Number(launcher.microbeCount) || 28));
     launcher.microbeSpeed = Math.max(0.1, Math.min(1.5, Number(launcher.microbeSpeed) || 0.65));
     launcher.appColumns = Math.max(3, Math.min(6, Number(launcher.appColumns) || 4));
@@ -192,6 +203,7 @@ export async function getSiteContent(): Promise<SiteContent> {
       headline: String(profile.headline || site.owner.headline), intro: String(profile.summary || site.owner.intro)
     },
     projects: liveProjects,
+    gallery: liveGallery,
     experience: liveExperience,
     education: liveEducation,
     achievements: liveAchievements,

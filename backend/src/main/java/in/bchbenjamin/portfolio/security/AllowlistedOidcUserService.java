@@ -29,8 +29,15 @@ public class AllowlistedOidcUserService extends OidcUserService {
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         OidcUser user = super.loadUser(userRequest);
-        String identity = user.getIssuer().toString().replaceAll("/$", "") + "|" + user.getSubject();
-        if (!allowedSubjects.contains(identity)) {
+        String issuer = user.getIssuer().toString().replaceAll("/$", "");
+        String subjectIdentity = issuer + "|" + user.getSubject();
+        String email = user.getAttribute("email");
+        boolean verifiedEmail = Boolean.TRUE.equals(user.getAttribute("email_verified"));
+        String verifiedEmailIdentity = email == null ? "" : issuer + "|" + email.trim().toLowerCase(java.util.Locale.ROOT);
+        // Prefer Google's immutable OIDC subject; permit an explicitly allowlisted, verified email
+        // so the owner can bootstrap the first login before the subject claim is known.
+        if (!allowedSubjects.contains(subjectIdentity)
+                && !(verifiedEmail && allowedSubjects.contains(verifiedEmailIdentity))) {
             throw new OAuth2AuthenticationException(
                 new OAuth2Error("access_denied", "This identity is not authorized for portfolio administration.", null));
         }

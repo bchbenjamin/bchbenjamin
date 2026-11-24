@@ -60,3 +60,12 @@ The Google Search bar asset is cropped from the attributed Galaxy Nexus screensh
 
 - Android 4.0/4.1 screenshot guide: https://controlmysms.com/images/AndroidConfigManual.pdf. The guide shows the phone dock (Phone, People, app drawer, Messaging, Browser), separate Back/Home/Recent navigation bar, and four-column app drawer with APPS/WIDGETS tabs.
 - Android Authority, Android 4.1 vs 4.2 comparison: https://www.androidauthority.com/android-4-1-vs-android-4-2-jelly-bean-149740/ (describes the stock conversation-thread and SMS/MMS bubble interface).
+
+
+## Micromax A110 and Android Water live wallpaper
+
+- Micromax Canvas 2 A110 launched with Android 4.0.4 and received an official Android 4.1.1 Jelly Bean update in March 2013. The launcher identifies the device as `Micromax A110` and uses the Jelly Bean-era Water ripple interaction.
+- Android Open Source Project live-wallpaper documentation: https://android.googlesource.com/platform/frameworks/base/+/859f455645bc49e32330108b1ea9f85ffb80a2cd/docs/html/resources/articles/live-wallpapers.jd (documents `android.wallpaper.tap` and the Water wallpaper's touch-generated ripples).
+- Micromax A110 Canvas 2 review: https://www.gadgets360.com/mobiles/reviews/micromax-a110-superfone-canvas-2-review-324251/ (launch OS and device interface).
+- Micromax A110 Android 4.1.1 update announcement: https://www.gsmarena.com/micromax_launches_jelly_bean_411_for_a110_canvas_2-news-5699.php.
+- The browser implementation uses an original lightweight Canvas renderer; it does not bundle a proprietary APK or copy third-party wallpaper assets.
