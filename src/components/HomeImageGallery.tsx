@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { createLiquidGlass, supportsRefraction } from "@/lib/liquid-glass/liquid-glass";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import type { Project } from "@/lib/content";
 
 export default function HomeImageGallery({ projects }: { projects: Project[] }) {
   const rail = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const hosts = Array.from(rail.current?.querySelectorAll<HTMLElement>(".home-gallery-card") ?? []);
+    const instances = hosts.map((host) => {
+      host.dataset.liquidGlass = supportsRefraction ? "refractive" : "frosted-fallback";
+      return createLiquidGlass(host, { radius: 22, rim: 0.85, blur: 1.5, saturate: 1.18, reflect: false, promote: false });
+    });
+    return () => instances.forEach((instance) => instance.destroy());
+  }, [projects]);
   if (!projects.length) return null;
 
   function move(direction: -1 | 1) {
@@ -18,7 +27,7 @@ export default function HomeImageGallery({ projects }: { projects: Project[] }) 
   }
 
   return (
-    <section className="home-image-gallery" aria-label="Selected project image gallery" data-reveal>
+    <section className="home-image-gallery" aria-label="Selected project image gallery">
       <div className="shell home-gallery-heading">
         <div><p className="eyebrow"><span className="eyebrow-line" /> SELECTED WORK / A VISUAL INDEX</p><h2>Things I’ve <span>built.</span></h2></div>
         <div className="home-gallery-controls" aria-label="Gallery controls">

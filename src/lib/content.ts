@@ -1,5 +1,6 @@
 import siteData from "../data/site.json";
 
+export interface ProjectMedia { id: string; original_filename: string; content_type: string; alt_text?: string; caption?: string; url: string; }
 export interface Project {
   slug: string;
   name: string;
@@ -14,6 +15,7 @@ export interface Project {
   period?: string;
   imageUrl?: string;
   imageAlt?: string;
+  media: ProjectMedia[];
   visual: "awarespan" | "siddhi" | "aiida" | "clipz";
   featured: boolean;
 }
@@ -121,6 +123,7 @@ export async function getSiteContent(): Promise<SiteContent> {
         const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
         return image?.url ? `${API_BASE}${String(image.url)}` : undefined;
       })() : undefined,
+      media: Array.isArray(row.media) ? (row.media as Record<string, unknown>[]).map((asset) => ({ id: String(asset.id), original_filename: String(asset.original_filename ?? ""), content_type: String(asset.content_type ?? ""), alt_text: String(asset.alt_text ?? ""), caption: String(asset.caption ?? ""), url: `${API_BASE}${String(asset.url ?? "")}` })) : [],
       imageAlt: Array.isArray(row.media) && row.media.length ? (() => {
         const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
         return image?.alt_text ? String(image.alt_text) : undefined;
@@ -143,6 +146,7 @@ export async function getSiteContent(): Promise<SiteContent> {
   const liveAchievements: Achievement[] = (achievementRows ?? []).filter((row) => row.title).map((row) => ({
     label: String(row.category ?? "MILESTONE"), title: String(row.title), detail: String(row.detail ?? ""),
     imageUrl: row.imageUrl ? `${API_BASE}${String(row.imageUrl)}` : undefined,
+    media: [],
     awardedOn: row.awardedOn ? String(row.awardedOn) : undefined
   }));
   const groups = new Map<string, string[]>();

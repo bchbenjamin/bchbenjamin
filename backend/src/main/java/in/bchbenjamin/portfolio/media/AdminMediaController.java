@@ -30,7 +30,7 @@ import org.springframework.http.HttpStatus;
 @RequestMapping("/api/v1/admin/media")
 public class AdminMediaController {
     private static final long MAX_BYTES = 12L * 1024L * 1024L;
-    private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf");
+    private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf", "video/mp4", "video/webm");
     private static final Set<String> RESOURCE_TYPES = Set.of("project", "achievement", "experience", "education", "profile");
     private final JdbcTemplate jdbc;
     private final AdminAuditService audit;
@@ -58,7 +58,7 @@ public class AdminMediaController {
         String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase();
         byte[] bytes = file.getBytes();
         if (!ALLOWED_TYPES.contains(contentType) || !matchesSignature(contentType, bytes)) {
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "File content does not match an allowed image or PDF type");
+            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "File content does not match an allowed image, video or PDF type");
         }
         String state = visibility.equalsIgnoreCase("PUBLIC") ? "PUBLIC" : "PRIVATE";
         UUID id = jdbc.queryForObject("""
@@ -154,7 +154,7 @@ public class AdminMediaController {
             byte[] bytes = rs.getBytes("file_bytes");
             return ResponseEntity.ok().contentType(MediaType.parseMediaType(type))
                 .cacheControl(CacheControl.noStore())
-                .header(HttpHeaders.CONTENT_DISPOSITION, type.equals("application/pdf") ? "attachment; filename=\"" + filename + "\"" : "inline; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
                 .header("X-Content-Type-Options", "nosniff").body(bytes);
         }, id);
     }
@@ -167,6 +167,8 @@ public class AdminMediaController {
             case "image/gif" -> new String(bytes, 0, 3, java.nio.charset.StandardCharsets.US_ASCII).equals("GIF");
             case "image/webp" -> bytes.length >= 12 && new String(bytes, 0, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("RIFF") && new String(bytes, 8, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("WEBP");
             case "application/pdf" -> new String(bytes, 0, 5, java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF-");
+            case "video/mp4" -> bytes.length >= 12 && new String(bytes, 4, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("ftyp");
+            case "video/webm" -> bytes.length >= 4 && (bytes[0] & 0xff) == 0x1a && (bytes[1] & 0xff) == 0x45 && (bytes[2] & 0xff) == 0xdf && (bytes[3] & 0xff) == 0xa3;
             default -> false;
         };
     }

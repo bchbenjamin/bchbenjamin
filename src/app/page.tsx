@@ -38,6 +38,10 @@ export default async function HomePage() {
     contact: <><section className="shell contact-callout" data-reveal><div><p className="eyebrow"><span className="eyebrow-line" /> OPEN CHANNEL / 04</p><h2>{site.homeContent.contactTitle}</h2><p>{site.homeContent.contactDescription}</p></div><Link className="button button-primary" href="#contact-form">Start a conversation <Arrow /></Link><span className="callout-watermark">BCH</span></section><section className="shell home-contact-form" id="contact-form" data-reveal><div className="home-contact-heading"><p className="eyebrow"><span className="eyebrow-line" /> SEND A NOTE / 05</p><h2>Tell me what you’re<br /><span>thinking about.</span></h2><p>Share a little context. Verified, approved enquiries reach my inbox directly.</p></div><ContactForm /></section></>
   };
   const order = [...site.homeSections].filter((section) => section.enabled).sort((a, b) => a.order - b.order);
+  // The visual project/photo rail is a fixed first-fold requirement, regardless
+  // of later CMS ordering changes to the remaining homepage sections.
+  const gallery = site.homeSections.find((section) => section.id === "image-gallery") ?? { id: "image-gallery", type: "image-gallery", enabled: true, order: 0 };
+  const pageOrder = [{ ...gallery, enabled: true }, ...order.filter((section) => section.id !== "image-gallery")];
 
-  return <>{order.map((section) => <div key={section.id} className="home-section-slot">{sections[section.id] ?? null}</div>)}</>;
+  return <>{pageOrder.map((section) => <div key={section.id} className="home-section-slot">{sections[section.id] ?? null}</div>)}</>;
 }

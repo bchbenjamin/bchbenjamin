@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
+import GlassSurface from "@/components/GlassSurface";
 import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -23,15 +24,15 @@ export default async function ExperiencePage() {
       <SectionHeading eyebrow="EXPERIENCE / 01" title="Where I’ve spent time." />
       <div className="timeline">
         {site.experience.map((entry, index) => (
-          <article className="timeline-entry" key={entry.title + entry.organization} data-reveal>
+          <article className="timeline-entry" key={entry.title + entry.organization}>
             <div className="timeline-marker"><span>0{index + 1}</span><i /></div>
-            <div className="timeline-content">
+            <GlassSurface className="timeline-content" as="div">
               <p className="eyebrow">{entry.label}</p>
               <h2>{entry.title}</h2>
               <div className="timeline-meta"><strong>{entry.organization}</strong><span>{entry.period}</span></div>
               <p>{entry.description}</p>
               {entry.repo && <a className="text-link" href={entry.repo} target="_blank" rel="noreferrer">View related source ↗</a>}
-            </div>
+            </GlassSurface>
           </article>
         ))}
       </div>
@@ -39,14 +40,14 @@ export default async function ExperiencePage() {
       <SectionHeading eyebrow="EDUCATION / 02" title="Where I’ve studied." />
       <div className="timeline education-timeline">
         {site.education.map((entry, index) => (
-          <article className="timeline-entry" key={entry.qualification + entry.institution} data-reveal>
+          <article className="timeline-entry" key={entry.qualification + entry.institution}>
             <div className="timeline-marker"><span>0{index + 1}</span><i /></div>
-            <div className="timeline-content">
+            <GlassSurface className="timeline-content" as="div">
               <p className="eyebrow">{entry.period}</p>
               <h2>{entry.qualification}</h2>
               <div className="timeline-meta"><strong>{entry.institution}</strong>{entry.fieldOfStudy && <span>{entry.fieldOfStudy}</span>}</div>
               {entry.description && <p>{entry.description}</p>}
-            </div>
+            </GlassSurface>
           </article>
         ))}
       </div>
@@ -54,11 +55,11 @@ export default async function ExperiencePage() {
       <SectionHeading eyebrow="MILESTONES / 03" title="A few things worth noting." />
       <div className="achievement-grid">
         {site.achievements.map((item, index) => (
-          <article className="achievement-card" key={item.title} data-reveal>
+          <GlassSurface as="article" className="achievement-card" key={item.title}>
             <span className="achievement-index">0{index + 1} / {item.label}</span>
             <h3>{item.title}</h3>
             <p>{item.detail}</p>
-          </article>
+          </GlassSurface>
         ))}
       </div>
 

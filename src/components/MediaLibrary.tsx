@@ -8,7 +8,7 @@ type MediaAsset = { id: string; original_filename: string; content_type: string;
 type AchievementOption = { id: string; title: string; detail?: string };
 type ProjectOption = { id: string; name: string; slug: string };
 type MediaResourceType = "project" | "achievement";
-const acceptedTypes = ["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"];
+const acceptedTypes = ["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf", "video/mp4", "video/webm"];
 const maxFileSize = 12 * 1024 * 1024;
 async function csrfToken() { const r = await fetch(`${apiBase}/api/v1/csrf`, { credentials: "include" }); if (!r.ok) throw new Error("Could not initialise a secure request."); return (await r.json() as { token: string }).token; }
 
@@ -50,7 +50,7 @@ export default function MediaLibrary() {
   }
 
   async function upload() {
-    if (!file) { setMessage("Choose an image or PDF first."); return; }
+    if (!file) { setMessage("Choose an image, video or PDF first."); return; }
     setBusy(true); setUploadProgress(0);
     try {
       const token = await csrfToken();
@@ -70,7 +70,7 @@ export default function MediaLibrary() {
       });
       let responseMessage = "";
       try { responseMessage = (JSON.parse(result.responseText) as { message?: string }).message ?? ""; } catch { /* response body may be empty */ }
-      if (result.status < 200 || result.status >= 300) throw new Error(responseMessage || `Upload failed (${result.status}). Images and PDFs up to 12 MB are supported.`);
+      if (result.status < 200 || result.status >= 300) throw new Error(responseMessage || `Upload failed (${result.status}). Images, MP4/WebM videos and PDFs up to 12 MB are supported.`);
       setUploadProgress(100); setUploadComplete(true); setFile(null); setAltText(""); setCaption("");
       setMessage("Upload complete. Stored privately; publish and attach it when ready.");
       await load();
@@ -96,7 +96,7 @@ export default function MediaLibrary() {
       const token = await csrfToken();
       const response = await fetch(`${apiBase}/api/v1/admin/media/${asset.id}/link`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": token }, body: JSON.stringify({ resourceType, resourceId, purpose: resourceType === "project" ? "project-gallery" : "gallery", sortOrder: 0 }) });
       if (!response.ok) throw new Error(`Could not attach ${asset.original_filename}.`);
-      setMessage(`Image linked to ${targetName}. It appears publicly only when both the asset and record are published.`);
+      setMessage(`Media linked to ${targetName}. It appears publicly only when both the asset and record are published.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not attach media."); }
   }
 
@@ -111,16 +111,16 @@ export default function MediaLibrary() {
           onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }}
           onDrop={(event) => { event.preventDefault(); setDragging(false); chooseFile(event.dataTransfer.files?.[0]); }}
         >
-          <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" disabled={busy} onChange={(event) => chooseFile(event.target.files?.[0])} />
+          <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,video/mp4,video/webm" disabled={busy} onChange={(event) => chooseFile(event.target.files?.[0])} />
           <span className="media-upload-symbol" aria-hidden="true">{uploadComplete ? "✓" : file ? "↗" : "＋"}</span>
           <strong>{uploadComplete ? "Upload complete — stored privately" : file?.name ?? "Add screenshots, photos or documents"}</strong>
-          <small>{dragging ? "RELEASE TO ADD FILE" : uploadComplete ? "READY FOR ANOTHER ASSET" : "PNG · JPEG · WEBP · GIF · PDF · UP TO 12 MB"}</small>
+          <small>{dragging ? "RELEASE TO ADD FILE" : uploadComplete ? "READY FOR ANOTHER ASSET" : "PNG · JPEG · WEBP · GIF · MP4 · WEBM · PDF · UP TO 12 MB"}</small>
           {(busy || uploadComplete) && <span className={`media-upload-progress${uploadComplete ? " is-complete" : ""}`} role="progressbar" aria-label="Upload progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={uploadProgress}><i style={{ width: `${uploadProgress}%` }} /></span>}
         </label>
         <div className="media-upload-fields"><label>Alt text<input value={altText} onChange={(event) => setAltText(event.target.value)} placeholder="Describe the image" /></label><label>Caption<input value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Optional caption" /></label><button className={`button button-primary upload-action${busy ? " is-busy" : ""}`} disabled={busy || !file} onClick={() => void upload()} type="button"><span>{busy ? `Uploading ${uploadProgress}%` : "Upload privately"}</span><i aria-hidden="true">{busy ? "" : "↗"}</i></button></div>
       </div>
       <div className="media-library-toolbar"><div><span className="eyebrow">YOUR ASSETS / {assets.length}</span><h3>Asset collection</h3></div><div className="media-attach-targets"><label>Gallery<select value={resourceType} onChange={(event) => { const next = event.target.value as MediaResourceType; setResourceType(next); const options = next === "project" ? projects : achievements; setResourceId(options[0]?.id ?? ""); }}><option value="project">Project image gallery</option><option value="achievement">Achievement gallery</option></select></label><label>{resourceType === "project" ? "Project" : "Achievement"}<select value={resourceId} onChange={(event) => setResourceId(event.target.value)}><option value="">Choose a {resourceType}</option>{resourceType === "project" ? projects.map((item) => <option key={item.id} value={item.id}>{item.name}</option>) : achievements.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></div></div>
-      <div className="media-asset-grid">{assets.map((asset) => <article className="media-asset-card" key={asset.id}><div className="media-asset-preview">{asset.content_type.startsWith("image/") ? <Image unoptimized fill sizes="(max-width: 700px) 100vw, 25vw" crossOrigin="use-credentials" src={`${apiBase}/api/v1/admin/media/${asset.id}/file`} alt={asset.alt_text || asset.original_filename} /> : <span>PDF</span>}<span className={asset.visibility === "PUBLIC" ? "asset-status public" : "asset-status"}>{asset.visibility}</span></div><div className="media-asset-info"><strong>{asset.original_filename}</strong><span>{Math.max(1, Math.round(asset.byte_size / 1024))} KB · {asset.content_type}</span><div><button type="button" onClick={() => void attach(asset)}>Feature in gallery</button><button className={`asset-visibility-toggle${asset.visibility === "PUBLIC" ? " is-public" : ""}`} type="button" aria-pressed={asset.visibility === "PUBLIC"} onClick={() => void updateVisibility(asset)}><span className="asset-visibility-track" aria-hidden="true"><i /></span><span>{asset.visibility === "PUBLIC" ? "Public" : "Private"}</span></button></div></div></article>)}</div>
+      <div className="media-asset-grid">{assets.map((asset) => <article className="media-asset-card" key={asset.id}><div className="media-asset-preview">{asset.content_type.startsWith("image/") ? <Image unoptimized fill sizes="(max-width: 700px) 100vw, 25vw" crossOrigin="use-credentials" src={`${apiBase}/api/v1/admin/media/${asset.id}/file`} alt={asset.alt_text || asset.original_filename} /> : asset.content_type.startsWith("video/") ? <video src={`${apiBase}/api/v1/admin/media/${asset.id}/file`} controls preload="metadata" /> : <span>PDF</span>}<span className={asset.visibility === "PUBLIC" ? "asset-status public" : "asset-status"}>{asset.visibility}</span></div><div className="media-asset-info"><strong>{asset.original_filename}</strong><span>{Math.max(1, Math.round(asset.byte_size / 1024))} KB · {asset.content_type}</span><div><button type="button" onClick={() => void attach(asset)}>Feature in gallery</button><button className={`asset-visibility-toggle${asset.visibility === "PUBLIC" ? " is-public" : ""}`} type="button" aria-pressed={asset.visibility === "PUBLIC"} onClick={() => void updateVisibility(asset)}><span className="asset-visibility-track" aria-hidden="true"><i /></span><span>{asset.visibility === "PUBLIC" ? "Public" : "Private"}</span></button></div></div></article>)}</div>
       {assets.length === 0 && <div className="media-empty">Your media library is empty. Upload a certificate, screenshot or project photograph to start.</div>}
       <p className="admin-message" role="status">{message}</p>
     </section>

@@ -3,7 +3,6 @@ package in.bchbenjamin.portfolio.media;
 import java.time.Duration;
 import java.util.UUID;
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,7 +21,7 @@ public class PublicMediaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> get(@PathVariable UUID id) {
-        return jdbc.query("SELECT content_type, file_bytes FROM media_assets WHERE id = ? AND visibility = 'PUBLIC' AND content_type LIKE 'image/%'", rs -> {
+        return jdbc.query("SELECT content_type, file_bytes FROM media_assets WHERE id = ? AND visibility = 'PUBLIC' AND (content_type LIKE 'image/%' OR content_type LIKE 'video/%' OR content_type = 'application/pdf')", rs -> {
             if (!rs.next()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media asset not found");
             return ResponseEntity.ok().contentType(MediaType.parseMediaType(rs.getString("content_type")))
                 .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic())

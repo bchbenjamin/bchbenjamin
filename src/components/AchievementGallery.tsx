@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Achievement } from "@/lib/content";
+import GlassSurface from "@/components/GlassSurface";
 
 export default function AchievementGallery({ achievements }: { achievements: Achievement[] }) {
   const [active, setActive] = useState(0);
@@ -33,7 +34,7 @@ export default function AchievementGallery({ achievements }: { achievements: Ach
   const step = (direction: number) => setActive((value) => (value + direction + items.length) % items.length);
 
   return (
-    <section className="shell achievement-gallery" aria-label="Latest achievements and milestones" data-reveal>
+    <section className="shell achievement-gallery" aria-label="Latest achievements and milestones">
       <div className="achievement-gallery-heading">
         <div><p className="eyebrow"><span className="eyebrow-line" /> FIELD NOTES / LATEST MILESTONES</p><h2>Recent <span>highlights.</span></h2></div>
         <div className="gallery-controls">
@@ -42,7 +43,7 @@ export default function AchievementGallery({ achievements }: { achievements: Ach
           <motion.button type="button" aria-label="Next achievement" onClick={() => step(1)} whileHover={disableMotion ? undefined : { scale: 1.08 }} whileTap={disableMotion ? undefined : { scale: 0.9 }}>→</motion.button>
         </div>
       </div>
-      <div className="achievement-gallery-stage" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false); }}>
+      <GlassSurface className="achievement-gallery-stage" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false); }}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.article className="achievement-feature" key={current.title + active} initial={disableMotion ? false : { opacity: 0, y: 18, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={disableMotion ? undefined : { opacity: 0, y: -12, scale: 0.99 }} transition={disableMotion ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
             <div className="achievement-feature-media">
@@ -61,7 +62,7 @@ export default function AchievementGallery({ achievements }: { achievements: Ach
         <div className="achievement-gallery-rail" role="tablist" aria-label="Choose achievement">
           {items.map((item, index) => <motion.button key={`${item.title}-${index}`} role="tab" aria-selected={active === index} aria-label={`Show ${item.title}`} className={active === index ? "gallery-rail-item active" : "gallery-rail-item"} onClick={() => setActive(index)} whileHover={disableMotion ? undefined : { x: 3 }} whileTap={disableMotion ? undefined : { scale: 0.985 }}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.title}</strong>{active === index ? <motion.i layoutId="achievement-rail-marker" transition={{ type: "spring", stiffness: 520, damping: 34 }} /> : <i />}</motion.button>)}
         </div>
-      </div>
+      </GlassSurface>
     </section>
   );
 }

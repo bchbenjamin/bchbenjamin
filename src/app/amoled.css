@@ -122,6 +122,7 @@ input:focus, textarea:focus, select:focus { border-color:#8b9cff !important; }
 .media-dropzone.is-dragging, .media-dropzone.has-file { background:#111a36 !important; border-color:#7186ff !important; }
 .media-dropzone.is-complete { background:#0b1711 !important; border-color:#28583e !important; }
 .media-asset-preview { background:#101014 !important; }
+.media-asset-preview video { width:100%; height:100%; object-fit:contain; }
 .asset-visibility-track { background:#444 !important; }
 .asset-visibility-toggle.is-public .asset-visibility-track { background:#7186ff !important; }
 .private-chip, .private-chip, .site-section-number { color:#a3b0ff !important; }
@@ -435,3 +436,102 @@ html[data-motion-paused="true"] .upload-action.is-busy i { animation-play-state:
   .project-card:hover .mini-chart i { animation: chart-rise .45s var(--motion-out) both; }
   .project-card:hover .timeline-playhead { animation: timeline-scrub 1.5s ease-in-out infinite; }
 }
+
+
+/* Hard dark-theme guarantees for legacy editorial components. These selectors
+   intentionally target the actual components rather than relying on token
+   inheritance from the older light-theme stylesheet. */
+.achievement-card,
+.timeline-content,
+.detail-facts,
+.skill-group,
+.admin-module,
+.resume-template-card,
+.resume-history-item,
+.media-asset-card,
+.site-content-editor,
+.site-section-row,
+.field-visibility-panel,
+.contact-details,
+.contact-panel,
+.about-panel {
+  color: #f4f4f5 !important;
+  background: #090909 !important;
+  border-color: #292929 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 16px 44px rgba(0,0,0,.38) !important;
+}
+.achievement-card h3,
+.timeline-content h2,
+.detail-facts strong,
+.skill-group h3,
+.admin-module h2,
+.media-asset-info strong { color: #f5f5f7 !important; }
+.achievement-card p,
+.timeline-content > p:not(.eyebrow),
+.timeline-meta span,
+.detail-facts > div > span,
+.media-asset-info > span { color: #a1a1aa !important; }
+.achievement-card .achievement-index,
+.timeline-meta strong { color: #a8b5ff !important; }
+.timeline-marker i { background: #8b9cff !important; box-shadow: 0 0 0 5px rgba(139,156,255,.12) !important; }
+.timeline { border-color: #262626 !important; }
+.experience-bottom { border-color: #292929 !important; color: #a1a1aa !important; }
+.page-intro h1, .page-intro > p:last-child, .section-heading h2,
+.section-heading p:not(.eyebrow) { color: #f4f4f5 !important; }
+.page-intro > p:last-child, .section-heading p:not(.eyebrow) { color: #a1a1aa !important; }
+html, body { min-height: 100%; background: #000 !important; }
+body::before { background: radial-gradient(ellipse 42rem 28rem at 83% 5%, rgba(58,76,166,.075), transparent 72%) !important; }
+.site-header { margin-top: 0 !important; padding-top: max(10px, env(safe-area-inset-top)) !important; }
+
+/* Refractive glass is shared across meaningful surfaces, not only navigation. */
+.glass-surface {
+  position: relative;
+  isolation: auto;
+  border: 1px solid rgba(214,224,255,.14) !important;
+  border-radius: 22px !important;
+  background: rgba(12,14,22,.16) !important;
+  --lg-tint: rgba(12,16,30,.14);
+  --lg-shadow: #050713;
+  --lg-caustic: #dce5ff;
+  --lg-rim-w: .9px;
+  --lg-rim-fade: 4px;
+  box-shadow: 0 14px 42px rgba(0,0,0,.32) !important;
+}
+.achievement-card.glass-surface,
+.timeline-content.glass-surface,
+.detail-facts.glass-surface,
+.project-card.glass-surface,
+.home-gallery-card.glass-surface {
+  background: rgba(12,14,22,.17) !important;
+  color: #f4f4f5 !important;
+}
+.achievement-card.glass-surface h3 { color: #f5f5f7 !important; }
+.achievement-card.glass-surface p { color: #a1a1aa !important; }
+.project-detail-media { display:grid; gap:16px; margin:42px 0 54px; }
+.project-detail-media h2 { color:#f5f5f7; font-size:clamp(22px,3vw,32px); letter-spacing:-.04em; }
+.project-media-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.project-media-item { min-width:0; overflow:hidden; border:1px solid #2a2a34; border-radius:20px; background:rgba(12,14,22,.2); }
+.project-media-visual { position:relative; min-height:220px; aspect-ratio:16/10; background:#080808; }
+.project-media-visual img { object-fit:cover; }
+.project-media-visual video { width:100%; height:100%; object-fit:cover; }
+.project-media-item iframe { display:block; width:100%; min-height:540px; border:0; background:#090909; }
+.project-media-caption { padding:12px 16px; color:#c5c7d1; font-size:12px; }
+.project-media-open { display:inline-flex; margin:12px 16px 16px; color:#a8b5ff; font-size:12px; }
+@media(max-width:760px) { .project-media-grid { grid-template-columns:1fr; } .project-media-item iframe { min-height:420px; } }
+
+.project-visual-image video { width:100%; height:100%; object-fit:cover; }
+
+.home-gallery-card.glass-surface { overflow:visible !important; transform:none !important; }
+.home-gallery-card.glass-surface:hover { transform:none !important; box-shadow:0 18px 48px rgba(0,0,0,.48) !important; }
+.home-gallery-card .project-visual { overflow:hidden; border-radius:20px 20px 0 0 !important; }
+.achievement-gallery-stage.glass-surface { overflow:visible !important; }
+
+.project-visual { position:relative; }
+.project-visual-image > img, .project-visual-image > video { z-index:0; }
+.project-media-types { position:absolute; z-index:3; right:12px; bottom:12px; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; pointer-events:none; }
+.project-media-types i { padding:6px 8px; border:1px solid rgba(220,228,255,.24); border-radius:999px; background:rgba(8,10,18,.72); color:#e5e9ff; font:700 8px/1 var(--font-body); font-style:normal; letter-spacing:.08em; -webkit-backdrop-filter:blur(12px) saturate(150%); backdrop-filter:blur(12px) saturate(150%); }
+.project-media-types b { color:#aab7ff; font-weight:800; }
+
+.project-artwork-shell { position:relative; min-width:0; }
+.project-artwork-shell > .project-visual { width:100%; }
+.project-artwork-shell > .project-media-types { bottom:12px; }
