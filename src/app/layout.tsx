@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   },
   description: "Portfolio of B C H Benjamin, a 5th-semester Computer Science student focused on Python development, data engineering, artificial intelligence and technical research.",
   applicationName: "B C H Benjamin — Portfolio",
+  other: { "color-scheme": "dark" },
   creator: "B C H Benjamin",
   publisher: "B C H Benjamin",
   alternates: { canonical: "/" },

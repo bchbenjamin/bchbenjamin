@@ -9,7 +9,7 @@ A personal engineering portfolio that presents verified work, education, experie
 - **AMOLED dark mode only.** The document canvas, page background and full-bleed sections use pure black (`#000000`). Do not introduce a light theme, cream canvas, white page, or automatic light-mode switch.
 - Secondary surfaces may use near-black charcoal (`#090909`, `#111111`) to separate cards and controls. Borders stay subtle (`#1a1a1a` to `#303038`).
 - Primary text is soft white (`#f5f5f5`); secondary text uses accessible cool greys. Accent colours are restrained periwinkle/blue with occasional coral or positive-state green.
-- Browser metadata declares `color-scheme: dark` and black `themeColor`. Form controls, dialogs, admin surfaces and hover states must remain dark.
+- The document emits an early `<meta name="color-scheme" content="dark">`, declares `color-scheme: dark` on `:root`, and uses black `themeColor`. Form controls, dialogs, admin surfaces and hover states must remain dark.
 - **Liquid glass must be real, not a blur-only imitation.** The primary navigation uses a licensed SVG displacement-map implementation to refract live backdrop pixels in Chromium. Unsupported engines receive a deliberate frosted fallback; do not label a plain translucent gradient as refractive glass. Keep refractive hosts compact, keep their wrappers transparent, and avoid backdrop-root triggers on their ancestors.
 - Keep contrast readable; do not rely on colour alone to communicate status.
 
