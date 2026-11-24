@@ -11,7 +11,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
       className="page-main"
       initial={false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: reduceMotion === false ? 0.48 : 0, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.main>

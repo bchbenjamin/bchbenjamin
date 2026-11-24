@@ -2,4 +2,5 @@
 @import "./theme.css";
 @import "./legacy.css";
 @import "./editorial.css";
+@import "../lib/liquid-glass/liquid-glass.css";
 @import "./amoled.css";

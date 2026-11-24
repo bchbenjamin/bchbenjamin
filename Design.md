@@ -10,6 +10,7 @@ A personal engineering portfolio that presents verified work, education, experie
 - Secondary surfaces may use near-black charcoal (`#090909`, `#111111`) to separate cards and controls. Borders stay subtle (`#1a1a1a` to `#303038`).
 - Primary text is soft white (`#f5f5f5`); secondary text uses accessible cool greys. Accent colours are restrained periwinkle/blue with occasional coral or positive-state green.
 - Browser metadata declares `color-scheme: dark` and black `themeColor`. Form controls, dialogs, admin surfaces and hover states must remain dark.
+- **Liquid glass must be real, not a blur-only imitation.** The primary navigation uses a licensed SVG displacement-map implementation to refract live backdrop pixels in Chromium. Unsupported engines receive a deliberate frosted fallback; do not label a plain translucent gradient as refractive glass. Keep refractive hosts compact, keep their wrappers transparent, and avoid backdrop-root triggers on their ancestors.
 - Keep contrast readable; do not rely on colour alone to communicate status.
 
 ## Homepage hierarchy
@@ -27,12 +28,12 @@ The first gallery supports touch swiping, trackpad/mouse horizontal scrolling, s
 
 ## Motion and interaction language
 
-Motion should communicate affordance, feedback and spatial continuity. Keep it light, quick and interruptible. Prefer transform and opacity; avoid large layout reflows and expensive continuous effects.
+Motion should communicate affordance, feedback and spatial continuity. Keep it light, quick and interruptible. Prefer transform and opacity; avoid large layout reflows, blur-filter reveals and expensive continuous effects. Pointer motion must be frame-coalesced and respect reduced-motion preferences.
 
 ### Navigation and controls
-- Buttons and navigation items use restrained spring-like press/hover responses: slight lift on hover, compression on press, short colour/border transitions.
+- Buttons and navigation items use restrained spring-like press/hover responses: slight lift on hover, compression on press, short colour/border transitions. Use a `linear()` overshoot curve with a cubic-bezier fallback where supported.
 - Arrows, switches and active gallery markers move with a spring-like easing rather than abrupt state changes.
-- Links have a clear hover/focus treatment and retain keyboard-visible focus outlines.
+- Links have a clear hover/focus treatment and retain keyboard-visible focus outlines. A persistent, keyboard-operable global motion control pauses persistent decorative CSS and GSAP motion, the animated divider and gallery autoplay; functional upload/loading indicators remain active while interaction feedback stays responsive.
 
 ### Hero blueprint
 - The abstract systems blueprint responds subtly to pointer movement with perspective tilt.
@@ -70,7 +71,7 @@ Motion should communicate affordance, feedback and spatial continuity. Keep it l
 
 ## Accessibility and performance
 
-- Respect `prefers-reduced-motion`: disable continuous orbit, breathing, floating and pointer-tilt motion; use immediate or minimal state transitions.
+- Respect `prefers-reduced-motion`: continuous decorative motion defaults to a static state and is only opted into when motion is allowed; disable orbit, breathing, floating and pointer-tilt motion while preserving non-spatial colour/focus feedback.
 - Horizontal gallery: meaningful accessible label, native overflow scrolling, scroll snapping, labelled arrow buttons, visible focus styles and no autoplay.
 - Do not make information available only on hover. Use real buttons for actions and links for navigation.
 - Lazy-load non-critical media, keep the first viewport lightweight, and avoid unnecessary animation libraries on static content.
@@ -83,5 +84,6 @@ Motion should communicate affordance, feedback and spatial continuity. Keep it l
 - `src/app/amoled.css`: mandatory AMOLED overrides.
 - `src/app/editorial.css`: layout, responsive behaviour and interaction/motion styles.
 - `src/components/HomeImageGallery.tsx`: first-fold horizontal gallery.
+- `src/lib/liquid-glass/`: licensed refraction implementation, MIT license and browser fallback notes.
 - `src/components/ScrollExperience.tsx`, `AchievementGallery.tsx`, `ProjectVisual.tsx`, `SaveProjectButton.tsx`, `CopyEmailButton.tsx`, `ContactForm.tsx`, `MediaLibrary.tsx`, and `SiteBuilder.tsx`: motion-bearing interaction components.
 - `src/lib/content.ts` and `backend/`: public content projections, editing and persistence rules.

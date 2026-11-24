@@ -889,9 +889,6 @@ a:hover .arrow-up-right { transform: translate(3px, -3px); }
   .field-visibility-grid { grid-template-columns:1fr 1fr; }
   .resume-builder-panel,.resume-history-panel { padding:14px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
-}
 
 .site-content-editor { margin:18px 0; padding:16px; border:1px solid var(--color-border); background:rgba(255,255,255,.015); }
 .site-content-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }

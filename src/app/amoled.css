@@ -26,7 +26,7 @@ body { background:#000 !important; }
 ::selection { color:#000; background:#a8b5ff; }
 
 /* Navigation, masthead and page chrome */
-.site-header { background:rgba(0,0,0,.86) !important; border-color:#222 !important; backdrop-filter:blur(18px); }
+.site-header { background:transparent !important; border-color:#222 !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
 .site-logo, .nav-link, .header-contact, .site-footer, .footer-bottom { color:#f4f4f5; }
 .header-contact { border-color:#383838 !important; background:#090909 !important; }
 .header-contact:hover { border-color:#a1afff !important; background:#171d3a !important; color:#fff !important; }
@@ -162,3 +162,276 @@ input:focus, textarea:focus, select:focus { border-color:#8b9cff !important; }
 .media-attach-targets select { border-color:#2a2a32 !important; background:#090909 !important; color:#f5f5f5 !important; }
 .project-visual-image { background:#090909 !important; }
 .project-period-label { color:#9696a0 !important; }
+
+
+/* True liquid-glass system: the navigation is refractive in Chromium and
+   degrades to a clean frosted surface in engines without SVG backdrop filters. */
+.site-header {
+  padding: 10px 0;
+  border: 0 !important;
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.header-inner.lg-host {
+  min-height: 66px;
+  padding-inline: clamp(16px, 2.3vw, 30px);
+  border: 1px solid rgba(220, 228, 255, .15);
+  border-radius: 30px;
+  background: rgba(12, 14, 22, .14);
+  --lg-tint: rgba(12, 16, 30, .12);
+  --lg-shadow: #050713;
+  --lg-caustic: #dce5ff;
+  --lg-rim-w: 1.1px;
+  --lg-rim-fade: 4.5px;
+  --lg-fold-exp: 1.16;
+  --lg-fold-sat: 1.55;
+  box-shadow: 0 12px 42px rgba(0, 0, 0, .32);
+}
+.header-inner .brand-mark {
+  border: 1px solid rgba(180, 194, 255, .42);
+  background: linear-gradient(145deg, rgba(144, 164, 255, .3), rgba(56, 68, 128, .12));
+  color: #e9edff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 0 24px rgba(111,133,255,.12);
+}
+.header-inner .brand-name { color: #f7f7fb; }
+.header-inner .nav-link { color: rgba(224, 228, 242, .66); transition: color .28s ease, transform .4s var(--motion-spring); }
+.header-inner .nav-link:hover, .header-inner .nav-link-active { color: #fff; transform: translateY(-1px); }
+.header-inner .nav-link::after { height: 2px; border-radius: 2px; background: linear-gradient(90deg, #8297ff, #c8d2ff); box-shadow: 0 0 12px rgba(130,151,255,.7); }
+.header-inner .header-contact {
+  min-height: 42px;
+  padding: 0 15px;
+  border: 1px solid rgba(211, 221, 255, .42) !important;
+  border-radius: 999px;
+  background: rgba(255,255,255,.055) !important;
+  color: #f6f7ff !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 18px rgba(0,0,0,.16);
+  transition: transform .45s var(--motion-spring), border-color .3s ease, background .3s ease, box-shadow .3s ease;
+}
+.header-inner .header-contact:hover {
+  transform: translateY(-2px);
+  border-color: rgba(164,180,255,.7) !important;
+  background: rgba(118,139,255,.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 8px 28px rgba(71,91,190,.2);
+}
+.header-inner .header-contact .arrow-up-right { color: #c4ceff !important; }
+
+/* The canvas stays absolute black; ambient colour is light, never a tinted page. */
+body::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(ellipse 42rem 28rem at 83% 5%, rgba(58, 76, 166, .105), transparent 72%),
+    radial-gradient(ellipse 34rem 26rem at 5% 48%, rgba(47, 71, 150, .055), transparent 74%);
+  opacity: .9;
+}
+body > * { position: relative; z-index: 1; }
+
+/* Premium interaction states: quick response, spring settling, clear focus. */
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 2px solid #aab8ff !important;
+  outline-offset: 4px;
+}
+:where(button, .button, .header-contact, .home-gallery-controls button) {
+  transition-timing-function: cubic-bezier(.2,.9,.2,1);
+}
+:where(button, .button, .header-contact):active { scale: .97; }
+.button-primary {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px !important;
+  box-shadow: 0 8px 30px rgba(103, 124, 255, .18), inset 0 1px 0 rgba(255,255,255,.28) !important;
+  transition: transform .45s var(--motion-spring), box-shadow .35s ease, background .25s ease !important;
+}
+.button-primary::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 18%, rgba(255,255,255,.34) 48%, transparent 76%);
+  transform: translateX(-130%);
+}
+.button-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 42px rgba(103,124,255,.3), inset 0 1px 0 rgba(255,255,255,.34) !important; }
+.button-quiet { transition: color .25s ease, transform .4s cubic-bezier(.2,.9,.2,1); }
+.button-quiet:hover { transform: translateX(3px); }
+
+/* Depth, edge light and controlled motion across the black surface. */
+.hero-art-frame {
+  border: 1px solid rgba(154, 171, 255, .25) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(ellipse at 78% 14%, rgba(111,133,255,.18), transparent 34%),
+    radial-gradient(ellipse at 18% 86%, rgba(70,96,194,.11), transparent 38%),
+    linear-gradient(145deg, #0c0d14, #050507 68%, #0b0d17) !important;
+  box-shadow: 0 30px 100px rgba(0,0,0,.62), 0 0 70px rgba(71,91,190,.08), inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+.hero-art-frame::before {
+  opacity: .38 !important;
+  background-image: linear-gradient(rgba(139,156,255,.09) 1px,transparent 1px), linear-gradient(90deg,rgba(139,156,255,.09) 1px,transparent 1px) !important;
+  background-size: 42px 42px !important;
+  mask-image: radial-gradient(ellipse at 50% 48%, #000 18%, transparent 82%) !important;
+}
+.hero-art-frame::after {
+  border: 1px solid rgba(194,205,255,.12) !important;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 -40px 100px rgba(78,95,185,.08) !important;
+  background: radial-gradient(360px circle at var(--pointer-x, 50%) var(--pointer-y, 50%), rgba(155,174,255,.12), transparent 68%);
+  opacity: .9;
+  pointer-events: none;
+}
+.hero-art-top, .hero-art-bottom { color: rgba(200,208,241,.55) !important; }
+.hero-art-top span:last-child { color: #aebcff !important; }
+.hero-side-note {
+  border: 1px solid rgba(207,218,255,.2) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, #151a2b, #090b12) !important;
+  color: #dfe4ff !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.1) !important;
+  backdrop-filter: none !important;
+}
+.hero-side-note span:first-child { color: #aab8ff !important; }
+.hero-core {
+  border: 1px solid rgba(222,229,255,.45) !important;
+  background: radial-gradient(circle at 32% 24%, #b7c3ff, #6077e8 45%, #293b91 100%) !important;
+  box-shadow: 0 0 0 10px rgba(115,137,255,.055), 0 0 60px rgba(92,116,255,.28), inset 0 2px 12px rgba(255,255,255,.34) !important;
+}
+.blueprint-card {
+  border: 1px solid rgba(180,194,255,.2) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, #181b2b, #090a11) !important;
+  box-shadow: 0 18px 46px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  backdrop-filter: none !important;
+}
+.blueprint-orbit { border-color: rgba(143,160,255,.22) !important; }
+.blueprint-orbit-one { animation-duration: 36s !important; }
+.blueprint-orbit-two { animation-duration: 48s !important; }
+.blueprint-route { filter: drop-shadow(0 0 5px rgba(133,153,255,.5)); }
+
+.project-card, .skill-group, .detail-facts, .timeline-content, .about-panel,
+.contact-panel, .achievement-feature, .achievement-gallery-stage, .home-contact-form {
+  border-radius: 22px !important;
+  box-shadow: 0 14px 42px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+.project-card { transition: transform .65s var(--motion-spring), border-color .35s ease, box-shadow .45s ease !important; }
+.project-card:hover { transform: translateY(-8px) scale(1.008); border-color: rgba(140,158,255,.58) !important; box-shadow: 0 28px 70px rgba(0,0,0,.58), 0 0 34px rgba(91,112,226,.09) !important; }
+.home-gallery-card { border-radius: 20px !important; transition: transform .65s var(--motion-spring), border-color .35s ease, box-shadow .45s ease !important; }
+.home-gallery-card:hover { transform: translateY(-8px) scale(1.012); }
+.home-gallery-card .project-visual { border-radius: 19px 19px 0 0 !important; }
+
+@keyframes blueprint-grid-drift { to { background-position: 42px 42px; } }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-art-frame::before { animation: blueprint-grid-drift 32s linear infinite; }
+  .hero-art-frame::after { transition: background-position .18s ease-out, opacity .3s ease; }
+  .button-primary::before { transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .button-primary:hover::before { transform: translateX(130%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  body::before, .hero-art-frame::before, .hero-orbit, .orbit-two, .hero-core,
+  .hero-scroll-cue i, .blueprint-orbit-one, .blueprint-orbit-two, .blueprint-route,
+  .blueprint-node, .blueprint-card-one, .blueprint-card-two,
+  .achievement-art-fallback::before, .achievement-art-fallback::after,
+  .achievement-art-fallback > i, .owner-console-status i,
+  .project-card:hover .classifier-line, .project-card:hover .mini-chart i,
+  .project-card:hover .timeline-playhead { animation: none !important; }
+  .button-primary::before { display: none; }
+  .button-primary, .button-quiet, .project-card, .home-gallery-card,
+  .header-contact, .motion-toggle { transition-property: color, background-color, border-color, box-shadow !important; }
+  .button-primary:hover, .button-quiet:hover, .project-card:hover, .home-gallery-card:hover,
+  .header-contact:hover, .motion-toggle:hover, .header-inner .nav-link:hover { transform: none !important; }
+  :where(button, .button, .header-contact, .motion-toggle):active { scale: 1 !important; }
+  .project-card .project-visual > *, .achievement-feature-media > img { transition: none !important; transform: none !important; }
+  .gallery-rail-item:hover { padding-left: 7px; }
+}
+@media (max-width: 760px) {
+  .site-header { padding: 7px 0; }
+  .header-inner.lg-host { min-height: 60px; padding-inline: 14px; border-radius: 24px; }
+  .header-inner .desktop-nav { gap: 14px; }
+  .header-inner .brand-name { font-size: 14px; }
+  .header-inner .header-contact { min-height: 36px; gap: 8px; padding-inline: 11px; }
+  .hero-art-frame { border-radius: 22px !important; }
+}
+
+.owner-console-nav { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: #090909 !important; }
+
+/* The editorial about band had a pale surface in the previous theme; keep the
+   entire site on the true-black canvas and use text contrast for separation. */
+.about-band {
+  border-color: #202027 !important;
+  background: #000 !important;
+}
+.about-band .wave-divider path { stroke: rgba(139,156,255,.28) !important; }
+.about-band .about-heading h2 { color: #f5f5f7 !important; }
+.about-band .about-heading h2 span { color: #aab6ff !important; }
+.about-band .about-copy { color: #b2b2bd !important; }
+.about-band .about-copy p { color: #b2b2bd !important; }
+.about-band .about-copy .text-link { color: #aab6ff !important; }
+.project-save-button { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+:root { --motion-spring: cubic-bezier(.2,.9,.25,1.25); }
+@supports (transition-timing-function: linear(0, 1)) {
+  :root { --motion-spring: linear(0, .45 15%, 1.08 35%, .97 55%, 1.01 75%, 1); }
+}
+@media (prefers-contrast: more) {
+  .header-inner.lg-host { border-color: rgba(220,228,255,.52); }
+  .header-inner .header-contact { border-color: rgba(211,221,255,.7) !important; }
+}
+
+
+/* A global motion switch pauses decorative CSS, WAAPI and GSAP motion. */
+.motion-toggle {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(211,221,255,.28);
+  border-radius: 50%;
+  background: rgba(255,255,255,.045);
+  color: #dfe4ff;
+  cursor: pointer;
+  font: 600 11px/1 var(--font-body);
+  transition: transform .35s var(--motion-spring), border-color .25s ease, background .25s ease, color .25s ease;
+}
+.motion-toggle:hover { transform: translateY(-2px); border-color: rgba(164,180,255,.72); background: rgba(118,139,255,.14); color: #fff; }
+.motion-toggle:active { scale: .94; }
+html[data-motion-paused="true"] *,
+html[data-motion-paused="true"] *::before,
+html[data-motion-paused="true"] *::after { animation-play-state: paused !important; }
+html[data-motion-paused="true"] .loading-spinner,
+html[data-motion-paused="true"] .upload-action.is-busy i { animation-play-state: running !important; }
+@media (max-width: 760px) { .motion-toggle { width: 34px; height: 34px; } }
+@media (prefers-reduced-motion: reduce) { .motion-toggle { display: none; } }
+
+
+/* Persistent decorative motion is opt-in; reduced-motion users get the same
+   complete artwork in a static state rather than a rapidly shortened loop. */
+.hero-orbit, .orbit-two, .hero-core, .hero-scroll-cue i,
+.blueprint-orbit-one, .blueprint-orbit-two, .blueprint-route,
+.blueprint-node, .blueprint-card-one, .blueprint-card-two,
+.achievement-art-fallback::before, .achievement-art-fallback::after,
+.achievement-art-fallback > i, .owner-console-status i,
+.project-card:hover .classifier-line, .project-card:hover .mini-chart i,
+.project-card:hover .timeline-playhead { animation: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-orbit { animation: orbit-drift 52s linear infinite; }
+  .orbit-two { animation: orbit-drift 64s linear infinite reverse; }
+  .blueprint-orbit-one { animation: orbit-drift 70s linear infinite; }
+  .blueprint-orbit-two { animation: orbit-drift 44s linear infinite reverse; }
+  .blueprint-route { animation: route-flow 5.8s linear infinite; }
+  .blueprint-node { animation: node-breathe 3.8s ease-in-out infinite; }
+  .blueprint-card-one { animation: blueprint-float 7s ease-in-out infinite; }
+  .blueprint-card-two { animation: blueprint-float 8.5s ease-in-out -2.7s infinite; }
+  .hero-core { animation: core-float 7s ease-in-out infinite, core-glow 5s ease-in-out infinite; }
+  .hero-scroll-cue i { animation: scroll-cue 2.2s ease-in-out infinite; }
+  .achievement-art-fallback::before { animation: gallery-orbit 18s linear infinite; }
+  .achievement-art-fallback::after { animation: gallery-orbit 25s linear infinite reverse; }
+  .achievement-art-fallback > i { animation: gallery-signal 3.2s ease-in-out infinite; }
+  .owner-console-status i { animation: status-pulse 2s ease-in-out infinite; }
+  .project-card:hover .classifier-line { animation: signal-line .75s ease-in-out both; }
+  .project-card:hover .mini-chart i { animation: chart-rise .45s var(--motion-out) both; }
+  .project-card:hover .timeline-playhead { animation: timeline-scrub 1.5s ease-in-out infinite; }
+}

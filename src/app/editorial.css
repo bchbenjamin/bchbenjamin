@@ -618,11 +618,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .custom-field-form { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *,*::before,*::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-  }
+  html { scroll-behavior: auto !important; }
+  .hero-orbit, .orbit-two, .hero-core, .hero-scroll-cue i,
+  .blueprint-orbit-one, .blueprint-orbit-two, .blueprint-route,
+  .blueprint-node, .blueprint-card-one, .blueprint-card-two,
+  .achievement-art-fallback::before, .achievement-art-fallback::after,
+  .achievement-art-fallback > i, .owner-console-status i,
+  .project-card:hover .classifier-line, .project-card:hover .mini-chart i,
+  .project-card:hover .timeline-playhead { animation: none !important; }
+  .project-card:hover .project-visual > *, .achievement-feature-media > img { transition: none !important; transform: none !important; }
+  .gallery-rail-item:hover { padding-left: 7px; }
 }
 /* Blueprint motif used by the hero illustration */
 .hero-blueprint { position:absolute; z-index:2; inset:55px 18px 48px; }
@@ -824,7 +829,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .project-save-button.is-saved .project-save-icon { fill:rgba(49,86,216,.18); transform:translateY(-1px); }
 .project-save-count { display:grid; place-items:center; min-width:15px; height:16px; padding:0 4px; border-left:1px solid rgba(111,123,157,.2); color:#858d9f; font-size:8px; font-variant-numeric:tabular-nums; }
 .project-save-button.is-saved .project-save-count { color:var(--blue); border-color:rgba(49,86,216,.2); }
-@media (prefers-reduced-motion: reduce) { .project-save-button { transition:none; } .project-save-icon { transition:none; } }
+@media (prefers-reduced-motion: reduce) { .project-save-button { transition-property:color,background-color,border-color,box-shadow; } .project-save-icon { transition-property:fill; } }
 
 /* First-fold horizontal project image gallery */
 .home-image-gallery { padding: 26px 0 30px; overflow: hidden; border-bottom: 1px solid var(--line); }
@@ -858,8 +863,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .home-gallery-card .project-visual { min-height:165px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .home-gallery-card,.home-gallery-controls button,.home-gallery-title i { transition:none !important; }
-  .home-gallery-card:hover { transform:none; }
+  .home-gallery-card,.home-gallery-controls button { transition-property:border-color,background-color,color,box-shadow !important; }
+  .home-gallery-card:hover, .home-gallery-controls button:hover, .home-gallery-controls button:active { transform:none !important; }
+  .home-gallery-controls button:active { scale:1 !important; }
+  .home-gallery-title i { transition:none !important; }
 }
 .resume-inclusion-control { display:flex; align-items:flex-start; gap:11px; margin-top:16px; padding:14px 15px; border:1px solid var(--line); border-radius:4px; color:var(--ink); cursor:pointer; }
 .resume-inclusion-control input { width:16px; height:16px; margin-top:2px; accent-color:var(--blue); }
