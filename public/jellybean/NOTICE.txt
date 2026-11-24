@@ -1,0 +1,47 @@
+Android 4.1 Jelly Bean visual assets
+
+AOSP wallpaper and stock application icons
+Source: Android Open Source Project (AOSP), Android 4.1.2_r1.
+Source repositories:
+- https://android.googlesource.com/platform/frameworks/base/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Launcher2/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Browser/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Gallery2/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Contacts/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Calendar/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Calculator/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Email/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Mms/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Settings/+/android-4.1.2_r1/
+
+Files:
+- android-4.1-default-wallpaper.jpg: drawable-nodpi/default_wallpaper.jpg
+- android-4.1-tablet-wallpaper.jpg: drawable-sw600dp-nodpi/default_wallpaper.jpg
+- icons/aosp-4.1.2/browser.png: Browser/res/mipmap-hdpi/ic_launcher_browser.png
+- icons/aosp-4.1.2/gallery.png: Gallery2/res/mipmap-hdpi/ic_launcher_gallery.png
+- icons/aosp-4.1.2/camera.png: Camera/res/mipmap-hdpi/ic_launcher_camera.png
+- icons/aosp-4.1.2/contacts.png: Contacts/res/mipmap-hdpi/ic_launcher_contacts.png
+- icons/aosp-4.1.2/phone.png: Contacts/res/mipmap-hdpi/ic_launcher_phone.png
+- icons/aosp-4.1.2/calendar.png: Calendar/res/mipmap-hdpi/ic_launcher_calendar.png
+- icons/aosp-4.1.2/calculator.png: Calculator/res/mipmap-hdpi/ic_launcher_calculator.png
+- icons/aosp-4.1.2/email.png: Email/res/mipmap-hdpi/ic_launcher_email.png
+- icons/aosp-4.1.2/messaging.png: Mms/res/mipmap-hdpi/ic_launcher_smsmms.png
+- icons/aosp-4.1.2/settings.png: Settings/res/drawable-hdpi/ic_launcher_settings.png
+
+AOSP assets are Copyright The Android Open Source Project and licensed under the Apache License, Version 2.0. See LICENSE-Apache-2.0.txt.
+
+Third-party brand artwork:
+- icons/termux.png: Termux application launcher icon from https://github.com/termux/termux-app; GPL-3.0-only, see TERMUX-LICENSE.md.
+- icons/github.png: GitHub mark/favicon from https://github.com/fluidicon.png. GitHub and the Octocat are trademarks of GitHub, Inc.; used here to identify the linked GitHub destination.
+
+The launcher implementation and portfolio-specific artwork are independent work. Android and Jelly Bean are trademarks of Google LLC.
+
+Additional AOSP 4.1.2 UI assets
+- clock/dial.png, clock/hour.png, clock/minute.png: DeskClock analog widget layers from packages/apps/DeskClock.
+- icons/aosp-4.1.2/all-apps.png: Launcher2 all-apps hotseat icon from packages/apps/Launcher2.
+- nav-back.png, nav-home.png, nav-recent.png, stat_sys_wifi_signal_4_fully.png, stat_sys_signal_4_fully.png: SystemUI resources from packages/SystemUI.
+- stat_sys_battery_71.png: framework resource from core/res.
+All are Android Open Source Project artwork under Apache License 2.0.
+
+search-widget.png is a crop of the Android 4.1 Galaxy Nexus screenshot listed in docs/references/README.md. The screenshot is attributed to the Android Open Source Project and licensed CC BY 2.5; see the source file page for the license and attribution terms.
+- ic_notify_clear_normal.png, ic_notify_quicksettings_normal.png, ic_notify_rotation_off_normal.png: Android 4.1.2 SystemUI notification shade controls from packages/SystemUI.
