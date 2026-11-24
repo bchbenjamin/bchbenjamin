@@ -151,3 +151,143 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-app-window:has(.jb-terminal) .jb-terminal{height:100%;min-height:0;margin:0}
 .jb-terminal-top{display:flex;align-items:center;justify-content:space-between;height:42px;min-height:42px;flex:0 0 42px;padding:0 13px;background:#17232b;border-bottom:1px solid #30414b;color:#e5edf1;font-size:13px;letter-spacing:.1px}
 .jb-terminal-top span{float:none;color:#9cb3bf;font-size:10px}
+
+/* Launcher cleanup and mobile viewport handling. */
+.jb-wallpaper{background:#020711;}
+.jb-wallpaper:before{display:none}
+.jb-microbes{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:auto}
+.jb-gallery-widget{padding:0;background:transparent;border:0;box-shadow:none}
+.jb-gallery-strip button{flex-basis:clamp(112px,29vw,145px)}
+.jb-gallery-strip button>div{height:clamp(72px,18vw,92px)}
+.jb-gallery-strip button>span{font-size:11px;text-shadow:0 1px 3px #000}
+.jb-dock{background:linear-gradient(#16232d44,#101923a8);border-top:1px solid #ffffff25}
+.jb-navigation-bar{background:#05080d;border-top:1px solid #ffffff1a}
+.jb-navigation-bar button img{width:22px;height:22px;object-fit:contain;opacity:1}
+.jb-drawer-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:30px 8px}
+.jb-drawer-foot{display:none}
+.jb-settings-screen{min-height:100%;background:#f1f2f3;color:#20272b;padding:0 16px 24px}
+.jb-settings-screen h3{margin:0 -16px 8px;padding:18px 16px 12px;background:#fff;color:#20272b;font-size:20px;font-weight:400;letter-spacing:0;border-bottom:1px solid #d6dadd}
+.jb-settings-screen section{margin:18px -16px 0;padding:0 16px;background:#fff}
+.jb-settings-screen section>b{display:block;padding:13px 0 8px;color:#1683b3;font-size:13px;font-weight:500}
+.jb-settings-screen section>button,.jb-settings-row,.jb-build-number{width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:10px 0;border:0;border-top:1px solid #e2e5e7;background:#fff;color:#263238;text-align:left;font-size:15px}
+.jb-settings-screen section>button i{font-style:normal;color:#89949a;font-size:24px}
+.jb-settings-row{font-size:14px}.jb-settings-row small,.jb-build-number small{color:#6d7b82;font-size:12px}
+.jb-settings-back{margin:12px 0;border:0;background:none;color:#1683b3;font-size:15px}
+.jb-build-number{margin:14px -16px 0;width:calc(100% + 32px);padding:14px 16px;background:#fff}
+.jb-msg-toolbar{height:56px;min-height:56px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#202a31;color:#fff;border-bottom:1px solid #10171c;box-shadow:0 2px 4px #0003}
+.jb-msg-toolbar>div{min-width:0;flex:1}.jb-msg-toolbar b{display:block;font-size:20px;font-weight:400}.jb-msg-toolbar small{display:block;margin-top:2px;color:#b5c5ce;font-size:11px}
+.jb-msg-toolbar button{width:36px;height:42px;border:0;background:transparent;color:#e5edf1;font-size:28px;font-weight:300}
+.jb-msg-search{font-size:29px!important}.jb-messaging{height:100%;min-height:0;display:flex;flex-direction:column;margin:-17px -16px -30px;background:#f1f2f3;color:#263238;overflow:hidden}
+.jb-app-window:has(.jb-messaging) .jb-app-actionbar{display:none}
+.jb-app-content:has(.jb-messaging){padding:17px 16px 30px!important;overflow:hidden}
+.jb-msg-inbox{position:relative;flex:1;min-height:0;background:#fff}
+.jb-msg-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#7d898f}
+.jb-msg-empty-icon{width:58px;height:58px;display:grid;place-items:center;border:2px solid #c6d0d5;border-radius:50%;font-size:30px;color:#8c9ba3}
+.jb-msg-empty b{font-size:14px;font-weight:400}
+.jb-msg-fab{position:absolute;right:22px;bottom:22px;width:54px;height:54px;border:0;border-radius:50%;background:#33b5e5;color:#fff;box-shadow:0 3px 8px #0005;font-size:28px}
+.jb-msg-compose{flex:1;min-height:0;display:flex;flex-direction:column;background:#fff;overflow:auto}
+.jb-msg-recipient{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #d8dfe2}
+.jb-msg-avatar{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#7d9fb0;color:#fff;font-size:17px}
+.jb-msg-recipient small,.jb-msg-recipient b{display:block}.jb-msg-recipient small{color:#78868d;font-size:11px}.jb-msg-recipient b{margin-top:2px;font-size:14px;font-weight:500}
+.jb-msg-fields{padding:4px 16px 10px}
+.jb-msg-fields label{display:flex;align-items:center;gap:12px;min-height:47px;border-bottom:1px solid #e1e5e7}
+.jb-msg-fields label>span{width:82px;flex:0 0 82px;color:#718088;font-size:12px}
+.jb-msg-fields input{width:100%;min-width:0;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:#263238;font-size:14px}
+.jb-msg-fields input::placeholder{color:#a1abb0}
+.jb-msg-composer{display:flex;align-items:flex-end;gap:10px;margin:auto 12px 12px;padding:8px 8px 8px 12px;border:1px solid #b8c6cd;border-radius:3px;background:#fafbfb;box-shadow:inset 0 1px 2px #0000000c}
+.jb-msg-composer textarea{min-width:0;flex:1;resize:vertical;min-height:56px;max-height:140px;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:#263238;font:14px/1.5 Roboto,Arial,sans-serif}
+.jb-msg-composer textarea::placeholder{color:#89969c}
+.jb-msg-composer button{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:2px;background:#1685b2;color:#fff;font-size:22px}
+.jb-msg-composer button:disabled{opacity:.48}
+.jb-msg-compose-footer{min-height:35px;display:flex;justify-content:space-between;align-items:center;padding:0 14px;background:#e8ecee;border-top:1px solid #d1d8dc;color:#78868d;font-size:10px}
+.jb-msg-status{margin:0 14px 12px;padding:9px 10px;font-size:12px;line-height:1.4}.jb-msg-status.success{background:#e4f1e7;color:#32633d}.jb-msg-status.error{background:#f7e8e8;color:#923d3d}
+@media(max-width:520px){
+  .jb-world{min-height:100dvh;height:100dvh;padding:0;}
+  .jb-device{height:100dvh;min-height:0;max-height:none;width:100%;border:0;border-radius:0;box-shadow:none;}
+  .jb-status-bar{top:env(safe-area-inset-top);height:25px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));}
+  .jb-wallpaper{inset:calc(25px + env(safe-area-inset-top)) 0 calc(46px + env(safe-area-inset-bottom));}
+  .jb-home-viewport{inset:calc(25px + env(safe-area-inset-top)) 0 calc(102px + env(safe-area-inset-bottom));}
+  .jb-panel{padding:18px 16px 14px;}
+  .jb-page-indicator{bottom:calc(91px + env(safe-area-inset-bottom));}
+  .jb-dock{bottom:calc(46px + env(safe-area-inset-bottom));height:56px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));}
+  .jb-navigation-bar{bottom:env(safe-area-inset-bottom);height:46px;}
+  .jb-navigation-bar button{width:33.333%;}
+  .jb-overlay{inset:calc(25px + env(safe-area-inset-top)) 0 0;}
+  .jb-app-overlay{inset:0;}
+  .jb-app-window{width:100%;height:100%;}
+  .jb-app-content{padding-bottom:max(18px,env(safe-area-inset-bottom));}
+  .jb-drawer{padding:18px max(16px,env(safe-area-inset-left)) calc(32px + env(safe-area-inset-bottom));}
+  .jb-drawer-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 4px;padding:22px 0;}
+  .jb-drawer-grid button{font-size:10px;}
+  .jb-app-icon-large{width:48px;height:48px;}
+  .jb-messaging{margin:-17px -16px calc(-30px - env(safe-area-inset-bottom));}
+}
+@media(orientation:landscape) and (min-width:600px){
+  .jb-drawer-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;}
+  .jb-panel{padding-top:18px;padding-bottom:12px;}
+  .jb-msg-compose{max-width:740px;width:100%;margin:0 auto;}
+}
+
+/* Keep the three Android system-navigation controls visible above every app. */
+.jb-navigation-bar{z-index:30}
+.jb-app-overlay{inset:25px 0 46px;background:#111820}
+.jb-drawer-overlay{inset:25px 0 46px;background:#101923ed}
+.jb-shade-overlay{z-index:20}
+.jb-app-actionbar{background:#202a31;border-bottom:1px solid #10171c;box-shadow:none}
+.jb-app-actionbar small{display:none}
+.jb-app-actionbar>button:last-child{display:none}
+.jb-hide-labels .jb-home-shortcut-row button>span:not(.jb-app-icon),.jb-hide-labels .jb-icon-grid button>span:not(.jb-app-icon),.jb-hide-labels .jb-drawer-grid button>span:last-child{display:none}
+.jb-recent-overlay{inset:25px 0 46px;background:#0d1721eF;display:flex;align-items:center;justify-content:center}
+.jb-recent-stack{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;padding:22px}
+.jb-recent-stack>button{width:116px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px solid #ffffff35;border-radius:3px;background:#263846;color:#fff;font-size:12px}
+.jb-recent-home{width:56px;height:56px;display:grid;place-items:center;border:2px solid #dbe7ed;border-radius:50%;font-size:32px}
+@media(orientation:landscape) and (min-width:600px){.jb-app-overlay,.jb-drawer-overlay,.jb-recent-overlay{inset:0 0 48px}}
+@media(max-width:520px){.jb-app-overlay,.jb-drawer-overlay,.jb-recent-overlay{inset:calc(25px + env(safe-area-inset-top)) 0 calc(46px + env(safe-area-inset-bottom))}}
+.jb-microbes{position:absolute;inset:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 50% 44%,#10233b 0%,#06101e 55%,#020711 100%)}
+.jb-microbe{position:absolute;display:block;border-radius:50%;opacity:.86;transform:translate3d(0,0,0);background:radial-gradient(circle at 31% 27%,hsla(var(--microbe-hue),100%,98%,.98) 0 3%,hsla(var(--microbe-hue),96%,82%,.96) 10%,hsla(var(--microbe-hue),92%,58%,.98) 31%,hsla(var(--microbe-hue),88%,37%,.97) 62%,hsla(var(--microbe-hue),85%,18%,.95) 100%);box-shadow:inset -3px -4px 8px #0009,inset 2px 2px 5px #ffffff9c,0 0 15px hsla(var(--microbe-hue),95%,62%,.48);animation-name:jb-microbe-drift,jb-microbe-pulse;animation-timing-function:ease-in-out,ease-in-out;animation-iteration-count:infinite,infinite;will-change:transform}
+.jb-microbe i{position:absolute;width:30%;height:15%;top:18%;left:19%;border-radius:50%;background:#ffffffa8;filter:blur(1px);transform:rotate(-32deg)}
+.jb-microbe b{position:absolute;width:23%;height:23%;right:-10%;bottom:7%;border-radius:50%;background:radial-gradient(circle at 30% 25%,#ffffffb8,hsla(var(--microbe-hue),90%,54%,.75) 50%,transparent 78%);box-shadow:0 0 7px hsla(var(--microbe-hue),100%,65%,.6)}
+@keyframes jb-microbe-drift{0%,100%{translate:0 0}50%{translate:var(--microbe-drift-x) var(--microbe-drift-y)}}
+@keyframes jb-microbe-pulse{0%,100%{scale:.9;opacity:.72}50%{scale:1.12;opacity:1}}
+@media(prefers-reduced-motion:reduce){.jb-microbe{animation:none;opacity:.9}}
+.jb-msg-thread{flex:1;min-height:0;background:#fff;display:flex;flex-direction:column}
+.jb-msg-compose{flex:0 0 auto;background:#e8ecee;padding:9px 8px;border-top:1px solid #c6d0d5}
+.jb-msg-composer{margin:0;padding:5px 6px 5px 11px;background:#fff}
+.jb-msg-composer textarea{min-height:40px;max-height:100px}
+.jb-msg-compose-footer{display:none}
+.jb-msg-dialog-backdrop{position:absolute;inset:56px 0 0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px;background:#0007}
+.jb-msg-profile-dialog{width:min(100%,340px);padding:18px 18px 10px;background:#f4f5f6;border:1px solid #9aaab2;box-shadow:0 8px 28px #0007;color:#27343b}
+.jb-msg-profile-dialog h3{margin:0 0 12px;padding:0 0 10px;border-bottom:1px solid #c8d0d4;color:#26343c;font-size:18px;font-weight:400}
+.jb-msg-profile-dialog label{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid #d7dddf}
+.jb-msg-profile-dialog label span{width:74px;flex:0 0 74px;color:#68777e;font-size:11px}
+.jb-msg-profile-dialog input{width:100%;min-width:0;border:0!important;outline:0!important;background:transparent!important;color:#263238;font-size:13px}
+.jb-msg-profile-dialog>div{display:flex;justify-content:flex-end;gap:22px;padding:14px 0 4px}
+.jb-msg-profile-dialog>div button{border:0;background:transparent;color:#1685b2;font-size:12px;text-transform:uppercase}
+.jb-msg-status{margin:14px 16px;padding:9px 11px;align-self:flex-start;max-width:85%;border-radius:3px;font-size:11px;line-height:1.45}
+.jb-msg-status.success{background:#e7eef1;color:#425761}.jb-msg-status.error{background:#f7e8e8;color:#923d3d}
+.jb-chess-glyph{display:grid;place-items:center;width:100%;height:100%;color:#fff;font-size:32px;line-height:1;text-shadow:0 2px 3px #0008}
+.jb-wallpaper-custom{background-position:center;background-size:cover;background-repeat:no-repeat}
+@media(max-width:599px){.jb-tablet-status{display:none!important}}
+.jb-microbe-food{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#fff;box-shadow:0 0 8px 3px #ffffffb8,0 0 20px 7px #b6e7ff7a;animation:jb-microbe-food-fade 1.5s ease-out forwards;pointer-events:none}
+@keyframes jb-microbe-food-fade{0%{transform:scale(.4);opacity:1}35%{transform:scale(1.5);opacity:1}100%{transform:scale(.1);opacity:0}}
+.jb-widget-preview-clock{height:108px;display:grid;place-items:center;background:#18232c}
+.jb-widget-preview-clock .jb-analog-clock{width:88px;height:88px;margin:0}
+.jb-widget-preview-search{height:52px;display:flex;align-items:center;padding:8px;background:#e5e8ea}
+.jb-widget-preview-search img{width:100%;height:auto;object-fit:contain}
+.jb-widget-preview-gallery{height:108px;display:flex;gap:4px;padding:6px;background:#1c2931}
+.jb-widget-preview-gallery>*{min-width:0;flex:1;overflow:hidden}
+.jb-navigation-bar .jb-tablet-status{display:none}
+@media(orientation:landscape) and (min-width:600px){.jb-navigation-bar .jb-tablet-status{display:flex}}
+
+/* Stock Holo messaging details: restrained action icons, conversation list and compose controls. */
+.jb-msg-empty-icon{border:0;border-radius:0;width:52px;height:52px}
+.jb-msg-empty-icon svg{width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.jb-msg-empty small{font-size:11px;color:#9aa5aa}
+.jb-msg-bottom-bar{position:absolute;left:0;right:0;bottom:0;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-top:1px solid #d5dcdf;background:#eef1f2;color:#65757d;font-size:11px}
+.jb-msg-fab{display:grid;place-items:center;border-radius:2px;background:#33b5e5}
+.jb-msg-fab svg{width:25px;height:25px;fill:#fff}
+.jb-msg-composer button{display:grid;place-items:center}
+.jb-msg-composer button svg{width:23px;height:23px;fill:#fff}
+.jb-msg-toolbar .jb-msg-menu{font-size:24px}
+.jb-msg-recipient{min-height:68px}
+.jb-msg-recipient small:last-child{margin-top:3px;color:#96a2a8;font-size:10px}

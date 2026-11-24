@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.authorization.AuthorizationDecision;
+import java.time.Instant;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.http.HttpStatus;
@@ -52,7 +54,7 @@ public class SecurityConfig {
         ClientRegistrationRepository registrations,
         AgentTokenAuthenticationFilter agentTokenFilter,
         RateLimitFilter rateLimitFilter,
-        @Value("${app.frontend-url:https://bchbenjamin.in}") String frontendUrl
+        @Value("${app.frontend-url:https://www.bchbenjamin.in}") String frontendUrl
     ) throws Exception {
         var resolver = new DefaultOAuth2AuthorizationRequestResolver(
             registrations, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
@@ -71,7 +73,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/agent/**", "/mcp").denyAll() // MCP remains intentionally disabled pending a separate security review.
                 .requestMatchers(HttpMethod.POST, "/api/v1/public/contact/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/internal/maintenance").permitAll()
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/admin/session", "/api/v1/admin/totp/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/admin/**").access((authentication, context) -> {
+                    var principal = authentication.get();
+                    var session = context.getRequest().getSession(false);
+                    Object expiry = session == null ? null : session.getAttribute(in.bchbenjamin.portfolio.admin.AdminTotpController.STEP_UP_UNTIL);
+                    boolean elevated = expiry instanceof Instant instant && instant.isAfter(Instant.now());
+                    boolean owner = principal != null && principal.isAuthenticated() && principal.getAuthorities().stream().anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+                    return new AuthorizationDecision(owner && elevated);
+                })
                 .anyRequest().denyAll())
             .exceptionHandling(exceptions -> exceptions
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/v1/agent/**"))
@@ -103,7 +113,7 @@ public class SecurityConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource(
-        @Value("${app.security.allowed-origins:https://bchbenjamin.in,http://localhost:3000}") String origins
+        @Value("${app.security.allowed-origins:https://www.bchbenjamin.in,https://bchbenjamin.in,http://localhost:3000}") String origins
     ) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.stream(origins.split(",")).map(String::trim).filter(value -> !value.isBlank()).toList());

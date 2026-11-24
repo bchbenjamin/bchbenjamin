@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 @Configuration
@@ -32,14 +33,32 @@ public class DatabaseUrlConfiguration {
         @Value("${spring.datasource.username:}") String configuredUsername,
         @Value("${spring.datasource.password:}") String configuredPassword
     ) {
-        String migrationUrl = firstNonBlank(flywayUrl, unpooledUrl, configuredUrl);
-        // Flyway may hold a metadata/lock connection while opening its migration connection.
-        return createDataSource(migrationUrl, configuredUsername, configuredPassword, 3);
+        ConnectionDetails details = connectionDetails(firstNonBlank(flywayUrl, unpooledUrl, configuredUrl), configuredUsername, configuredPassword);
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("org.postgresql.Driver");
+        dataSource.setUrl(details.url());
+        if (details.username() != null && !details.username().isBlank()) dataSource.setUsername(details.username());
+        if (details.password() != null) dataSource.setPassword(details.password());
+        return dataSource;
     }
 
     private HikariDataSource createDataSource(String configuredUrl, String configuredUsername,
                                                String configuredPassword, int maximumPoolSize) {
+        ConnectionDetails details = connectionDetails(configuredUrl, configuredUsername, configuredPassword);
         HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(details.url());
+        if (details.username() != null && !details.username().isBlank()) config.setUsername(details.username());
+        if (details.password() != null) config.setPassword(details.password());
+        config.setMaximumPoolSize(Math.max(1, Math.min(maximumPoolSize, 20)));
+        config.setMinimumIdle(0);
+        config.setConnectionTimeout(10000);
+        config.setValidationTimeout(5000);
+        config.setMaxLifetime(600000);
+        config.setIdleTimeout(300000);
+        return new HikariDataSource(config);
+    }
+
+    private static ConnectionDetails connectionDetails(String configuredUrl, String configuredUsername, String configuredPassword) {
         String url = configuredUrl;
         String username = configuredUsername;
         String password = configuredPassword;
@@ -54,20 +73,13 @@ public class DatabaseUrlConfiguration {
                 if (credentials.length > 1) password = credentials[1];
             }
         }
-        config.setJdbcUrl(url);
-        if (username != null && !username.isBlank()) config.setUsername(username);
-        if (password != null) config.setPassword(password);
-        config.setMaximumPoolSize(Math.max(1, Math.min(maximumPoolSize, 20)));
-        config.setMinimumIdle(0);
-        config.setConnectionTimeout(10000);
-        config.setValidationTimeout(5000);
-        config.setMaxLifetime(600000);
-        config.setIdleTimeout(300000);
-        return new HikariDataSource(config);
+        return new ConnectionDetails(url, username, password);
     }
 
     private static String firstNonBlank(String... values) {
         for (String value : values) if (value != null && !value.isBlank()) return value;
         throw new IllegalStateException("A database URL is required");
     }
+
+    private record ConnectionDetails(String url, String username, String password) { }
 }

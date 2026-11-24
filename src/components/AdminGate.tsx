@@ -9,10 +9,11 @@ import MediaLibrary from "@/components/MediaLibrary";
 import SiteBuilder from "@/components/SiteBuilder";
 import CustomFieldDefinitions from "@/components/CustomFieldDefinitions";
 import AdminContactPanel from "@/components/AdminContactPanel";
+import AdminStepUp from "@/components/AdminStepUp";
 
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
-type Session = { authenticated: boolean; name: string; email: string; issuer: string };
+type Session = { authenticated: boolean; name: string; email: string; issuer: string; totpConfigured: boolean; stepUp: boolean };
 
 export default function AdminGate() {
   const [session, setSession] = useState<Session | null>(null);
@@ -45,6 +46,8 @@ export default function AdminGate() {
       </div>
     );
   }
+
+  if (!session.stepUp) return <AdminStepUp configured={session.totpConfigured} onVerified={() => setSession(current => current ? { ...current, totpConfigured: true, stepUp: true } : current)} />;
 
   return (
     <div className="admin-state">

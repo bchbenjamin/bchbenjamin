@@ -24,6 +24,7 @@ export interface EducationEntry { qualification: string; fieldOfStudy: string; i
 export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; }
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
+export interface LauncherConfig { wallpaper: "microbes" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; }
 export interface HomeContent {
   heroEyebrow: string; focus: string; aboutTitle: string; aboutParagraphs: string[];
   projectsTitle: string; projectsDescription: string; skillsTitle: string; skillsDescription: string;
@@ -38,6 +39,7 @@ export interface SiteContent {
   skillGroups: SkillGroup[];
   homeSections: HomeSection[];
   homeContent: HomeContent;
+  launcher: LauncherConfig;
 }
 
 const DEFAULT_HOME_SECTIONS: HomeSection[] = [
@@ -50,6 +52,7 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "skills", type: "skills", enabled: true, order: 50 },
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
+const DEFAULT_LAUNCHER: LauncherConfig = { wallpaper: "microbes", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true };
 const DEFAULT_HOME_CONTENT: HomeContent = {
   heroEyebrow: "5TH-SEMESTER B.E. COMPUTER SCIENCE / BATCH OF 2028", focus: "Python Development · Data Engineering · Artificial Intelligence · Technical Research & Documentation",
   aboutTitle: "Technical curiosity.\nPractical engineering.",
@@ -58,13 +61,13 @@ const DEFAULT_HOME_CONTENT: HomeContent = {
   skillsTitle: "Technologies and tools.", skillsDescription: "Languages, frameworks, databases and technical focus areas.",
   contactTitle: "Have a worthwhile engineering problem?", contactDescription: "Get in touch to discuss software, AI, data engineering or technical research."
 };
-const site = { ...(siteData as SiteContent), homeSections: DEFAULT_HOME_SECTIONS, homeContent: DEFAULT_HOME_CONTENT };
+const site = { ...(siteData as SiteContent), homeSections: DEFAULT_HOME_SECTIONS, homeContent: DEFAULT_HOME_CONTENT, launcher: DEFAULT_LAUNCHER };
 export { site };
 export const projects = site.projects;
 export const featuredProjects = projects.filter((project) => project.featured);
 export function getProjectBySlug(slug: string): Project | undefined { return projects.find((project) => project.slug === slug); }
-// VERCEL_URL identifies this frontend deployment, not the backend API. Only an explicit API_BASE_URL enables live-API mode; otherwise serve the reviewed public snapshot bundled with the site.
-const API_BASE = (process.env.API_BASE_URL || "").replace(/\/$/, "");
+// On Vercel, the frontend and Spring API share the same origin through service rewrites. Local development can point directly at the API using NEXT_PUBLIC_API_BASE_URL.
+const API_BASE = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "")).replace(/\/$/, "");
 
 async function readPublic<T>(path: string): Promise<T | null> {
   if (!API_BASE) return null;
@@ -84,6 +87,7 @@ function emptyLiveSite(): SiteContent {
   return {
     owner: { name: "", monogram: "BCH", role: "", location: "", email: "", website: "", github: "", linkedin: "", headline: "", intro: "" },
     homeContent: DEFAULT_HOME_CONTENT,
+    launcher: DEFAULT_LAUNCHER,
     projects: [], experience: [], education: [], achievements: [], skillGroups: [], homeSections: site.homeSections ?? []
   };
 }
@@ -157,19 +161,35 @@ export async function getSiteContent(): Promise<SiteContent> {
   }
   let homeSections = site.homeSections ?? [];
   let homeContent = site.homeContent ?? DEFAULT_HOME_CONTENT;
+  let launcherConfig: LauncherConfig = DEFAULT_LAUNCHER;
   try {
-    const parsed = typeof siteConfig === "string" ? JSON.parse(siteConfig) as { home?: { sections?: HomeSection[]; content?: Partial<HomeContent> } } : siteConfig as { home?: { sections?: HomeSection[]; content?: Partial<HomeContent> } } | undefined;
+    const parsed = typeof siteConfig === "string" ? JSON.parse(siteConfig) as { home?: { sections?: HomeSection[]; content?: Partial<HomeContent> }; launcher?: Partial<LauncherConfig> } : siteConfig as { home?: { sections?: HomeSection[]; content?: Partial<HomeContent> }; launcher?: Partial<LauncherConfig> } | undefined;
     if (parsed?.home?.sections) homeSections = parsed.home.sections;
     if (parsed?.home?.content) homeContent = { ...DEFAULT_HOME_CONTENT, ...parsed.home.content };
+    const launcher = { ...DEFAULT_LAUNCHER, ...parsed?.launcher };
+    launcher.wallpaper = launcher.wallpaper === "android-default" || launcher.wallpaper === "custom" ? launcher.wallpaper : "microbes";
+    launcher.microbeCount = Math.max(12, Math.min(38, Number(launcher.microbeCount) || 28));
+    launcher.microbeSpeed = Math.max(0.1, Math.min(1.5, Number(launcher.microbeSpeed) || 0.65));
+    launcher.appColumns = Math.max(3, Math.min(6, Number(launcher.appColumns) || 4));
+    launcherConfig = {
+      ...launcher,
+      hiddenApps: Array.isArray(launcher.hiddenApps) ? launcher.hiddenApps.map(String) : [],
+      appOrder: Array.isArray(launcher.appOrder) ? [...new Set([...launcher.appOrder.map(String).filter(id => DEFAULT_LAUNCHER.appOrder.includes(id)), ...DEFAULT_LAUNCHER.appOrder])] : DEFAULT_LAUNCHER.appOrder,
+      appLabels: launcher.appLabels && typeof launcher.appLabels === "object" && !Array.isArray(launcher.appLabels) ? Object.fromEntries(Object.entries(launcher.appLabels).map(([key,value])=>[key,String(value).slice(0,32)])) : {},
+      wallpaperImageUrl: typeof launcher.wallpaperImageUrl === "string" && (launcher.wallpaperImageUrl.startsWith("https://") || launcher.wallpaperImageUrl.startsWith("/api/v1/public/media/")) ? (launcher.wallpaperImageUrl.startsWith("/") ? `${API_BASE}${launcher.wallpaperImageUrl}` : launcher.wallpaperImageUrl) : "",
+      showSearch: launcher.showSearch !== false,
+      showClock: launcher.showClock !== false,
+      showGallery: launcher.showGallery !== false
+    };
   } catch { /* Keep the known safe section layout and content if configuration is malformed. */ }
 
   return {
     ...emptyLiveSite(),
     owner: {
-      name: String(profile.fullName ?? ""), monogram: "BCH", role: String(profile.headline ?? ""),
-      location: String(profile.location ?? ""), email: String(profile.email ?? ""),
-      website: String(profile.websiteUrl ?? ""), github: String(profile.githubUrl ?? ""), linkedin: String(profile.linkedinUrl ?? ""),
-      headline: String(profile.headline ?? ""), intro: String(profile.summary ?? "")
+      name: String(profile.fullName || site.owner.name), monogram: String(profile.monogram || site.owner.monogram), role: String(profile.headline || site.owner.role),
+      location: String(profile.location || site.owner.location), email: String(profile.email || site.owner.email),
+      website: String(profile.websiteUrl || site.owner.website), github: String(profile.githubUrl || site.owner.github), linkedin: String(profile.linkedinUrl || site.owner.linkedin),
+      headline: String(profile.headline || site.owner.headline), intro: String(profile.summary || site.owner.intro)
     },
     projects: liveProjects,
     experience: liveExperience,
@@ -177,7 +197,8 @@ export async function getSiteContent(): Promise<SiteContent> {
     achievements: liveAchievements,
     skillGroups: Array.from(groups, ([name, skills]) => ({ name, skills })),
     homeSections,
-    homeContent
+    homeContent,
+    launcher: launcherConfig
   };
 }
 

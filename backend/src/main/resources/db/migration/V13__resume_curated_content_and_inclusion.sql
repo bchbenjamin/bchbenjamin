@@ -6,16 +6,14 @@ ALTER TABLE education ADD COLUMN resume_included BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE skills ADD COLUMN resume_included BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE achievements ADD COLUMN resume_included BOOLEAN NOT NULL DEFAULT FALSE;
 
--- Replace the inaccurate starter records with the current résumé-backed dataset.
--- Remove old relationships to those starter records; media files themselves remain in the
--- private media library until the owner chooses to remove them.
-DELETE FROM media_relationships WHERE resource_type IN ('project', 'experience', 'education', 'achievement', 'profile');
-DELETE FROM skills;
-DELETE FROM skill_groups;
-DELETE FROM experience;
-DELETE FROM projects;
-DELETE FROM education;
-DELETE FROM achievements;
+-- Retire the previous starter dataset without deleting owner content or media relationships.
+-- Existing records remain available in the admin workspace and can be republished if needed.
+UPDATE projects SET published = FALSE, resume_included = FALSE, updated_at = now();
+UPDATE experience SET published = FALSE, resume_included = FALSE, updated_at = now();
+UPDATE education SET published = FALSE, resume_included = FALSE, updated_at = now();
+UPDATE skill_groups SET published = FALSE, updated_at = now();
+UPDATE achievements SET published = FALSE, resume_included = FALSE, updated_at = now();
+UPDATE skills SET resume_included = FALSE, updated_at = now();
 
 -- Canonical profile fields from the current résumé (no birth date or confidential role).
 UPDATE profile

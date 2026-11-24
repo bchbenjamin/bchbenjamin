@@ -40,3 +40,23 @@ Additional exact AOSP source trees used for the assets:
 - SystemUI: https://android.googlesource.com/platform/frameworks/base/+/android-4.1.2_r1/packages/SystemUI
 
 The Google Search bar asset is cropped from the attributed Galaxy Nexus screenshot above. It is a visual recreation of the original widget, not a functional Google search field.
+
+
+## Messaging app visual references
+
+- AOSP Android 4.1.2 Mms application source: https://android.googlesource.com/platform/packages/apps/Mms/+/android-4.1.2_r1. The stock app uses a Holo action bar, conversation list, recipient/conversation screen, and a message composer at the bottom.
+- AOSP Android 4.1.1 Mms source tag: https://android.googlesource.com/platform/packages/apps/Mms/+/android-4.1.1_r1.
+- Visual reference for the conversation bubbles and bottom composer: TechRadar's Motorola Droid RAZR HD Messaging screenshot (Android 4.0-era Holo UI): https://www.techradar.com/reviews/phones/mobile-phones/motorola-droid-razr-hd-1095289/review/5. This is a period-correct visual reference, not the exact Nexus/stock 4.1 app build.
+- The portfolio messaging screen adapts the AOSP conversation layout while submitting a contact enquiry through the existing email-verification workflow; it does not pretend to send SMS.
+
+## Microbes live wallpaper
+
+- The iconic Microbes wallpaper originally shipped with the Nexus S / Android 2.3 Gingerbread, not Android 4.1. The requested recreation intentionally combines that wallpaper with the Android 4.1 launcher.
+- Droid Life, 16 December 2010: https://www.droid-life.com/2010/12/16/download-nexus-s-microbes-live-wallpaper/ (Nexus S Microbes live wallpaper identification and release context).
+- IntoMobile, 15 December 2010: https://www.intomobile.com/2010/12/15/android-2-3-gingerbread-video-walkthrough-nfc-text-selection-tool-live-wallpaper-and-more/ (describes touch-created food particles, attraction, growth and division).
+- The browser recreation uses original CSS-rendered spheres and touch-created food particles. It does not redistribute the original proprietary APK or its artwork.
+
+## Android launcher layout reference
+
+- Android 4.0/4.1 screenshot guide: https://controlmysms.com/images/AndroidConfigManual.pdf. The guide shows the phone dock (Phone, People, app drawer, Messaging, Browser), separate Back/Home/Recent navigation bar, and four-column app drawer with APPS/WIDGETS tabs.
+- Android Authority, Android 4.1 vs 4.2 comparison: https://www.androidauthority.com/android-4-1-vs-android-4-2-jelly-bean-149740/ (describes the stock conversation-thread and SMS/MMS bubble interface).
