@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import ProjectMediaGallery from "@/components/ProjectMediaGallery";
-import GlassSurface from "@/components/GlassSurface";
+import Surface from "@/components/Surface";
 import { getPublicProjectBySlug } from "@/lib/content";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -43,12 +43,12 @@ export default async function ProjectDetailPage({ params }: Props) {
           <h2>What it is<br /><span>and why it matters.</span></h2>
           <p>{project.description}</p>
         </div>
-        <GlassSurface as="aside" className="detail-facts">
+        <Surface as="aside" className="detail-facts">
           {project.role && <div><span>MY ROLE</span><strong>{project.role}</strong></div>}
           <div><span>TECHNOLOGY</span><div className="skill-pills">{project.stack.map((item) => <span key={item}>{item}</span>)}</div></div>
           {project.repo && <a className="text-link" href={project.repo} target="_blank" rel="noreferrer">Explore repository ↗</a>}
           {project.liveUrl && <a className="text-link" href={project.liveUrl} target="_blank" rel="noreferrer">Open live demo ↗</a>}
-        </GlassSurface>
+        </Surface>
       </div>
       <div className="detail-next"><span>KEEP EXPLORING</span><Link className="text-link" href="/projects">More projects ↗</Link></div>
     </article>

@@ -1,0 +1,6 @@
+Roboto-Regular.ttf and Android 4.1.2 SystemUI assets
+Copyright The Android Open Source Project.
+Source: AOSP tag android-4.1.2_r1.
+https://github.com/aosp-mirror/platform_frameworks_base/tree/android-4.1.2_r1
+Files: data/fonts/Roboto-Regular.ttf and packages/SystemUI/res/drawable-hdpi/{ic_sysbar_back.png,ic_sysbar_home.png,ic_sysbar_recent.png,stat_sys_wifi_signal_4_fully.png,stat_sys_signal_4_fully.png,stat_sys_battery_71.png}
+Licensed under the Apache License, Version 2.0. See Apache-2.0.txt.

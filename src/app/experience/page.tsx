@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import GlassSurface from "@/components/GlassSurface";
+import Surface from "@/components/Surface";
 import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -26,13 +26,13 @@ export default async function ExperiencePage() {
         {site.experience.map((entry, index) => (
           <article className="timeline-entry" key={entry.title + entry.organization}>
             <div className="timeline-marker"><span>0{index + 1}</span><i /></div>
-            <GlassSurface className="timeline-content" as="div">
+            <Surface className="timeline-content" as="div">
               <p className="eyebrow">{entry.label}</p>
               <h2>{entry.title}</h2>
               <div className="timeline-meta"><strong>{entry.organization}</strong><span>{entry.period}</span></div>
               <p>{entry.description}</p>
               {entry.repo && <a className="text-link" href={entry.repo} target="_blank" rel="noreferrer">View related source ↗</a>}
-            </GlassSurface>
+            </Surface>
           </article>
         ))}
       </div>
@@ -42,12 +42,12 @@ export default async function ExperiencePage() {
         {site.education.map((entry, index) => (
           <article className="timeline-entry" key={entry.qualification + entry.institution}>
             <div className="timeline-marker"><span>0{index + 1}</span><i /></div>
-            <GlassSurface className="timeline-content" as="div">
+            <Surface className="timeline-content" as="div">
               <p className="eyebrow">{entry.period}</p>
               <h2>{entry.qualification}</h2>
               <div className="timeline-meta"><strong>{entry.institution}</strong>{entry.fieldOfStudy && <span>{entry.fieldOfStudy}</span>}</div>
               {entry.description && <p>{entry.description}</p>}
-            </GlassSurface>
+            </Surface>
           </article>
         ))}
       </div>
@@ -55,11 +55,11 @@ export default async function ExperiencePage() {
       <SectionHeading eyebrow="MILESTONES / 03" title="A few things worth noting." />
       <div className="achievement-grid">
         {site.achievements.map((item, index) => (
-          <GlassSurface as="article" className="achievement-card" key={item.title}>
+          <Surface as="article" className="achievement-card" key={item.title}>
             <span className="achievement-index">0{index + 1} / {item.label}</span>
             <h3>{item.title}</h3>
             <p>{item.detail}</p>
-          </GlassSurface>
+          </Surface>
         ))}
       </div>
 

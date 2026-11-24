@@ -1,9 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { createLiquidGlass, supportsRefraction } from "@/lib/liquid-glass/liquid-glass";
+import { useState } from "react";
 
 const links = [
   { href: "/#about", label: "About" },
@@ -13,16 +13,7 @@ const links = [
 
 export default function SiteHeader() {
   const pathname = usePathname();
-  const glassRef = useRef<HTMLDivElement>(null);
   const [motionPaused, setMotionPaused] = useState(false);
-
-  useEffect(() => {
-    const host = glassRef.current;
-    if (!host) return;
-    host.dataset.liquidGlass = supportsRefraction ? "refractive" : "frosted-fallback";
-    const glass = createLiquidGlass(host, { radius: 30, rim: 1.15, blur: 1.8, saturate: 1.28, reflect: false, reflectStrength: 1.4, promote: false });
-    return () => glass.destroy();
-  }, []);
 
   const toggleMotion = () => {
     const next = !motionPaused;
@@ -34,9 +25,9 @@ export default function SiteHeader() {
 
   return (
     <header className="site-header">
-      <div ref={glassRef} className="shell header-inner" data-lg-dark>
+      <div className="shell header-inner">
         <Link className="brand" href="/" aria-label="B C H Benjamin — home">
-          <span className="brand-mark">BCH</span>
+          <Image className="brand-logo" src="/logo.svg" alt="" width={30} height={38} priority />
           <span className="brand-name">benjamin<span className="brand-dot">.</span></span>
         </Link>
 

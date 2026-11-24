@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import CopyEmailButton from "@/components/CopyEmailButton";
 import { site } from "@/lib/content";
@@ -7,7 +8,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="shell footer-main">
         <Link className="brand footer-brand" href="/">
-          <span className="brand-mark">BCH</span>
+          <Image className="brand-logo" src="/logo.svg" alt="" width={30} height={38} />
           <span className="brand-name">benjamin<span className="brand-dot">.</span></span>
         </Link>
         <p className="footer-note">Thoughtfully built. Constantly iterating.</p>

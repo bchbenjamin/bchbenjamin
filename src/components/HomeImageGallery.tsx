@@ -1,21 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { createLiquidGlass, supportsRefraction } from "@/lib/liquid-glass/liquid-glass";
+import { useRef } from "react";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import type { Project } from "@/lib/content";
 
 export default function HomeImageGallery({ projects }: { projects: Project[] }) {
   const rail = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const hosts = Array.from(rail.current?.querySelectorAll<HTMLElement>(".home-gallery-card") ?? []);
-    const instances = hosts.map((host) => {
-      host.dataset.liquidGlass = supportsRefraction ? "refractive" : "frosted-fallback";
-      return createLiquidGlass(host, { radius: 22, rim: 0.85, blur: 1.5, saturate: 1.18, reflect: false, promote: false });
-    });
-    return () => instances.forEach((instance) => instance.destroy());
-  }, [projects]);
   if (!projects.length) return null;
 
   function move(direction: -1 | 1) {

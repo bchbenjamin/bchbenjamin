@@ -6,6 +6,7 @@ import PageTransition from "@/components/PageTransition";
 import ScrollExperience from "@/components/ScrollExperience";
 import { site } from "@/lib/content";
 import "./globals.css";
+import "./jellybean.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.owner.website),
@@ -19,6 +20,10 @@ export const metadata: Metadata = {
   creator: "B C H Benjamin",
   publisher: "B C H Benjamin",
   alternates: { canonical: "/" },
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg"
+  },
   openGraph: {
     type: "website",
     url: site.owner.website,

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ProjectMedia } from "@/lib/content";
-import GlassSurface from "@/components/GlassSurface";
+import Surface from "@/components/Surface";
 
 export default function ProjectMediaGallery({ media }: { media: ProjectMedia[] }) {
   if (!media?.length) return null;
@@ -12,7 +12,7 @@ export default function ProjectMediaGallery({ media }: { media: ProjectMedia[] }
           const type = asset.content_type;
           const label = asset.caption || asset.original_filename;
           return (
-            <GlassSurface as="article" className="project-media-item" key={asset.id} radius={20}>
+            <Surface as="article" className="project-media-item" key={asset.id}>
               {type.startsWith("image/") ? (
                 <div className="project-media-visual"><Image unoptimized fill sizes="(max-width: 760px) 100vw, 50vw" src={asset.url} alt={asset.alt_text || label} /></div>
               ) : type.startsWith("video/") ? (
@@ -22,7 +22,7 @@ export default function ProjectMediaGallery({ media }: { media: ProjectMedia[] }
               ) : null}
               <p className="project-media-caption">{label}</p>
               {type === "application/pdf" && <a className="project-media-open" href={asset.url} target="_blank" rel="noreferrer">Open document ↗</a>}
-            </GlassSurface>
+            </Surface>
           );
         })}
       </div>
