@@ -25,7 +25,8 @@ export interface EducationEntry { qualification: string; fieldOfStudy: string; i
 export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; }
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
-export interface LauncherConfig { wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; }
+export interface LauncherShortcut { id: string; name: string; url: string; iconUrl?: string; }
+export interface LauncherConfig { customApps: LauncherShortcut[]; chessComProfileUrl: string; lichessProfileUrl: string; wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; }
 export interface HomeContent {
   heroEyebrow: string; focus: string; aboutTitle: string; aboutParagraphs: string[];
   projectsTitle: string; projectsDescription: string; skillsTitle: string; skillsDescription: string;
@@ -54,7 +55,7 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "skills", type: "skills", enabled: true, order: 50 },
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
-const DEFAULT_LAUNCHER: LauncherConfig = { wallpaper: "water", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true };
+const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "water", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true };
 const DEFAULT_HOME_CONTENT: HomeContent = {
   heroEyebrow: "5TH-SEMESTER B.E. COMPUTER SCIENCE / BATCH OF 2028", focus: "Python Development · Data Engineering · Artificial Intelligence · Technical Research & Documentation",
   aboutTitle: "Technical curiosity.\nPractical engineering.",
@@ -185,7 +186,10 @@ export async function getSiteContent(): Promise<SiteContent> {
     launcherConfig = {
       ...launcher,
       hiddenApps: Array.isArray(launcher.hiddenApps) ? launcher.hiddenApps.map(String) : [],
-      appOrder: Array.isArray(launcher.appOrder) ? [...new Set([...launcher.appOrder.map(String).filter(id => DEFAULT_LAUNCHER.appOrder.includes(id)), ...DEFAULT_LAUNCHER.appOrder])] : DEFAULT_LAUNCHER.appOrder,
+      appOrder: Array.isArray(launcher.appOrder) ? [...new Set([...launcher.appOrder.map(String).filter(id => DEFAULT_LAUNCHER.appOrder.includes(id) || (Array.isArray(launcher.customApps) && launcher.customApps.some(app => app && typeof app.id === "string" && app.id === id))), ...DEFAULT_LAUNCHER.appOrder])] : DEFAULT_LAUNCHER.appOrder,
+      chessComProfileUrl: typeof launcher.chessComProfileUrl === "string" && /^https:\/\//i.test(launcher.chessComProfileUrl) ? launcher.chessComProfileUrl : DEFAULT_LAUNCHER.chessComProfileUrl,
+      lichessProfileUrl: typeof launcher.lichessProfileUrl === "string" && /^https:\/\//i.test(launcher.lichessProfileUrl) ? launcher.lichessProfileUrl : DEFAULT_LAUNCHER.lichessProfileUrl,
+      customApps: Array.isArray(launcher.customApps) ? launcher.customApps.filter(app => app && typeof app.id === "string" && typeof app.name === "string" && typeof app.url === "string" && /^https:\/\//i.test(app.url)).slice(0,24).map(app => ({ id: app.id.slice(0,64), name: app.name.slice(0,32), url: app.url, ...(typeof app.iconUrl === "string" && (/^https:\/\//i.test(app.iconUrl) || app.iconUrl.startsWith("/api/v1/public/media/")) ? { iconUrl: app.iconUrl.startsWith("/") ? `${API_BASE}${app.iconUrl}` : app.iconUrl } : {}) })) : [],
       appLabels: launcher.appLabels && typeof launcher.appLabels === "object" && !Array.isArray(launcher.appLabels) ? Object.fromEntries(Object.entries(launcher.appLabels).map(([key,value])=>[key,String(value).slice(0,32)])) : {},
       wallpaperImageUrl: typeof launcher.wallpaperImageUrl === "string" && (launcher.wallpaperImageUrl.startsWith("https://") || launcher.wallpaperImageUrl.startsWith("/api/v1/public/media/")) ? (launcher.wallpaperImageUrl.startsWith("/") ? `${API_BASE}${launcher.wallpaperImageUrl}` : launcher.wallpaperImageUrl) : "",
       showSearch: launcher.showSearch !== false,

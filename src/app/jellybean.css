@@ -22,7 +22,7 @@ body:has(.jb-world) .page-transition, body:has(.jb-world) #main-content { min-he
 .jb-drawer-tabs>button{padding:0 0 13px;border:0;background:none;color:#a9c1cf;font-size:12px;letter-spacing:1px}.jb-drawer-tabs>button.selected{color:#fff;border-bottom:2px solid #33b5e5;margin-bottom:-15px}.jb-drawer-tabs>.jb-drawer-close{padding:0;margin-left:auto;color:#fff;font-size:24px}.jb-widget-picker{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:24px}.jb-widget-picker>button{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:12px;border:1px solid #ffffff35;background:#ffffff0d;color:#fff;text-align:left}.jb-widget-picker b{font-size:12px}.jb-widget-picker small{font-size:10px;color:#b6c9d4}.jb-widget-preview-clock,.jb-widget-preview-gallery,.jb-widget-preview-profile{width:100%;height:62px;display:grid;place-items:center;background:#152b3a;color:#fff;font-size:22px}.jb-widget-preview-clock{font-size:28px;font-weight:200}.jb-widget-preview-profile{background:linear-gradient(145deg,#63b6d8,#24648d);font-size:34px}
 
 /* Jelly Bean 4.1 fidelity pass: AOSP wallpaper, launcher iconography, Holo shade and adaptive tablet layout. */
-.jb-wallpaper{background:#17202a url('/jellybean/android-4.1-default-wallpaper.jpg') center center/cover no-repeat}
+.jb-wallpaper{background:#0b2941 url('/jellybean/water-live-wallpaper.jpg') center center/cover no-repeat}.jb-wallpaper-static{background-image:url('/jellybean/android-4.1-default-wallpaper.jpg') !important}
 .jb-wallpaper:before{display:none}
 .jb-app-icon{width:48px;height:48px;padding:2px;border-radius:11px;background:linear-gradient(155deg,color-mix(in srgb,var(--app-color),white 42%),var(--app-color) 55%,color-mix(in srgb,var(--app-color),black 28%));border:1px solid #ffffffa8;box-shadow:inset 0 1px 2px #ffffffa0,0 2px 4px #0009;overflow:hidden}
 .jb-app-icon svg{display:block;width:100%;height:100%;filter:drop-shadow(0 1px 1px #0005)}
@@ -70,7 +70,7 @@ body:has(.jb-world) .page-transition, body:has(.jb-world) #main-content { min-he
 
 /* A landscape viewport becomes a tablet-style workspace instead of a stretched phone mockup. */
 @media (orientation:landscape) and (min-width:600px){
-  .jb-wallpaper{background-image:url('/jellybean/android-4.1-tablet-wallpaper.jpg')}
+  .jb-wallpaper{background-image:url('/jellybean/water-live-wallpaper.jpg')}
   .jb-world{width:100vw;height:100dvh;min-height:0;padding:0;justify-content:stretch;background:#080d12}
   .jb-device{width:100%;max-width:none;height:100dvh;min-height:0;border:0;border-radius:0;box-shadow:none}
   .jb-status-bar{height:25px;padding:0 14px}
@@ -153,7 +153,7 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-terminal-top span{float:none;color:#9cb3bf;font-size:10px}
 
 /* Launcher cleanup and mobile viewport handling. */
-.jb-wallpaper{background:#020711;}
+.jb-wallpaper{background:#0b2941 url('/jellybean/water-live-wallpaper.jpg') center center/cover no-repeat}
 .jb-wallpaper:before{display:none}
 .jb-microbes{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:auto}
 .jb-gallery-widget{padding:0;background:transparent;border:0;box-shadow:none}
@@ -342,3 +342,21 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-drawer-page-indicators{height:20px;display:flex;align-items:center;justify-content:center;gap:8px;flex:none}
 .jb-drawer-page-indicators button{width:6px;height:6px;border:0;border-radius:50%;padding:0;background:#ffffff55}
 .jb-drawer-page-indicators button.active{background:#fff;transform:scale(1.25)}
+
+/* Android-style launcher editing and native brand folder artwork. */
+.jb-world img{-webkit-user-drag:none;-webkit-touch-callout:none;user-select:none;pointer-events:auto}
+.jb-device,.jb-device *{-webkit-tap-highlight-color:transparent}
+.jb-edit-toolbar{position:absolute;z-index:14;top:25px;left:0;right:0;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#101a25eF;border-bottom:1px solid #ffffff35;color:#fff;font-size:12px;letter-spacing:.4px}
+.jb-edit-toolbar button{border:1px solid #8ac8df;border-radius:3px;padding:6px 14px;background:#176987;color:#fff;font-size:11px}
+.jb-device:has(.jb-edit-toolbar) .jb-home-viewport{top:67px}
+.jb-device:has(.jb-edit-toolbar) .jb-status-bar{top:42px}
+.jb-device:has(.jb-edit-toolbar) .jb-home-shortcut-row button,.jb-device:has(.jb-edit-toolbar) .jb-icon-grid button{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
+@keyframes jb-icon-wiggle{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+.jb-chess-folder{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:18px 0}
+.jb-chess-folder a{display:flex;min-height:132px;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1px solid #cbd4d9;background:#fff;color:#27343b;text-decoration:none;font-size:12px;font-weight:600}
+.jb-chess-folder img{width:64px;height:64px;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.jb-app-icon img{width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.jb-app-icon-folder{background:transparent}
+
+.jb-app-icon img{-webkit-user-drag:none;-webkit-touch-callout:none;user-select:none;pointer-events:none}
+.jb-custom-apps img{object-fit:contain}

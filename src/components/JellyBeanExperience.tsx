@@ -8,8 +8,8 @@ import ProjectArtwork from "@/components/ProjectArtwork";
 import JellyBeanMessaging from "@/components/JellyBeanMessaging";
 import WaterWallpaper from "@/components/WaterWallpaper";
 
-type AppId = "about" | "gallery" | "projects" | "experience" | "education" | "skills" | "terminal" | "contact" | "github" | "settings" | "chess" | "achievements" | "journey" | "email" | "contactDetails";
-type AppInfo = { id: AppId; name: string; icon: string; color: string; panel: number };
+type AppId = string;
+type AppInfo = { id: string; name: string; icon: string; color: string; panel: number; url?: string; iconUrl?: string; folder?: boolean };
 
 const APPS: AppInfo[] = [
   { id: "about", name: "About", icon: "person", color: "#4c9bd6", panel: 0 },
@@ -21,20 +21,21 @@ const APPS: AppInfo[] = [
   { id: "terminal", name: "Termux", icon: "terminal", color: "#303b43", panel: 2 },
   { id: "github", name: "GitHub", icon: "github", color: "#555b66", panel: 2 },
   { id: "contact", name: "Messaging", icon: "message", color: "#6eaa61", panel: 4 },
-  { id: "settings", name: "Settings", icon: "skills", color: "#6a9b63", panel: 2 },
-  { id: "chess", name: "Chess", icon: "chess", color: "#b59a70", panel: 3 },
+  { id: "settings", name: "Settings", icon: "settings", color: "#6a9b63", panel: 2 },
+  { id: "chess", name: "Chess", icon: "folder", color: "#b59a70", panel: 3, folder: true },
   { id: "achievements", name: "Achievements", icon: "achievements", color: "#d6a34d", panel: 3 },
   { id: "journey", name: "Journey", icon: "journey", color: "#4c9bd6", panel: 3 },
   { id: "email", name: "Email", icon: "email", color: "#668fa9", panel: 4 },
   { id: "contactDetails", name: "Contact", icon: "person", color: "#4c9bd6", panel: 4 }
 ];
 
+/* eslint-disable @next/next/no-img-element -- custom admin-provided icon URLs are intentionally unoptimized. */
 function AppIcon({ app, size = "normal" }: { app: AppInfo; size?: "normal" | "large" }) {
   const assets: Record<string, string> = {
-    person: "aosp-4.1.2/contacts.png", gallery: "aosp-4.1.2/gallery.png", projects: "aosp-4.1.2/browser.png",
-    message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png"
+    person: "aosp-4.1.2/contacts.png", gallery: "aosp-4.1.2/gallery.png",
+    message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png", github: "brands/github.svg", terminal: "termux.png"
   };
-  const asset = assets[app.icon];
+  const asset = app.iconUrl || assets[app.icon];
   const glyphs: Record<string, string> = {
     email: "M5 11h38v26H5z M5 13l19 15 19-15",
     briefcase: "M8 16h32v24H8z M17 16v-5h14v5 M8 23h32 M20 23v4h8v-4",
@@ -44,10 +45,12 @@ function AppIcon({ app, size = "normal" }: { app: AppInfo; size?: "normal" | "la
     github: "M24 5a19 19 0 0 0-6 37c1 0 2-1 2-2v-4c-7 2-9-3-9-3-1-2-2-3-2-3-2-1 0-1 0-1 2 0 3 2 3 2 2 3 5 2 7 1 0-2 1-3 2-4-6-1-12-3-12-13 0-3 1-5 3-7 0-1-1-4 0-7 0 0 3-1 8 3a25 25 0 0 1 14 0c5-4 8-3 8-3 1 3 0 6 0 7 2 2 3 4 3 7 0 10-6 12-12 13 1 1 2 3 2 6v6c0 1 1 2 2 2A19 19 0 0 0 24 5z",
     chess: "M24 5c-5 0-8 4-8 8 0 3 2 5 4 6l-2 5h12l-2-5c3-1 4-3 4-6 0-4-3-8-8-8z M16 26h16l3 5H13z M13 34h22l3 7H10z",
     achievements: "M15 6h18v8c0 8-4 13-9 13s-9-5-9-13z M15 11H7v4c0 6 4 9 10 9 M33 11h8v4c0 6-4 9-10 9 M24 27v8 M16 41h16 M19 35h10",
-    journey: "M24 43s-15-14-15-25a15 15 0 1 1 30 0c0 11-15 25-15 25z M24 23a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"
+    journey: "M24 43s-15-14-15-25a15 15 0 1 1 30 0c0 11-15 25-15 25z M24 23a5 5 0 1 0 0-10 5 5 0 0 0 0 10z",
+    projects: "M8 8h32v7H8z M8 20h32v7H8z M8 32h32v7H8z",
+    folder: "M4 13V9a3 3 0 0 1 3-3h11l4 4h9a3 3 0 0 1 3 3v19a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z M4 15h36l-4 19H8z"
   };
   return <span className={`jb-app-icon jb-app-icon-${size} jb-icon-${app.icon}`} style={{ "--app-color": app.color } as CSSProperties}>
-    {asset ? <Image src={`/jellybean/icons/${asset}`} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} unoptimized /> : <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d={glyphs[app.icon] ?? "M8 8h32v32H8z"} /></svg>}
+    {app.iconUrl ? <img src={app.iconUrl} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} draggable={false} /> : asset ? <Image src={asset.startsWith("http") || asset.startsWith("/") ? asset : `/jellybean/icons/${asset}`} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} unoptimized draggable={false} /> : <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d={glyphs[app.icon] ?? "M8 8h32v32H8z"} /></svg>}
   </span>;
 }
 
@@ -72,7 +75,8 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const drawerPointerStart = useRef<{ x: number; y: number } | null>(null);
   const [shade, setShade] = useState(false);
   const [recent, setRecent] = useState(false);
-  const [recentApps, setRecentApps] = useState<AppId[]>([]);
+  const [recentApps, setRecentApps] = useState<string[]>([]);
+  const [launcherEditMode, setLauncherEditMode] = useState(false);
   const [activeApp, setActiveApp] = useState<AppId | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [settingsPage, setSettingsPage] = useState<"main" | "about">("main");
@@ -80,7 +84,8 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalLines, setTerminalLines] = useState<string[]>(["Welcome to Termux!", "This is a read-only portfolio environment. Type help to get started."]);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const pointerStart = useRef<{ x: number; y: number; started: number; appId?: AppId; panel: number } | null>(null);
+  const pointerStart = useRef<{ x: number; y: number; started: number; appId?: string; panel: number; fromDrawer?: boolean } | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressIconClick = useRef(false);
   const [homePlacements, setHomePlacements] = useState<Record<string, { panel: number; slot: number }>>({});
   const terminalOutputRef = useRef<HTMLDivElement>(null);
@@ -95,8 +100,10 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const visibleApps = useMemo(() => {
     const order = Array.isArray(site.launcher.appOrder) ? site.launcher.appOrder : [];
     const hidden = Array.isArray(site.launcher.hiddenApps) ? site.launcher.hiddenApps : [];
-    return APPS.filter((item) => !hidden.includes(item.id)).sort((a,b) => (order.indexOf(a.id) < 0 ? 999 : order.indexOf(a.id))-(order.indexOf(b.id) < 0 ? 999 : order.indexOf(b.id))).map(item => ({ ...item, name: site.launcher.appLabels[item.id] || item.name }));
-  }, [site.launcher.hiddenApps, site.launcher.appOrder, site.launcher.appLabels]);
+    const builtIns = APPS.filter((item) => !hidden.includes(item.id));
+    const custom = (site.launcher.customApps ?? []).filter(item => item && item.id && item.name && item.url).map(item => ({ id: item.id, name: item.name, icon: "custom", color: "#5d8297", panel: 4, url: item.url, iconUrl: item.iconUrl }));
+    return [...builtIns, ...custom].sort((a,b) => (order.indexOf(a.id) < 0 ? 999 : order.indexOf(a.id))-(order.indexOf(b.id) < 0 ? 999 : order.indexOf(b.id))).map(item => ({ ...item, name: site.launcher.appLabels[item.id] || item.name }));
+  }, [site.launcher.hiddenApps, site.launcher.appOrder, site.launcher.appLabels, site.launcher.customApps]);
   const app = visibleApps.find((item) => item.id === activeApp) ?? APPS.find((item) => item.id === activeApp) ?? null;
   const panels = useMemo(() => [0, 1, 2, 3, 4], []);
   const homeAppsByPanel = useMemo(() => panels.map(index => visibleApps
@@ -110,26 +117,27 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const goPanel = useCallback((next: number) => setPanel(Math.max(0, Math.min(4, next))), []);
   const closeOverlays = useCallback(() => { setActiveApp(null); setDrawer(false); setShade(false); setRecent(false); }, []);
   const navBack = useCallback(() => {
-    if (shade) setShade(false);
+    if (launcherEditMode) setLauncherEditMode(false);
+    else if (shade) setShade(false);
     else if (drawer) setDrawer(false);
     else if (recent) setRecent(false);
     else if (activeApp && selectedProject) setSelectedProject(null);
     else if (activeApp) setActiveApp(null);
     else goPanel(0);
-  }, [shade, drawer, recent, activeApp, selectedProject, goPanel]);
+  }, [launcherEditMode, shade, drawer, recent, activeApp, selectedProject, goPanel]);
   const navHome = useCallback(() => { closeOverlays(); setSelectedProject(null); goPanel(0); }, [closeOverlays, goPanel]);
   const navRecent = useCallback(() => { setActiveApp(null); setDrawer(false); setShade(false); setRecent(true); }, []);
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") closeOverlays();
+      if (event.key === "Escape") { if (launcherEditMode) setLauncherEditMode(false); else closeOverlays(); }
       if (!activeApp && !drawer && !shade && event.key === "ArrowLeft") goPanel(panel - 1);
       if (!activeApp && !drawer && !shade && event.key === "ArrowRight") goPanel(panel + 1);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeApp, drawer, shade, panel, closeOverlays, goPanel]);
+  }, [activeApp, drawer, shade, panel, closeOverlays, goPanel, launcherEditMode]);
 
-  function open(appId: AppId) { setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
+  function open(appId: string) { const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url) { window.open(external.url, "_blank", "noopener,noreferrer"); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
   function runCommand(event: React.FormEvent) {
     event.preventDefault(); const command = terminalInput.trim().toLowerCase(); if (!command) return;
     const output: Record<string, string[]> = {
@@ -152,18 +160,43 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   }
 
   return <main className="jb-world">
-    <div className={`jb-device${site.launcher.showLabels ? "" : " jb-hide-labels"}`} aria-label="Micromax Canvas 2 A110 launcher" onPointerDown={(event) => {
+    <div className={`jb-device${site.launcher.showLabels ? "" : " jb-hide-labels"}`} aria-label="Micromax Canvas 2 A110 launcher" onContextMenu={(event) => event.preventDefault()} onDragStart={(event) => event.preventDefault()} onPointerDown={(event) => {
       const target = event.target as HTMLElement;
-      if (target.closest(".jb-app-overlay,.jb-drawer-overlay,.jb-shade-overlay,.jb-recent-overlay")) return;
-      const icon = target.closest<HTMLElement>("[data-home-app]");
-      pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp as AppId | undefined, panel: Number(icon?.dataset.homePanel ?? panel) };
-    }} onPointerUp={(event) => {
+      if (target.closest(".jb-app-overlay,.jb-shade-overlay,.jb-recent-overlay")) return;
+      const icon = target.closest<HTMLElement>("[data-home-app],[data-drawer-app]");
+      if (target.closest(".jb-drawer-overlay") && !icon) return;
+      if (target.closest("button,input,a") && !icon) return;
+      pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, panel: Number(icon?.dataset.homePanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp) };
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      if (icon) longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 450);
+    }} onPointerCancel={() => { pointerStart.current = null; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
       const start = pointerStart.current; pointerStart.current = null;
+      if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
       if (!start) return;
       const dx = event.clientX - start.x; const dy = event.clientY - start.y;
       const moved = Math.hypot(dx, dy);
-      if (start.appId && Date.now() - start.started >= 380 && moved > 18) {
+      if (start.appId && Date.now() - start.started >= 450) {
+        setLauncherEditMode(true);
         const device = event.currentTarget.getBoundingClientRect();
+        if (start.fromDrawer) {
+          const destinationPanel = Math.max(0, Math.min(4, start.panel));
+          const existing = homeAppsByPanel[destinationPanel].map(item => homePlacements[item.id]?.slot ?? homeAppsByPanel[destinationPanel].indexOf(item));
+          const firstFree = Array.from({length:16},(_,index)=>index).find(index=>!existing.includes(index)) ?? existing.length;
+          const row = Math.max(0, Math.min(3, Math.floor((event.clientY - device.top - 70) / 94)));
+          const column = Math.max(0, Math.min(3, Math.floor((event.clientX - device.left) / device.width * 4)));
+          const destinationSlot = moved > 18 ? row * 4 + column : firstFree;
+          setHomePlacements(current => ({...current,[start.appId!]:{panel:destinationPanel,slot:destinationSlot}}));
+          try { localStorage.setItem("jb-home-icon-layout", JSON.stringify({...homePlacements,[start.appId]:{panel:destinationPanel,slot:destinationSlot}})); } catch { /* Keep the in-memory layout. */ }
+          setPanel(destinationPanel); setDrawer(false); suppressIconClick.current = true;
+          window.setTimeout(() => { suppressIconClick.current = false; }, 450);
+          return;
+        }
+        if (moved <= 18) { suppressIconClick.current = true; return; }
+        if (event.clientY < device.top + 68) {
+          const next = {...homePlacements,[start.appId]:{panel:-1,slot:-1}};
+          setHomePlacements(next); try { localStorage.setItem("jb-home-icon-layout", JSON.stringify(next)); } catch { /* Keep the in-memory layout. */ }
+          suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return;
+        }
         const destinationPanel = Math.max(0, Math.min(4, start.panel + (dx > 100 ? -1 : dx < -100 ? 1 : 0)));
         const row = Math.max(0, Math.min(3, Math.floor((event.clientY - device.top - 70) / 94)));
         const column = Math.max(0, Math.min(2, Math.floor((event.clientX - device.left) / device.width * 4)));
@@ -181,13 +214,14 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       }
       if (drawer && dy > 70 && dy > Math.abs(dx)) { setDrawer(false); return; }
       if (shade && dy < -70 && Math.abs(dy) > Math.abs(dx)) { setShade(false); return; }
-      if (activeApp || drawer || recent || shade) return;
+      if (activeApp || drawer || recent || shade || launcherEditMode) return;
       const target = event.target as HTMLElement;
       if (!target.closest(".jb-home-viewport")) return;
       if (dy > 65 && dy > Math.abs(dx) * 1.1) setShade(true);
       else if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 1.15) goPanel(panel + (dx < 0 ? 1 : -1));
     }}>
 
+      {launcherEditMode && <div className="jb-edit-toolbar"><span>Rearrange · drag from drawer to add · drag to top to remove</span><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
       <div className="jb-status-bar" onClick={() => setShade(true)} role="button" tabIndex={0} aria-label="Open notifications and quick settings">
         <div className="jb-status-left" aria-hidden="true" />
         <div className="jb-status-right"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="signal" /><SystemStatusIcon kind="battery" /><span className="jb-status-time">{clock}</span></div>
@@ -231,7 +265,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       </div>
       <div className="jb-navigation-bar"><div className="jb-tablet-nav"><button onClick={navBack} aria-label="Back"><SystemNavigationIcon kind="back" /></button><button onClick={navHome} aria-label="Home"><SystemNavigationIcon kind="home" /></button><button onClick={navRecent} aria-label="Recent apps"><SystemNavigationIcon kind="recent" /></button></div><button className="jb-tablet-status" onClick={() => setShade(true)} aria-label="Open notifications"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="battery" /><span>{clock}</span><span className="jb-tablet-notification-mark">●</span></button></div>
 
-      {drawer && <div className="jb-overlay jb-drawer-overlay"><div className="jb-drawer" onPointerDown={event => { drawerPointerStart.current = { x: event.clientX, y: event.clientY }; }} onPointerUp={event => { const start = drawerPointerStart.current; drawerPointerStart.current = null; if (!start) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) setDrawerPage(page => Math.max(0, Math.min(drawerPages.length - 1, page + (dx < 0 ? 1 : -1)))); else if (dy > 75 && dy > Math.abs(dx)) setDrawer(false); }}><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <button key={a.id} onClick={() => a.id === "github" ? window.open(site.owner.github, "_blank", "noopener,noreferrer") : open(a.id)}><AppIcon app={a} size="large" /><span>{a.name}</span></button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
+      {drawer && <div className="jb-overlay jb-drawer-overlay"><div className="jb-drawer" onPointerDown={event => { drawerPointerStart.current = { x: event.clientX, y: event.clientY }; }} onPointerUp={event => { const start = drawerPointerStart.current; drawerPointerStart.current = null; if (!start) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) setDrawerPage(page => Math.max(0, Math.min(drawerPages.length - 1, page + (dx < 0 ? 1 : -1)))); else if (dy > 75 && dy > Math.abs(dx)) setDrawer(false); }}><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <button key={a.id} data-drawer-app={a.id} onClick={() => a.url ? window.open(a.url, "_blank", "noopener,noreferrer") : a.id === "github" ? window.open(site.owner.github, "_blank", "noopener,noreferrer") : open(a.id)}><AppIcon app={a} size="large" /><span>{a.name}</span></button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
         {site.launcher.showClock&&<button onClick={()=>{setDrawer(false);goPanel(0);}}><span className="jb-widget-preview-clock"><span className="jb-analog-clock"><Image src="/jellybean/clock/dial.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/hour.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/minute.png" alt="" fill sizes="90px" unoptimized/></span></span><b>Analog clock</b><small>2 × 2</small></button>}
         {site.launcher.showSearch&&<button onClick={()=>{setDrawer(false);goPanel(0);}}><span className="jb-widget-preview-search"><Image src="/jellybean/search-widget.png" alt="" width={220} height={20} unoptimized/></span><b>Google Search</b><small>4 × 1</small></button>}
         {site.launcher.showGallery&&<button onClick={()=>{setDrawer(false);goPanel(0);}}><span className="jb-widget-preview-gallery">{projects.slice(0,3).map(project=><ProjectArtwork key={project.slug} project={project}/>)}</span><b>Gallery</b><small>4 × 2</small></button>}
@@ -254,7 +288,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         {activeApp === "email" && <><h3>EMAIL</h3><p>{site.owner.email}</p><a className="jb-project-action" href={`mailto:${site.owner.email}`}>COMPOSE EMAIL ↗</a></>}
         {activeApp === "contactDetails" && <><h3>CONTACT</h3>{[["EMAIL",site.owner.email,`mailto:${site.owner.email}`],["GITHUB",site.owner.github,site.owner.github],["LINKEDIN",site.owner.linkedin,site.owner.linkedin]].filter(item=>item[1]).map(([label,value,url])=><div className="jb-info-row" key={label}><span>{label}</span><a href={url} target={url.startsWith("mailto:")?undefined:"_blank"} rel="noreferrer">{value} ↗</a></div>)}</>}
         {activeApp === "settings" && <div className="jb-settings-screen">{settingsPage === "main" ? <><h3>Settings</h3>{["Wireless & networks","Device","Personal","System"].map((group)=><section key={group}><b>{group}</b>{(group === "System" ? ["Date & time","Accessibility","About phone"] : group === "Device" ? ["Sound","Display","Storage","Battery","Apps"] : group === "Personal" ? ["Location access","Security","Language & input"] : ["Wi-Fi","Bluetooth","Data usage"]).map(item=><button key={item} onClick={()=>item === "About phone" && setSettingsPage("about")}><span>{item}</span><i>›</i></button>)}</section>)}</> : <><button className="jb-settings-back" onClick={()=>setSettingsPage("main")}>‹ Settings</button><h3>About phone</h3>{["Status","Legal information","Model number","Android version","Baseband version","Kernel version"].map(item=><div className="jb-settings-row" key={item}><span>{item}</span><small>{item === "Android version" ? "4.1.1" : item === "Model number" ? "Micromax A110" : item === "Kernel version" ? "3.0.13 · Android 4.1" : ""}</small></div>)}<button className="jb-build-number" onClick={()=>{const next=buildTaps+1;setBuildTaps(next);if(next>=7){setBuildTaps(0);router.push("/admin?source=developer-options");}}}><span>Build number</span><small>JZO54K</small></button></>}</div>}
-        {activeApp === "chess" && <><h3>CHESS</h3><p>Play correspondence or live games on your preferred chess platform.</p><a className="jb-project-action" href="https://www.chess.com" target="_blank" rel="noreferrer">CHESS.COM ↗</a><a className="jb-project-action" href="https://lichess.org" target="_blank" rel="noreferrer">LICHESS ↗</a></>}
+        {activeApp === "chess" && <><h3>CHESS</h3><p>Choose a chess platform.</p><div className="jb-chess-folder"><a href={site.launcher.chessComProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/chessdotcom.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Chess.com profile</span></a><a href={site.launcher.lichessProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/lichess.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Lichess profile</span></a></div></>}
         {activeApp === "github" && <><h3>GITHUB</h3><p>Explore public repositories and current engineering work.</p><a className="jb-project-action" href={site.owner.github} target="_blank" rel="noreferrer">OPEN GITHUB ↗</a></>}
       </div></div></div>}
     </div>

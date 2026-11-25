@@ -69,3 +69,9 @@ The Google Search bar asset is cropped from the attributed Galaxy Nexus screensh
 - Micromax A110 Canvas 2 review: https://www.gadgets360.com/mobiles/reviews/micromax-a110-superfone-canvas-2-review-324251/ (launch OS and device interface).
 - Micromax A110 Android 4.1.1 update announcement: https://www.gsmarena.com/micromax_launches_jelly_bean_411_for_a110_canvas_2-news-5699.php.
 - The browser implementation uses an original lightweight Canvas renderer; it does not bundle a proprietary APK or copy third-party wallpaper assets.
+
+## Micromax A110 Water wallpaper and launcher brand marks
+
+- The Water wallpaper visual is based on the original Xllusion **Water live wallpaper** (package `com.xllusion.livewallpaper.water`, Android 4.0-era release). The repository image is a crop of the wallpaper area from the Phoneky preview at https://prodigits.co.uk/pthumbs/android/thumbs/0/water.jpg; it is not the original APK or a full-resolution export. The web launcher layers its own touch-driven ripple effect over that reference image.
+- Water Live Wallpaper app listing and feature description: https://play.google.com/store/apps/details?id=com.xllusion.livewallpaper.water
+- Chess.com, Lichess, and GitHub marks are sourced from Simple Icons (`https://cdn.simpleicons.org/`); Simple Icons artwork is CC0. Product names and marks remain the property of their respective owners.

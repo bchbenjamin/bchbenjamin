@@ -11,7 +11,7 @@ export default function WaterWallpaper() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d", { alpha: false });
+    const context = canvas?.getContext("2d", { alpha: true });
     if (!canvas || !context) return;
     let frame = 0;
     let width = 0;
@@ -32,19 +32,7 @@ export default function WaterWallpaper() {
 
     const draw = (now: number) => {
       const t = now * 0.00016;
-      const sky = context.createLinearGradient(0, 0, width, height);
-      sky.addColorStop(0, "#6e9da8");
-      sky.addColorStop(0.38, "#2e6e7d");
-      sky.addColorStop(1, "#071d2a");
-      context.fillStyle = sky;
-      context.fillRect(0, 0, width, height);
-
-      const light = context.createRadialGradient(width * (0.2 + Math.sin(t) * 0.04), height * 0.22, 2, width * 0.35, height * 0.35, width * 0.8);
-      light.addColorStop(0, "rgba(215,245,236,.42)");
-      light.addColorStop(0.34, "rgba(85,175,183,.16)");
-      light.addColorStop(1, "rgba(0,15,28,0)");
-      context.fillStyle = light;
-      context.fillRect(0, 0, width, height);
+      context.clearRect(0, 0, width, height);
 
       // Soft moving reflection bands give the water depth without a heavy WebGL shader.
       for (let band = 0; band < 18; band++) {
@@ -57,7 +45,7 @@ export default function WaterWallpaper() {
           const py = y + wave + secondary;
           if (x === 0) context.moveTo(x, py); else context.lineTo(x, py);
         }
-        context.strokeStyle = `rgba(185,235,226,${0.025 + (band % 4) * 0.012})`;
+        context.strokeStyle = `rgba(255,255,255,${0.07 + (band % 4) * 0.025})`;
         context.lineWidth = 1 + (band % 3) * 0.45;
         context.stroke();
       }
