@@ -70,8 +70,13 @@ export { site };
 export const projects = site.projects;
 export const featuredProjects = projects.filter((project) => project.featured);
 export function getProjectBySlug(slug: string): Project | undefined { return projects.find((project) => project.slug === slug); }
-// On Vercel, the frontend and Spring API share the same origin through service rewrites. Local development can point directly at the API using NEXT_PUBLIC_API_BASE_URL.
-const API_BASE = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "")).replace(/\/$/, "");
+// On Vercel, use the stable production alias for server-side requests. VERCEL_URL
+// can be an auth-protected deployment hostname, which would return a login page
+// instead of the public Spring API during SSR. Local development can point directly
+// at the API using NEXT_PUBLIC_API_BASE_URL.
+const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || "";
+const vercelOrigin = vercelHost ? (/^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`) : "";
+const API_BASE = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || vercelOrigin).replace(/\/$/, "");
 
 async function readPublic<T>(path: string): Promise<T | null> {
   if (!API_BASE) return null;
