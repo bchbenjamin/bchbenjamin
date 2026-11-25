@@ -4,18 +4,19 @@ import { notFound } from "next/navigation";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import ProjectMediaGallery from "@/components/ProjectMediaGallery";
 import Surface from "@/components/Surface";
-import { getPublicProjectBySlug } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = await getPublicProjectBySlug(slug);
+  const site = await getSiteContent();
+  const project = site.projects.find(item => item.slug === slug);
   if (!project) return {};
   return {
     title: project.name,
     description: project.summary,
-    openGraph: { title: project.name + " — Benjamin", description: project.summary }
+    openGraph: { title: `${project.name} — ${site.owner.name || "Portfolio"}`, description: project.summary }
   };
 }
 
@@ -23,7 +24,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
-  const project = await getPublicProjectBySlug(slug);
+  const site = await getSiteContent();
+  const project = site.projects.find(item => item.slug === slug);
   if (!project) notFound();
 
   return (

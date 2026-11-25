@@ -6,7 +6,7 @@ import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "Selected software, AI, data and edge-computing projects by Benjamin."
+  description: "Selected software, AI, data and edge-computing projects."
 };
 
 export const dynamic = "force-dynamic";

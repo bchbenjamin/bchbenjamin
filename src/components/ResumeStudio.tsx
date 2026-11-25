@@ -54,7 +54,7 @@ export default function ResumeStudio() {
       const response = await fetch(`${apiBase}/api/v1/admin/resumes/${id}/download`, { credentials: "include", cache: "no-store" });
       if (!response.ok) throw new Error(`Download failed (${response.status}).`);
       const blob = await response.blob(); const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a"); anchor.href = url; anchor.download = `Benjamin-resume-${id}.pdf`; anchor.click(); URL.revokeObjectURL(url);
+      const anchor = document.createElement("a"); anchor.href = url; anchor.download = `Portfolio-resume-${id}.pdf`; anchor.click(); URL.revokeObjectURL(url);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Download failed."); }
   }
 

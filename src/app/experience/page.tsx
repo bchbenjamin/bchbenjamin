@@ -6,7 +6,7 @@ import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Experience",
-  description: "Experience, milestones and interests from Benjamin's engineering journey."
+  description: "Professional experience, education, milestones and selected engineering work."
 };
 
 export const dynamic = "force-dynamic";

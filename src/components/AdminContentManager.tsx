@@ -8,7 +8,7 @@ type Resource = (typeof resources)[number];
 type RecordItem = Record<string, unknown> & { id?: string };
 
 const templates: Record<Resource, Record<string, unknown>> = {
-  profile: { fullName: "", headline: "", summary: "", location: "India", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false, publicFields: { "*": false }, customFields: {} },
+  profile: { fullName: "", headline: "", summary: "", location: "", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false, publicFields: { "*": false }, customFields: {} },
   projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, resumeIncluded: true, sortOrder: 0, startedOn: null, completedOn: null, publicFields: { "*": false }, customFields: {} },
   experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
   education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
@@ -32,10 +32,10 @@ async function csrfToken() {
 }
 
 export default function AdminContentManager() {
-  const [resource, setResource] = useState<Resource>("projects");
+  const [resource, setResource] = useState<Resource>("profile");
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [selected, setSelected] = useState<RecordItem | null>(null);
-  const [editor, setEditor] = useState(JSON.stringify(templates.projects, null, 2));
+  const [editor, setEditor] = useState(JSON.stringify(templates.profile, null, 2));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Select a record or create a new one.");
 

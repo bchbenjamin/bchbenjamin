@@ -4,8 +4,10 @@ import { getSiteContent } from "@/lib/content";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { projects } = await getSiteContent();
-  const baseUrl = "https://bchbenjamin.in";
+  const site = await getSiteContent();
+  const { projects } = site;
+  let baseUrl = "https://bchbenjamin.in";
+  try { baseUrl = new URL(site.owner.website || baseUrl).origin; } catch { /* Retain the configured canonical deployment domain. */ }
   const pages: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "monthly", priority: 1 },
     { url: baseUrl + "/projects", changeFrequency: "monthly", priority: 0.9 },

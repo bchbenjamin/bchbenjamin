@@ -11,7 +11,7 @@ const links = [
   { href: "/experience", label: "Journey" }
 ];
 
-export default function SiteHeader() {
+export default function SiteHeader({ ownerName }: { ownerName: string }) {
   const pathname = usePathname();
   const [motionPaused, setMotionPaused] = useState(false);
 
@@ -26,9 +26,9 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="shell header-inner">
-        <Link className="brand" href="/" aria-label="B C H Benjamin — home">
+        <Link className="brand" href="/" aria-label={`${ownerName || "Portfolio"} — home`}>
           <Image className="brand-logo" src="/logo.svg" alt="" width={30} height={38} priority />
-          <span className="brand-name">benjamin<span className="brand-dot">.</span></span>
+          <span className="brand-name">{ownerName || "Portfolio"}<span className="brand-dot">.</span></span>
         </Link>
 
         <nav className="desktop-nav" aria-label="Main navigation">
@@ -57,7 +57,7 @@ export default function SiteHeader() {
           <span aria-hidden="true">{motionPaused ? "▶" : "Ⅱ"}</span>
         </button>
 
-        <Link className="header-contact" href="/contact" aria-label="Contact B C H Benjamin">
+        <Link className="header-contact" href="/contact" aria-label={`Contact ${ownerName || "the owner"}`}>
           <span>Let’s talk</span>
           <span aria-hidden="true" className="arrow-up-right">↗</span>
         </Link>

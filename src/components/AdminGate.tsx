@@ -7,7 +7,6 @@ import LinkedInPublishingPanel from "@/components/LinkedInPublishingPanel";
 import ResumeStudio from "@/components/ResumeStudio";
 import MediaLibrary from "@/components/MediaLibrary";
 import SiteBuilder from "@/components/SiteBuilder";
-import CustomFieldDefinitions from "@/components/CustomFieldDefinitions";
 import AdminContactPanel from "@/components/AdminContactPanel";
 import AdminStepUp from "@/components/AdminStepUp";
 
@@ -52,21 +51,15 @@ export default function AdminGate() {
 
   return (
     <div className="admin-state">
-      <p className="eyebrow"><span className="status-pulse" /> AUTHENTICATED OWNER SESSION</p>
-      <h2>Welcome, {session.name}.</h2>
-      <p>{session.email}</p>
-      <p className="admin-muted">Identity provider: {new URL(session.issuer).hostname}</p>
-      <p className="admin-muted">The owner-only content API is active. Changes are audited.</p>
-      <div className="owner-console-head"><div><p className="eyebrow">CONTROL PLANE / OWNER ONLY</p><h2>Private <span>workspace.</span></h2><p>Manage content, publication, media and private documents from one place.</p></div><div className="owner-console-status"><i /> API SESSION VERIFIED</div></div>
-      <nav className="owner-console-nav" aria-label="Workspace sections"><a href="#site-builder">Site builder</a><a href="#content-manager">Content</a><a href="#custom-fields">Custom fields</a><a href="#media-library">Media</a><a href="#resume-studio">Resume studio</a><a href="#contact-queue">Inbox</a></nav>
+      <div className="owner-console-head"><div><p className="eyebrow"><span className="status-pulse" /> OWNER SESSION VERIFIED · {session.email}</p><h2>Portfolio <span>control.</span></h2><p>Manage public profile data, projects, the launcher and site publication.</p></div><div className="owner-console-status"><i /> TOTP STEP-UP ACTIVE</div></div>
+      <nav className="owner-console-nav" aria-label="Workspace sections"><a href="#site-builder">Site builder</a><a href="#content-manager">Profile & content</a><a href="#media-library">Media</a><a href="#resume-studio">Resume studio</a><a href="#contact-queue">Inbox</a><a href="#linkedin-publishing">LinkedIn</a></nav>
       <LogoutButton />
       <div id="site-builder"><SiteBuilder /></div>
       <div id="content-manager"><AdminContentManager /></div>
-      <div id="custom-fields"><CustomFieldDefinitions /></div>
       <div id="media-library"><MediaLibrary /></div>
       <div id="resume-studio"><ResumeStudio /></div>
       <div id="contact-queue"><AdminContactPanel /></div>
-      <LinkedInPublishingPanel />
+      <div id="linkedin-publishing"><LinkedInPublishingPanel /></div>
     </div>
   );
 }

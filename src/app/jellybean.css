@@ -392,3 +392,36 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-app-content{ -webkit-touch-callout:default }
 .admin-workspace-panel{padding-top:0!important}
 .admin-workspace-panel>.admin-state{padding-top:0}
+
+
+/* Home-screen widgets participate in the same launcher edit/drag system as app icons. */
+.jb-home-widget-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(72px,auto);gap:10px 9px;align-content:start;width:100%;margin:0 0 10px;touch-action:none}
+.jb-home-widget{min-width:0;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab;border-radius:4px}
+.jb-home-widget:active{cursor:grabbing}
+.jb-home-widget-search{align-items:flex-start;min-height:44px}
+.jb-home-widget-search .jb-search-widget{width:100%;height:auto;aspect-ratio:680/61;margin:0;padding:0;overflow:hidden}
+.jb-home-widget-search .jb-search-widget img{width:100%;height:100%;object-fit:fill}
+.jb-home-widget-clock .jb-clock-widget{margin:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.jb-home-widget-clock .jb-analog-clock{width:min(100%,150px);height:auto;aspect-ratio:1}
+.jb-home-widget-gallery .jb-gallery-widget{width:100%;height:100%;min-height:130px;margin:0;padding:9px;background:#0a1018a8;border:1px solid #ffffff22;display:flex;flex-direction:column;justify-content:center}
+.jb-home-widget-gallery .jb-gallery-strip{min-height:0;flex:1}
+.jb-home-widget-gallery .jb-gallery-strip button{flex-basis:22%;min-width:0}
+.jb-home-widget-gallery .jb-gallery-strip button>span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jb-device:has(.jb-edit-toolbar) .jb-home-widget{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
+.jb-widget-picker button:active{transform:scale(.97)}
+.jb-android-version{width:100%;border:0;text-align:left;background:transparent;color:inherit;cursor:pointer}
+.jb-android-easter-egg{position:absolute;z-index:10;inset:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#6754a4,#27224f 62%,#100f28);color:#fff;text-align:center}
+.jb-android-easter-egg>p{font-size:10px;letter-spacing:3px;color:#d7c9ff;margin:28px 0 18px}
+.jb-android-easter-egg>h2{font-size:30px;font-weight:300;letter-spacing:1px;margin:14px 0 4px}
+.jb-android-easter-egg>small{color:#d2c9ed}
+.jb-egg-close{position:absolute;top:12px;left:12px;padding:8px 10px;border:0;background:#ffffff18;color:#fff;border-radius:4px}
+.jb-giant-jellybean{position:relative;width:178px;height:245px;border:5px solid #ffffffb0;border-radius:54% 46% 50% 50% / 48% 47% 53% 52%;background:linear-gradient(135deg,#ff8aa5 0%,#e83e77 38%,#bd2869 75%,#792e89 100%);box-shadow:inset 12px 9px 20px #ffffff65,inset -14px -18px 28px #4b164f88,0 16px 32px #08061988;transform:rotate(-13deg);touch-action:manipulation}
+.jb-egg-face{position:absolute;inset:0;display:grid;place-items:center;color:#fff4e8;font-size:54px;text-shadow:0 2px 4px #6c194f88;transform:rotate(13deg)}
+.jb-floating-beans{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.jb-floating-beans i{position:absolute;bottom:-40px;width:24px;height:34px;border:2px solid #ffffffaa;border-radius:55% 45% 50% 50%;box-shadow:inset 3px 2px 4px #ffffff88;animation:jb-bean-float 5s linear infinite}
+@keyframes jb-bean-float{from{transform:translateY(0) rotate(0)}to{transform:translateY(-110vh) rotate(540deg)}}
+@media(max-width:520px){.jb-home-widget-grid{grid-auto-rows:minmax(66px,auto);gap:8px}.jb-home-widget-gallery .jb-gallery-widget{min-height:118px}}
+
+.jb-app-content{position:relative}
+.jb-edit-toolbar small{display:block;margin-top:2px;font-size:9px;opacity:.78}
+.jb-widget-picker button{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab}

@@ -14,7 +14,7 @@ export default function ProjectVisual({ variant, name }: Props) {
           <span className="radar-sweep" />
           <span className="radar-point" />
           <span className="radar-label">NODE / 01</span>
-          <span className="radar-coordinate">12.9716° N · 77.5946° E</span>
+          <span className="radar-coordinate">EDGE NODE · REGION 01</span>
         </div>
       )}
       {variant === "siddhi" && (
@@ -57,7 +57,7 @@ export default function ProjectVisual({ variant, name }: Props) {
           </div>
         </div>
       )}
-      <span className="visual-index">BCH / 0{["awarespan", "siddhi", "aiida", "clipz"].indexOf(variant) + 1}</span>
+      <span className="visual-index">PROJECT / 0{["awarespan", "siddhi", "aiida", "clipz"].indexOf(variant) + 1}</span>
     </div>
   );
 }

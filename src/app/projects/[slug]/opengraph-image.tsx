@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getPublicProjectBySlug } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -7,9 +7,11 @@ export const contentType = "image/png";
 
 export default async function ProjectOpenGraphImage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const project = await getPublicProjectBySlug(slug);
+  const site = await getSiteContent();
+  const project = site.projects.find(item => item.slug === slug);
   const name = project?.name ?? "Project";
   const category = project?.category ?? "SELECTED WORK";
+  const monogram = site.owner.monogram || "";
   return new ImageResponse(
     (
       <div style={{
@@ -24,17 +26,17 @@ export default async function ProjectOpenGraphImage({ params }: { params: Promis
         fontFamily: "Arial, sans-serif"
       }}>
         <div style={{ display: "flex", gap: "16px", alignItems: "center", fontSize: 24, letterSpacing: 4 }}>
-          <span style={{ color: "#6798ff", border: "1px solid #6798ff", padding: "12px 14px" }}>BCH</span>
+          <span style={{ color: "#6798ff", border: "1px solid #6798ff", padding: "12px 14px" }}>{monogram}</span>
           <span>SELECTED WORK</span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <span style={{ color: "#6798ff", fontSize: 22, letterSpacing: 5 }}>{category}</span>
           <strong style={{ fontSize: 100, lineHeight: 1 }}>{name}</strong>
-          <span style={{ fontSize: 28, color: "#b2b2bd" }}>A project by Benjamin</span>
+          <span style={{ fontSize: 28, color: "#b2b2bd" }}>A project by {site.owner.name || "the owner"}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", color: "#a4a4ad", fontSize: 22 }}>
           <span>SOFTWARE · AI · SYSTEMS</span>
-          <span>bchbenjamin.in</span>
+          <span>{site.owner.website.replace(/^https?:\/\//, "") || "Portfolio"}</span>
         </div>
       </div>
     ),

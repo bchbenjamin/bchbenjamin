@@ -1,4 +1,5 @@
 import siteData from "../data/site.json";
+import { normalizeLauncherHomeLayout, type LauncherHomeLayout } from "./launcher-layout";
 
 export interface ProjectMedia { id: string; original_filename: string; content_type: string; alt_text?: string; caption?: string; url: string; source_type?: string; source_title?: string; source_caption?: string; uploaded_at?: string; }
 export interface GalleryMedia extends ProjectMedia { source_type?: string; source_title?: string; source_caption?: string; }
@@ -26,7 +27,7 @@ export interface Achievement { label: string; title: string; detail: string; ima
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
 export interface LauncherShortcut { id: string; name: string; url: string; iconUrl?: string; }
-export interface LauncherConfig { customApps: LauncherShortcut[]; chessComProfileUrl: string; lichessProfileUrl: string; wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; showStatusBar: boolean; showDock: boolean; showPageIndicator: boolean; showNavigationBar: boolean; }
+export interface LauncherConfig { customApps: LauncherShortcut[]; homeLayout: LauncherHomeLayout; chessComProfileUrl: string; lichessProfileUrl: string; wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; showStatusBar: boolean; showDock: boolean; showPageIndicator: boolean; showNavigationBar: boolean; }
 export interface HomeContent {
   heroEyebrow: string; focus: string; aboutTitle: string; aboutParagraphs: string[];
   projectsTitle: string; projectsDescription: string; skillsTitle: string; skillsDescription: string;
@@ -55,12 +56,12 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "skills", type: "skills", enabled: true, order: 50 },
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
-const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "android-default", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","magisk","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true, showStatusBar: true, showDock: true, showPageIndicator: true, showNavigationBar: true };
+const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], homeLayout: { icons: {}, widgets: {} }, chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "android-default", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","breach-defend","hermes-quizzer","street-safety","experience","education","skills","terminal","magisk","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true, showStatusBar: true, showDock: true, showPageIndicator: true, showNavigationBar: true };
 const DEFAULT_HOME_CONTENT: HomeContent = {
-  heroEyebrow: "5TH-SEMESTER B.E. COMPUTER SCIENCE / BATCH OF 2028", focus: "Python Development · Data Engineering · Artificial Intelligence · Technical Research & Documentation",
+  heroEyebrow: "PERSONAL PORTFOLIO · SELECTED WORK", focus: "Software engineering · AI · Data systems · Technical research",
   aboutTitle: "Technical curiosity.\nPractical engineering.",
-  aboutParagraphs: ["I am a 5th-semester B.E. Computer Science student (Batch of 2028) with a strong foundation in Python Development, Data Engineering and Technical Research.", "At FOSSEE, IIT Bombay, I contributed to open-source Python software, Blender/OpenFOAM tooling, geometry-driven mesh generation and validation workflows. I value rigorous implementation, clear technical documentation and solutions that can be tested."],
-  projectsTitle: "Selected projects.", projectsDescription: "Software, AI, data and systems work documented in my résumé.",
+  aboutParagraphs: ["A collection of software projects, engineering work and technical research.", "This section is editable in the Site Builder and can be tailored to the current public profile."],
+  projectsTitle: "Selected projects.", projectsDescription: "Software, AI, data and systems work.",
   skillsTitle: "Technologies and tools.", skillsDescription: "Languages, frameworks, databases and technical focus areas.",
   contactTitle: "Have a worthwhile engineering problem?", contactDescription: "Get in touch to discuss software, AI, data engineering or technical research."
 };
@@ -88,7 +89,7 @@ function periodLabel(start?: string | null, end?: string | null, current?: boole
 }
 function emptyLiveSite(): SiteContent {
   return {
-    owner: { name: "", monogram: "BCH", role: "", location: "", email: "", website: "", github: "", linkedin: "", headline: "", intro: "" },
+    owner: { name: "", monogram: "", role: "", location: "", email: "", website: "", github: "", linkedin: "", headline: "", intro: "" },
     homeContent: DEFAULT_HOME_CONTENT,
     launcher: DEFAULT_LAUNCHER,
     projects: [], gallery: [], experience: [], education: [], achievements: [], skillGroups: [], homeSections: site.homeSections ?? []
@@ -185,7 +186,8 @@ export async function getSiteContent(): Promise<SiteContent> {
     launcher.appColumns = Math.max(3, Math.min(6, Number(launcher.appColumns) || 4));
     launcherConfig = {
       ...launcher,
-      hiddenApps: Array.isArray(launcher.hiddenApps) ? launcher.hiddenApps.map(String) : [],
+      homeLayout: normalizeLauncherHomeLayout(launcher.homeLayout),
+      hiddenApps: Array.isArray(launcher.hiddenApps) ? launcher.hiddenApps.map(String).filter(id => !["bengaluruduru", "ease-health", "academic-results", "peer-management"].includes(id)) : [],
       appOrder: Array.isArray(launcher.appOrder) ? [...new Set([...launcher.appOrder.map(String).filter(id => DEFAULT_LAUNCHER.appOrder.includes(id) || (Array.isArray(launcher.customApps) && launcher.customApps.some(app => app && typeof app.id === "string" && app.id === id))), ...DEFAULT_LAUNCHER.appOrder])] : DEFAULT_LAUNCHER.appOrder,
       chessComProfileUrl: typeof launcher.chessComProfileUrl === "string" && /^https:\/\//i.test(launcher.chessComProfileUrl) ? launcher.chessComProfileUrl : DEFAULT_LAUNCHER.chessComProfileUrl,
       lichessProfileUrl: typeof launcher.lichessProfileUrl === "string" && /^https:\/\//i.test(launcher.lichessProfileUrl) ? launcher.lichessProfileUrl : DEFAULT_LAUNCHER.lichessProfileUrl,
@@ -198,13 +200,15 @@ export async function getSiteContent(): Promise<SiteContent> {
     };
   } catch { /* Keep the known safe section layout and content if configuration is malformed. */ }
 
+  const liveOwnerName = String(profile.fullName ?? "");
+  const ownerInitials = liveOwnerName.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("") || "";
   return {
     ...emptyLiveSite(),
     owner: {
-      name: String(profile.fullName || site.owner.name), monogram: String(profile.monogram || site.owner.monogram), role: String(profile.headline || site.owner.role),
-      location: String(profile.location || site.owner.location), email: String(profile.email || site.owner.email),
-      website: String(profile.websiteUrl || site.owner.website), github: String(profile.githubUrl || site.owner.github), linkedin: String(profile.linkedinUrl || site.owner.linkedin),
-      headline: String(profile.headline || site.owner.headline), intro: String(profile.summary || site.owner.intro)
+      name: liveOwnerName, monogram: ownerInitials, role: String(profile.headline ?? ""),
+      location: String(profile.location ?? ""), email: String(profile.email ?? ""),
+      website: String(profile.websiteUrl ?? ""), github: String(profile.githubUrl ?? ""), linkedin: String(profile.linkedinUrl ?? ""),
+      headline: String(profile.headline ?? ""), intro: String(profile.summary ?? "")
     },
     projects: liveProjects,
     gallery: liveGallery,

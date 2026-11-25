@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -49,6 +50,29 @@ class PortfolioApiApplicationTest {
     @Test
     void administrativeSessionRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/admin/session"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void launcherLayoutConfigurationRequiresAuthenticatedOwner() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/site-configuration"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void mediaLibraryRequiresAuthenticatedOwner() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/media"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void launcherLayoutWriteRejectsAnonymousAndSpoofedIdentityHeaders() throws Exception {
+        mockMvc.perform(put("/api/v1/admin/site-configuration/launcher-layout")
+                .header("X-Role", "ADMIN")
+                .header("X-Forwarded-User", "owner@example.com")
+                .header("X-Auth-Request-Email", "owner@example.com")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"icons\":{},\"widgets\":{}}"))
             .andExpect(status().isUnauthorized());
     }
 

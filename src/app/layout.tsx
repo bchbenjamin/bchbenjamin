@@ -4,39 +4,32 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import PageTransition from "@/components/PageTransition";
 import ScrollExperience from "@/components/ScrollExperience";
-import { site } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 import "./globals.css";
 import "./jellybean.css";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.owner.website),
-  title: {
-    default: "B C H Benjamin — Computer Science Portfolio",
-    template: "%s — B C H Benjamin"
-  },
-  description: "Portfolio of B C H Benjamin, a 5th-semester Computer Science student focused on Python development, data engineering, artificial intelligence and technical research.",
-  applicationName: "B C H Benjamin — Portfolio",
-  other: { "color-scheme": "dark" },
-  creator: "B C H Benjamin",
-  publisher: "B C H Benjamin",
-  alternates: { canonical: "/" },
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg"
-  },
-  openGraph: {
-    type: "website",
-    url: site.owner.website,
-    siteName: "B C H Benjamin — Portfolio",
-    title: "B C H Benjamin — Computer Science Portfolio",
-    description: "Python development, data engineering, artificial intelligence and technical research."
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "B C H Benjamin — Computer Science Portfolio",
-    description: "Computer Science · Python Development · Data Engineering · Artificial Intelligence"
-  }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteContent();
+  const ownerName = site.owner.name || "Personal Portfolio";
+  const description = (site.owner.intro || site.owner.headline || "Professional portfolio and selected engineering work.").slice(0, 320);
+  let metadataBase: URL;
+  try { metadataBase = new URL(site.owner.website || "https://www.bchbenjamin.in"); }
+  catch { metadataBase = new URL("https://www.bchbenjamin.in"); }
+  const pageTitle = `${ownerName} — Portfolio`;
+  return {
+    metadataBase,
+    title: { default: pageTitle, template: `%s — ${ownerName}` },
+    description,
+    applicationName: pageTitle,
+    other: { "color-scheme": "dark" },
+    creator: site.owner.name || undefined,
+    publisher: site.owner.name || undefined,
+    alternates: { canonical: "/" },
+    icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }], shortcut: "/favicon.svg" },
+    openGraph: { type: "website", url: site.owner.website || metadataBase.toString(), siteName: pageTitle, title: pageTitle, description },
+    twitter: { card: "summary_large_image", title: pageTitle, description }
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#000000",
@@ -45,16 +38,17 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const site = await getSiteContent();
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <a className="skip-link" href="#main-content">Skip to content</a>
-        <SiteHeader />
+        <SiteHeader ownerName={site.owner.name} />
         <PageTransition>
           <div id="main-content">{children}</div>
         </PageTransition>
-        <SiteFooter />
+        <SiteFooter ownerName={site.owner.name} github={site.owner.github} linkedin={site.owner.linkedin} email={site.owner.email} />
         <ScrollExperience />
       </body>
     </html>

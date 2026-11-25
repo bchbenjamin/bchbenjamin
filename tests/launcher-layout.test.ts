@@ -1,0 +1,36 @@
+import { describe, expect, it } from "vitest";
+import { normalizeLauncherHomeLayout, placeWidgetWithoutOverlap } from "../src/lib/launcher-layout";
+
+describe("launcher home layout validation", () => {
+  it("keeps valid icon and widget positions", () => {
+    expect(normalizeLauncherHomeLayout({
+      icons: { about: { panel: 3, slot: 7 } },
+      widgets: { clock: { panel: 2, row: 4, column: 2 } }
+    })).toEqual({
+      icons: { about: { panel: 3, slot: 7 } },
+      widgets: { clock: { panel: 2, row: 4, column: 2 } }
+    });
+  });
+
+  it("drops unknown ids, malformed positions and out-of-range values", () => {
+    expect(normalizeLauncherHomeLayout({
+      icons: { "bad id": { panel: 0, slot: 0 }, hidden: { panel: 9, slot: 0 }, malformedHidden: { panel: -1, slot: 2 } },
+      widgets: { clock: { panel: 0, row: 99, column: 0 }, badWideColumn: { panel: 0, row: 0, column: 1 }, unknown: { panel: 0, row: 0, column: 0 } }
+    })).toEqual({ icons: {}, widgets: {} });
+  });
+
+  it("moves a colliding widget down while preserving other positions", () => {
+    const next = placeWidgetWithoutOverlap("gallery", 0, 1, 0, {
+      search: { panel: 0, row: 1, column: 0 },
+      clock: { panel: 1, row: 1, column: 0 }
+    });
+    expect(next.search).toEqual({ panel: 0, row: 1, column: 0 });
+    expect(next.clock).toEqual({ panel: 1, row: 1, column: 0 });
+    expect(next.gallery).toEqual({ panel: 0, row: 2, column: 0 });
+  });
+
+  it("clamps a wide widget to the leftmost grid column", () => {
+    const next = placeWidgetWithoutOverlap("search", 4, 3, 3, {});
+    expect(next.search).toEqual({ panel: 4, row: 3, column: 0 });
+  });
+});
