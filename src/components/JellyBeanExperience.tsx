@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { SiteContent } from "@/lib/content";
@@ -77,7 +78,6 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const [drawer, setDrawer] = useState(false);
   const [drawerTab, setDrawerTab] = useState<"apps" | "widgets">("apps");
   const [drawerPage, setDrawerPage] = useState(0);
-  const drawerPointerStart = useRef<{ x: number; y: number } | null>(null);
   const [shade, setShade] = useState(false);
   const [recent, setRecent] = useState(false);
   const [recentApps, setRecentApps] = useState<string[]>([]);
@@ -97,7 +97,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalLines, setTerminalLines] = useState<string[]>(["Welcome to Termux!", "This is a read-only portfolio environment. Type help to get started."]);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const pointerStart = useRef<{ x: number; y: number; started: number; appId?: string; widgetId?: "search" | "clock" | "gallery"; panel: number; fromDrawer?: boolean; fromDrawerWidget?: boolean } | null>(null);
+  const pointerStart = useRef<{ x: number; y: number; started: number; appId?: string; widgetId?: "search" | "clock" | "gallery"; panel: number; fromDrawer?: boolean; fromDrawerWidget?: boolean; fromDrawerPages?: boolean } | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressIconClick = useRef(false);
   const lastAutoPage = useRef(-1);
@@ -134,7 +134,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const app = visibleApps.find((item) => item.id === activeApp) ?? APPS.find((item) => item.id === activeApp) ?? null;
   const panels = useMemo(() => [0, 1, 2, 3, 4], []);
   const homeAppsByPanel = useMemo(() => panels.map(index => visibleApps
-    .filter(item => (homePlacements[item.id]?.panel ?? item.panel) === index)
+    .filter(item => homePlacements[item.id]?.panel === index && homePlacements[item.id]?.panel !== -1)
     .sort((a, b) => (homePlacements[a.id]?.slot ?? visibleApps.filter(item => item.panel === index).indexOf(a)) - (homePlacements[b.id]?.slot ?? visibleApps.filter(item => item.panel === index).indexOf(b)))), [panels, visibleApps, homePlacements]);
   const widgetsByPanel = useMemo(() => panels.map(index => {
     const ids = (Object.keys(DEFAULT_WIDGET_PLACEMENTS) as Array<keyof typeof DEFAULT_WIDGET_PLACEMENTS>).filter(id => {
@@ -284,8 +284,8 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       const widget = target.closest<HTMLElement>("[data-home-widget],[data-drawer-widget]");
       if (target.closest(".jb-drawer-overlay") && !icon && !widget) return;
       if (target.closest("button,input,a") && !icon && !widget) return;
-      pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget) };
-      if (icon || widget) event.currentTarget.setPointerCapture(event.pointerId);
+      pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget), fromDrawerPages: Boolean(target.closest(".jb-drawer-pages")) };
+      if (icon || widget || target.closest(".jb-drawer-pages")) event.currentTarget.setPointerCapture(event.pointerId);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
       if (icon || widget || target.closest(".jb-home-viewport")) longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 500);
     }} onPointerMove={(event) => { const start=pointerStart.current; if((!start?.appId && !start?.widgetId) || (start.fromDrawer && !start.fromDrawerWidget) || Date.now()-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { pointerStart.current = null; lastAutoPage.current=-1; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
@@ -348,6 +348,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         window.setTimeout(() => { suppressIconClick.current = false; }, 450);
         return;
       }
+      if (drawer && start.fromDrawerPages && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.15) { setDrawerPage(page => Math.max(0, Math.min(drawerPages.length - 1, page + (dx < 0 ? 1 : -1)))); return; }
       if (drawer && dy > 70 && dy > Math.abs(dx)) { setDrawer(false); return; }
       if (shade && dy < -70 && Math.abs(dy) > Math.abs(dx)) { setShade(false); return; }
       if (activeApp || drawer || recent || shade || launcherEditMode) return;
@@ -360,7 +361,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
 
 
       {selectionMenu && <div className="jb-android-selection-menu" style={{left:selectionMenu.x,top:selectionMenu.y}}><button onClick={()=>{void navigator.clipboard.writeText(window.getSelection()?.toString()??"");setSelectionMenu(null);}}>Copy</button><button onClick={()=>{const range=document.createRange();range.selectNodeContents(document.querySelector(".jb-app-content")??document.body);window.getSelection()?.removeAllRanges();window.getSelection()?.addRange(range);setSelectionMenu(null);}}>Select all</button><button onClick={()=>setSelectionMenu(null)}>⋮</button></div>}
-      {launcherEditMode && <div className="jb-edit-toolbar"><span>Home screen options <small>Apps live in the app drawer. Long-press an empty area to open these options. {layoutMessage}</small></span><button onClick={() => { setDrawerTab("widgets"); setDrawer(true); setLauncherEditMode(false); }}>Widgets</button><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
+      {launcherEditMode && <div className="jb-edit-toolbar"><span>Home screen options <small>Long-press an app icon to place it on the home screen. Long-press an empty area for options. {layoutMessage}</small></span><button onClick={() => { setDrawerTab("widgets"); setDrawer(true); setLauncherEditMode(false); }}>Widgets</button><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
       {site.launcher.showStatusBar !== false && <div className="jb-status-bar" onClick={() => setShade(true)} role="button" tabIndex={0} aria-label="Open notifications and quick settings">
         <div className="jb-status-left" aria-hidden="true" />
         <div className="jb-status-right"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="signal" /><SystemStatusIcon kind="battery" /><span className="jb-status-time">{clock}</span></div>
@@ -377,6 +378,9 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
                 {widget.id === "gallery" && <div className="jb-gallery-widget"><div className="jb-widget-heading"><span>GALLERY</span><button type="button" onClick={() => open("gallery")}>OPEN</button></div><div className="jb-gallery-strip">{site.gallery.slice(0, 5).map(media => <button key={media.id} onClick={() => open("gallery")} aria-label={`Open ${media.source_caption || media.caption || media.source_title || media.original_filename}`}><span className="jb-gallery-thumb">{media.content_type.startsWith("video/") ? <span className="jb-video-thumb">▶</span> : <Image src={media.url} alt="" width={120} height={72} unoptimized/>}</span><span>{media.source_caption || media.caption || media.source_title || media.original_filename}</span></button>)}</div></div>}
               </div>)}
             </div>
+            <div className="jb-home-app-grid" aria-label={`Home screen ${index + 1} app shortcuts`}>
+              {homeAppsByPanel[index].map((item) => <motion.button layout layoutId={`launcher-app-${item.id}`} key={item.id} data-home-app={item.id} data-home-panel={index} type="button" onClick={() => item.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(item.id)} whileTap={{ scale: 0.88 }} transition={{ type: "spring", stiffness: 520, damping: 34 }}><AppIcon app={item}/><span>{item.name}</span></motion.button>)}
+            </div>
           </section>)}
         </div>
       </div>
@@ -391,7 +395,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       </div>}
       {site.launcher.showNavigationBar !== false && <div className="jb-navigation-bar"><div className="jb-tablet-nav"><button onClick={navBack} aria-label="Back"><SystemNavigationIcon kind="back" /></button><button onClick={navHome} aria-label="Home"><SystemNavigationIcon kind="home" /></button><button onClick={navRecent} aria-label="Recent apps"><SystemNavigationIcon kind="recent" /></button></div><button className="jb-tablet-status" onClick={() => setShade(true)} aria-label="Open notifications"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="battery" /><span>{clock}</span><span className="jb-tablet-notification-mark">●</span></button></div>}
 
-      {drawer && <div className="jb-overlay jb-drawer-overlay"><div className="jb-drawer"><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`} onPointerDown={event => { drawerPointerStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerUp={event => { const start = drawerPointerStart.current; drawerPointerStart.current = null; if (!start) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.15) setDrawerPage(page => Math.max(0, Math.min(drawerPages.length - 1, page + (dx < 0 ? 1 : -1)))); else if (dy > 75 && dy > Math.abs(dx)) setDrawer(false); }} onPointerCancel={() => { drawerPointerStart.current = null; }}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <button key={a.id} data-drawer-app={a.id} onClick={() => a.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(a.id)}><AppIcon app={a} size="large" /><span className="jb-drawer-app-label">{a.name}</span></button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
+      {drawer && <div className="jb-overlay jb-drawer-overlay"><div className="jb-drawer"><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <motion.button layout layoutId={`launcher-app-${a.id}`} key={a.id} data-drawer-app={a.id} onClick={() => a.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(a.id)} whileTap={{ scale: 0.88 }} transition={{ type: "spring", stiffness: 520, damping: 34 }}><AppIcon app={a} size="large" /><span className="jb-drawer-app-label">{a.name}</span></motion.button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
         {site.launcher.showClock&&<button data-drawer-widget="clock" onClick={()=>addWidgetToCurrentPage("clock")}><span className="jb-widget-preview-clock"><span className="jb-analog-clock"><Image src="/jellybean/clock/dial.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/hour.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/minute.png" alt="" fill sizes="90px" unoptimized/></span></span><b>Analog clock</b><small>2 × 2 · tap to add, long-press to drag</small></button>}
         {site.launcher.showSearch&&<button data-drawer-widget="search" onClick={()=>addWidgetToCurrentPage("search")}><span className="jb-widget-preview-search"><Image src="/jellybean/search-widget.png" alt="" width={220} height={20} unoptimized/></span><b>Google Search</b><small>4 × 1 · tap to add, long-press to drag</small></button>}
         {site.launcher.showGallery&&<button data-drawer-widget="gallery" onClick={()=>addWidgetToCurrentPage("gallery")}><span className="jb-widget-preview-gallery">{projects.slice(0,3).map(project=><ProjectArtwork key={project.slug} project={project}/>)}</span><b>Gallery</b><small>4 × 2 · tap to add, long-press to drag</small></button>}

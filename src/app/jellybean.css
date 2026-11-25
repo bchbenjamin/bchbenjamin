@@ -502,3 +502,16 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 /* Horizontal app-drawer paging is handled by the launcher, not browser scrolling. */
 .jb-drawer-pages{touch-action:pan-y!important;overscroll-behavior-x:contain;user-select:none;-webkit-user-select:none}
 .jb-drawer-page-track{will-change:transform}
+
+/* Jelly Bean launcher shortcut grid and hardware-like icon motion. */
+.jb-home-app-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 10px;padding:12px 4px 20px;align-content:start}
+.jb-home-app-grid button{min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:5px 2px;border:0;background:transparent;color:#fff;font-size:10px;text-shadow:0 1px 3px #000;touch-action:none;transition:transform .24s cubic-bezier(.2,.8,.2,1),filter .2s ease}
+.jb-home-app-grid button:active{filter:drop-shadow(0 5px 7px #0009)}
+.jb-home-app-grid .jb-app-icon{width:48px;height:48px}
+.jb-drawer-page-track{transition:transform .34s cubic-bezier(.22,.75,.2,1)}
+.jb-drawer-page button{transition:transform .2s cubic-bezier(.2,.8,.2,1),opacity .2s ease}
+.jb-drawer-page button:active{transform:scale(.88)}
+.jb-dock button{transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease}
+.jb-dock button:active{transform:scale(.86);filter:brightness(1.18)}
+@media(prefers-reduced-motion:reduce){.jb-home-app-grid button,.jb-drawer-page-track,.jb-drawer-page button,.jb-dock button{transition:none!important;animation:none!important}}
+.jb-device:has(.jb-edit-toolbar) .jb-home-app-grid button,.jb-device:has(.jb-edit-toolbar) .jb-drawer-page button{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
