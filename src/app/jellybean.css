@@ -469,9 +469,9 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-page-indicator{bottom:110px;z-index:7;pointer-events:auto}
 @media(max-width:520px){.jb-page-indicator{bottom:calc(110px + env(safe-area-inset-bottom))}}
 
-/* App registry is the sole home for app shortcuts; home screens contain widgets only. */
-.jb-dock-drawer-only{display:flex!important;justify-content:center!important;align-items:center!important;grid-template-columns:none!important}
-.jb-dock-drawer-only>button{width:58px!important}
+/* Keep the five-slot Jelly Bean hotseat while home screens remain widget-only. */
+.jb-dock:not(.jb-dock-drawer-only){display:grid;grid-template-columns:repeat(5,minmax(0,1fr));justify-items:center;align-items:center}
+.jb-dock:not(.jb-dock-drawer-only)>button{width:100%;}
 .jb-edit-toolbar{gap:10px;flex-wrap:wrap}
 .jb-edit-toolbar>span{flex:1 1 100%}
 .jb-edit-toolbar>button{min-width:72px;padding:8px 14px;border:1px solid #8298a5;background:linear-gradient(#f7fafb,#dce5e9);color:#26343b}
@@ -498,3 +498,7 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-calendar-events article{padding:8px 0;border-top:1px solid #dce2e5}
 .jb-calendar-events strong{font-size:13px}
 .jb-calendar-events p,.jb-calendar-events>p{margin:4px 0 0;font-size:11px;line-height:1.5;color:#63727a}
+
+/* Horizontal app-drawer paging is handled by the launcher, not browser scrolling. */
+.jb-drawer-pages{touch-action:pan-y!important;overscroll-behavior-x:contain;user-select:none;-webkit-user-select:none}
+.jb-drawer-page-track{will-change:transform}
