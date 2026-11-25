@@ -54,7 +54,7 @@
     },
     {
       "slug": "street-safety-device",
-      "name": "AI-Powered Street Safety Device",
+      "name": "Awarespan",
       "category": "IOT RESEARCH · ATRIA IMPACT PROJECT",
       "status": "SELECTED WORK",
       "summary": "An IoT-based safety monitoring device using Raspberry Pi for real-time threat detection and edge computing.",
@@ -67,7 +67,6 @@
         "Edge computing",
         "Hardware integration"
       ],
-      "liveUrl": "https://kev-ai-device.vercel.app/",
       "visual": "awarespan",
       "featured": true,
       "period": "Oct 2025 — Present"

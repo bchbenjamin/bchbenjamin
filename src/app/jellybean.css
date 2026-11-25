@@ -435,3 +435,36 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-folder-preview-items img:nth-child(1){left:3%;top:8%;transform:rotate(-12deg)}
 .jb-folder-preview-items img:nth-child(2){right:2%;top:4%;transform:rotate(10deg)}
 .jb-folder-preview-items img:nth-child(3){left:30%;bottom:0;transform:scale(.92)}
+
+
+/* Drawer labels stay inside their own launcher cells at every phone width. */
+.jb-drawer-pages{min-height:0;overflow:hidden;contain:layout paint}
+.jb-drawer-page{grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:8px 6px;padding:14px 0 8px;align-content:stretch;min-height:0}
+.jb-drawer-page button{width:100%;height:100%;min-height:0;min-width:0;max-width:100%;padding:3px 2px;gap:5px;overflow:hidden;justify-content:flex-start}
+.jb-drawer-page button .jb-app-icon{width:clamp(40px,12vw,52px);height:clamp(40px,12vw,52px);flex:0 0 auto}
+.jb-drawer-app-label{display:-webkit-box!important;width:100%;max-width:100%;min-height:2.25em;overflow:hidden;text-overflow:ellipsis;white-space:normal!important;text-align:center;line-height:1.12;font-size:clamp(9px,2.7vw,11px);overflow-wrap:anywhere;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.jb-drawer-page-indicators{flex:0 0 20px}
+.jb-shade-settings-button{width:40px;height:40px;display:grid;place-items:center;padding:2px;border:1px solid #71818a;border-radius:3px;background:linear-gradient(#465762,#26343d);box-shadow:inset 0 1px #ffffff35,0 1px 3px #0008}
+.jb-shade-settings-button img{display:block;width:34px;height:34px;object-fit:contain}
+.jb-shade-controls{gap:9px}
+.jb-project-list-button{display:flex;align-items:center;gap:12px;padding:12px 0}
+.jb-project-favicon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:8px;background:#fff;border:1px solid #d1d9de}
+.jb-project-favicon img{width:32px;height:32px;object-fit:contain}
+.jb-project-copy{min-width:0;flex:1}
+.jb-project-copy>b,.jb-project-copy>small,.jb-project-copy>p{display:block}
+.jb-project-copy>span{font-size:10px;color:#167ba4}
+.jb-project-empty{padding:18px 0;color:#66747c;font-size:13px;line-height:1.5}
+.jb-home-viewport{z-index:1;overflow:hidden;clip-path:inset(0)}
+.jb-panel{box-sizing:border-box;padding-bottom:24px;overscroll-behavior:contain}
+.jb-dock{z-index:8;box-sizing:border-box;overflow:hidden;isolation:isolate}
+.jb-dock>button{min-width:0;min-height:0;max-height:50px;overflow:hidden;padding:0;box-sizing:border-box}
+.jb-dock>button>img{display:block;width:clamp(34px,10vw,44px);height:clamp(34px,10vw,44px);max-width:100%;max-height:100%;object-fit:contain}
+.jb-navigation-bar{z-index:9}
+.jb-app-icon-googleplus{width:48px;height:48px;flex:0 0 auto;display:block;overflow:hidden!important;border:0!important;border-radius:11px!important;padding:0!important;background:transparent!important;box-shadow:0 2px 5px #0009!important}
+.jb-app-icon-googleplus>img{display:block;width:100%;height:100%;object-fit:contain;border-radius:11px}
+.jb-home-shortcut-row .jb-app-icon-googleplus,.jb-icon-grid .jb-app-icon-googleplus{width:48px;height:48px}
+.jb-drawer-page .jb-app-icon-googleplus{width:52px;height:52px}
+
+/* Keep page dots fully above the hotseat; never let dock hit-testing cover them. */
+.jb-page-indicator{bottom:110px;z-index:7;pointer-events:auto}
+@media(max-width:520px){.jb-page-indicator{bottom:calc(110px + env(safe-area-inset-bottom))}}
