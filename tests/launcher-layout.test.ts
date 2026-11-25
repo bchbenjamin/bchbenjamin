@@ -29,6 +29,16 @@ describe("launcher home layout validation", () => {
     expect(next.gallery).toEqual({ panel: 0, row: 2, column: 0 });
   });
 
+  it("moves a widget onto a different home-screen page", () => {
+    const next = placeWidgetWithoutOverlap("clock", 2, 3, 2, {
+      search: { panel: 0, row: 0, column: 0 },
+      gallery: { panel: 1, row: 2, column: 0 }
+    });
+    expect(next.clock).toEqual({ panel: 2, row: 3, column: 2 });
+    expect(next.search.panel).toBe(0);
+    expect(next.gallery.panel).toBe(1);
+  });
+
   it("clamps a wide widget to the leftmost grid column", () => {
     const next = placeWidgetWithoutOverlap("search", 4, 3, 3, {});
     expect(next.search).toEqual({ panel: 4, row: 3, column: 0 });

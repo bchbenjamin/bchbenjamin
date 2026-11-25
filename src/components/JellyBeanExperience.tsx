@@ -25,6 +25,7 @@ const APPS: AppInfo[] = [
   { id: "terminal", name: "Termux", icon: "terminal", color: "#303b43", panel: 2 },
   { id: "magisk", name: "Magisk", icon: "magisk", color: "#19a56b", panel: 2, url: "https://github.com/topjohnwu/Magisk" },
   { id: "github", name: "GitHub", icon: "github", color: "#555b66", panel: 2 },
+  { id: "googleplus", name: "Google+", icon: "googleplus", color: "#d34836", panel: 4, url: "/links" },
   { id: "contact", name: "Messaging", icon: "message", color: "#6eaa61", panel: 4 },
   { id: "settings", name: "Settings", icon: "settings", color: "#6a9b63", panel: 2 },
   { id: "chess", name: "Chess", icon: "folder", color: "#b59a70", panel: 3, folder: true },
@@ -37,28 +38,16 @@ const APPS: AppInfo[] = [
 /* eslint-disable @next/next/no-img-element -- custom admin-provided icon URLs are intentionally unoptimized. */
 function AppIcon({ app, size = "normal" }: { app: AppInfo; size?: "normal" | "large" }) {
   const assets: Record<string, string> = {
-    person: "aosp-4.1.2/contacts.png", gallery: "aosp-4.1.2/gallery.png", projects: "googlemaps.svg", skills: "stackoverflow.svg",
-    message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png", github: "github.png", terminal: "termux-new.png", magisk: "magisk.svg"
+    person: "aosp-4.1.2/contacts.png", gallery: "aosp-4.1.2/gallery.png", projects: "aosp-4.1.2/market.png", skills: "aosp-4.1.2/calculator.png",
+    message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png", github: "https://github.com/favicon.ico", terminal: "termux-new.png", magisk: "magisk.svg",
+    briefcase: "aosp-4.1.2/clock.png", school: "aosp-4.1.2/calendar.png", email: "aosp-4.1.2/email.png", achievements: "aosp-4.1.2/market.png", journey: "aosp-4.1.2/browser.png", googleplus: "google-plus-2012.svg"
   };
   const asset = app.iconUrl || assets[app.icon];
-  const glyphs: Record<string, string> = {
-    email: "M5 11h38v26H5z M5 13l19 15 19-15",
-    briefcase: "M8 16h32v24H8z M17 16v-5h14v5 M8 23h32 M20 23v4h8v-4",
-    school: "M4 17 24 7l20 10-20 10z M12 22v12c7 5 17 5 24 0V22 M42 20v12",
-
-    terminal: "M7 11l10 9-10 9 M22 31h17",
-    github: "M24 5a19 19 0 0 0-6 37c1 0 2-1 2-2v-4c-7 2-9-3-9-3-1-2-2-3-2-3-2-1 0-1 0-1 2 0 3 2 3 2 2 3 5 2 7 1 0-2 1-3 2-4-6-1-12-3-12-13 0-3 1-5 3-7 0-1-1-4 0-7 0 0 3-1 8 3a25 25 0 0 1 14 0c5-4 8-3 8-3 1 3 0 6 0 7 2 2 3 4 3 7 0 10-6 12-12 13 1 1 2 3 2 6v6c0 1 1 2 2 2A19 19 0 0 0 24 5z",
-    chess: "M24 5c-5 0-8 4-8 8 0 3 2 5 4 6l-2 5h12l-2-5c3-1 4-3 4-6 0-4-3-8-8-8z M16 26h16l3 5H13z M13 34h22l3 7H10z",
-    achievements: "M15 6h18v8c0 8-4 13-9 13s-9-5-9-13z M15 11H7v4c0 6 4 9 10 9 M33 11h8v4c0 6-4 9-10 9 M24 27v8 M16 41h16 M19 35h10",
-    journey: "M24 43s-15-14-15-25a15 15 0 1 1 30 0c0 11-15 25-15 25z M24 23a5 5 0 1 0 0-10 5 5 0 0 0 0 10z",
-
-    folder: "M4 13V9a3 3 0 0 1 3-3h11l4 4h9a3 3 0 0 1 3 3v19a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z M4 15h36l-4 19H8z",
-    breach: "M24 4 40 10v12c0 10-7 17-16 22C15 39 8 32 8 22V10z M17 24l5 5 10-11",
-    quizzer: "M8 6h32v36H8z M15 15h18 M15 22h18 M15 29h8 M29 31q0-5 5-5t5 4q0 3-5 5v2 M34 39h.1",
-    safety: "M24 4 40 10v12c0 10-7 17-16 22C15 39 8 32 8 22V10z M24 15v11 M24 32h.1",
-  };
+  if (app.folder) return <span className={`jb-app-icon jb-app-icon-${size} jb-icon-folder`} style={{ "--app-color": app.color } as CSSProperties}>
+    <span className="jb-folder-preview"><Image src="/jellybean/icons/aosp-4.1.2/folder-ring.png" alt="" width={56} height={56} unoptimized/><span className="jb-folder-preview-items"><Image src="/jellybean/icons/brands/chessdotcom.svg" alt="" width={20} height={20} unoptimized/><Image src="/jellybean/icons/brands/lichess.svg" alt="" width={20} height={20} unoptimized/><Image src="/jellybean/icons/aosp-4.1.2/browser.png" alt="" width={20} height={20} unoptimized/></span></span>
+  </span>;
   return <span className={`jb-app-icon jb-app-icon-${size} jb-icon-${app.icon}`} style={{ "--app-color": app.color } as CSSProperties}>
-    {app.iconUrl ? <img src={app.iconUrl} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} draggable={false} /> : asset ? <Image src={asset.startsWith("http") || asset.startsWith("/") ? asset : `/jellybean/icons/${asset}`} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} unoptimized draggable={false} /> : <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d={glyphs[app.icon] ?? "M8 8h32v32H8z"} /></svg>}
+    {app.iconUrl ? <img src={app.iconUrl} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} draggable={false} /> : asset ? <Image src={asset.startsWith("http") || asset.startsWith("/") ? asset : `/jellybean/icons/${asset}`} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} unoptimized draggable={false} /> : <span aria-hidden="true">{app.name.slice(0, 1)}</span>}
   </span>;
 }
 
@@ -103,7 +92,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const pointerStart = useRef<{ x: number; y: number; started: number; appId?: string; widgetId?: "search" | "clock" | "gallery"; panel: number; fromDrawer?: boolean; fromDrawerWidget?: boolean } | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressIconClick = useRef(false);
-  const lastAutoPage = useRef(0);
+  const lastAutoPage = useRef(-1);
   const [homePlacements, setHomePlacements] = useState<Record<string, { panel: number; slot: number }>>(site.launcher.homeLayout?.icons ?? {});
   const [widgetPlacements, setWidgetPlacements] = useState<Record<string, { panel: number; row: number; column: number }>>(site.launcher.homeLayout?.widgets ?? {});
   const terminalOutputRef = useRef<HTMLDivElement>(null);
@@ -122,9 +111,10 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       const projectSlug = item.id === "breach-defend" ? "breach-defend" : item.id === "hermes-quizzer" ? "hermes-the-quizzer" : item.id === "street-safety" ? "street-safety-device" : null;
       if (!projectSlug) return [item];
       const project = site.projects.find(candidate => candidate.slug === projectSlug);
-      return project ? [{ ...item, name: project.name, url: project.repo || project.liveUrl }] : [];
+      const destination = project?.liveUrl || project?.repo;
+      return project && destination ? [{ ...item, name: project.name, url: destination, iconUrl: `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(destination)}` }] : [];
     });
-    const custom = (site.launcher.customApps ?? []).filter(item => item && item.id && item.name && item.url).map(item => ({ id: item.id, name: item.name, icon: "custom", color: "#5d8297", panel: 4, url: item.url, iconUrl: item.iconUrl }));
+    const custom = (site.launcher.customApps ?? []).filter(item => item && item.id && item.name && item.url).map(item => ({ id: item.id, name: item.name, icon: "custom", color: "#5d8297", panel: 4, url: item.url, iconUrl: item.iconUrl || `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(item.url)}` }));
     return [...builtIns, ...custom].sort((a,b) => (order.indexOf(a.id) < 0 ? 999 : order.indexOf(a.id))-(order.indexOf(b.id) < 0 ? 999 : order.indexOf(b.id))).map(item => ({ ...item, name: site.launcher.appLabels[item.id] || item.name }));
   }, [site.projects, site.launcher.hiddenApps, site.launcher.appOrder, site.launcher.appLabels, site.launcher.customApps]);
   const app = visibleApps.find((item) => item.id === activeApp) ?? APPS.find((item) => item.id === activeApp) ?? null;
@@ -281,9 +271,10 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       if (target.closest(".jb-drawer-overlay") && !icon && !widget) return;
       if (target.closest("button,input,a") && !icon && !widget) return;
       pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget) };
+      if (icon || widget) event.currentTarget.setPointerCapture(event.pointerId);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
       if (icon || widget) longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 450);
-    }} onPointerMove={(event) => { const start=pointerStart.current; if((!start?.appId && !start?.widgetId) || start.fromDrawer || Date.now()-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { pointerStart.current = null; lastAutoPage.current=0; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
+    }} onPointerMove={(event) => { const start=pointerStart.current; if((!start?.appId && !start?.widgetId) || (start.fromDrawer && !start.fromDrawerWidget) || Date.now()-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { pointerStart.current = null; lastAutoPage.current=-1; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
       const start = pointerStart.current; pointerStart.current = null;
       if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
       if (!start) return;
@@ -293,9 +284,13 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         setLauncherEditMode(true);
         if (moved <= 18) { suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
         const destinationPanel = Math.max(0, Math.min(4, panel));
-        const device = event.currentTarget.getBoundingClientRect();
-        const column = Math.max(0, Math.min(start.widgetId === "clock" ? 2 : 0, Math.floor((event.clientX - device.left) / device.width * 4)));
-        const row = Math.max(0, Math.min(8, Math.floor((event.clientY - device.top - 70) / 96)));
+        const grid = event.currentTarget.querySelector<HTMLElement>(`[data-widget-grid="${destinationPanel}"]`);
+        const bounds = grid?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+        const column = Math.max(0, Math.min(start.widgetId === "clock" ? 2 : 0, Math.floor((event.clientX - bounds.left) / (bounds.width / 4))));
+        const styles = grid ? window.getComputedStyle(grid) : null;
+        const rowHeight = Number.parseFloat(styles?.gridAutoRows ?? "72") || 72;
+        const rowGap = Number.parseFloat(styles?.rowGap ?? "10") || 10;
+        const row = Math.max(0, Math.min(8, Math.floor((event.clientY - bounds.top) / (rowHeight + rowGap))));
         const nextWidgets = placeWidgetWithoutOverlap(start.widgetId, destinationPanel, row, column, widgetPlacements);
         commitHomeLayout(homePlacements, nextWidgets);
         if (start.fromDrawerWidget) setDrawer(false);
@@ -418,6 +413,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         {showJellyBeanEgg && <div className={`jb-android-easter-egg${beanShower ? " is-bean-shower" : ""}`}><button type="button" className="jb-egg-close" onClick={()=>{setShowJellyBeanEgg(false);setBeanShower(false);}}>‹ About phone</button><p>ANDROID 4.1.1</p><button type="button" className="jb-giant-jellybean" aria-label="Jelly Bean Easter egg" onPointerDown={()=>{eggHoldTimer.current=window.setTimeout(()=>setBeanShower(true),550);}} onPointerUp={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onPointerLeave={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onPointerCancel={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onClick={()=>setBeanShower(true)}><span className="jb-egg-face">☺</span></button><h2>Jelly Bean</h2><small>Touch and hold the bean</small>{beanShower && <div className="jb-floating-beans" aria-hidden="true">{Array.from({length:18},(_,index)=><i key={index} style={{left:`${(index*37)%92+4}%`,animationDelay:`${(index%6)*-.7}s`,background:["#e94e78","#ffc247","#6db7e9","#9b73d3","#5fc79a"][index%5]}}/>)}</div>}</div>}
         {activeApp === "chess" && <><h3>CHESS</h3><p>Choose a chess platform.</p><div className="jb-chess-folder"><a href={site.launcher.chessComProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/chessdotcom.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Chess.com profile</span></a><a href={site.launcher.lichessProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/lichess.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Lichess profile</span></a></div></>}
         {activeApp === "github" && <><h3>GITHUB</h3>{site.owner.github ? <><p>Explore public repositories and current engineering work.</p><a className="jb-project-action" href={site.owner.github} target="_blank" rel="noreferrer">OPEN GITHUB ↗</a></> : <p>No public GitHub profile is configured.</p>}</>}
+        {activeApp === "googleplus" && <><h3>GOOGLE+</h3><p>All public profile and portfolio links in one place.</p><a className="jb-project-action" href="/links" target="_blank" rel="noreferrer">OPEN PROFILE LINKS ↗</a></>}
       </div></div></div>}
     </div>
   </main>;

@@ -6,6 +6,8 @@ Source repositories:
 - https://android.googlesource.com/platform/frameworks/base/+/android-4.1.2_r1/
 - https://android.googlesource.com/platform/packages/apps/Launcher2/+/android-4.1.2_r1/
 - https://android.googlesource.com/platform/packages/apps/Browser/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/Camera/+/android-4.1.2_r1/
+- https://android.googlesource.com/platform/packages/apps/DeskClock/+/android-4.1.2_r1/
 - https://android.googlesource.com/platform/packages/apps/Gallery2/+/android-4.1.2_r1/
 - https://android.googlesource.com/platform/packages/apps/Contacts/+/android-4.1.2_r1/
 - https://android.googlesource.com/platform/packages/apps/Calendar/+/android-4.1.2_r1/
@@ -45,3 +47,11 @@ All are Android Open Source Project artwork under Apache License 2.0.
 
 search-widget.png is a crop of the Android 4.1 Galaxy Nexus screenshot listed in docs/references/README.md. The screenshot is attributed to the Android Open Source Project and licensed CC BY 2.5; see the source file page for the license and attribution terms.
 - ic_notify_clear_normal.png, ic_notify_quicksettings_normal.png, ic_notify_rotation_off_normal.png: Android 4.1.2 SystemUI notification shade controls from packages/SystemUI.
+
+Additional Android 4.1.2 application icons (mdpi launcher resources):
+- Browser, Calculator, Calendar, Camera, Contacts, Phone, DeskClock, Email, Gallery, Messaging and Settings from their corresponding packages/apps repositories at android-4.1.2_r1.
+- market.png and folder-ring.png from packages/apps/Launcher2 (ic_launcher_market_holo.png and portal_ring_inner_holo.png).
+These AOSP assets are licensed under Apache License 2.0.
+
+Google+ icon:
+- icons/google-plus-2012.svg: original 2012 Google+ service mark from Wikimedia Commons, attributed to Google; public-domain text/logo artwork with trademark rights reserved. Source: https://commons.wikimedia.org/wiki/File:Google_Plus_icon_(2012-2013).svg
