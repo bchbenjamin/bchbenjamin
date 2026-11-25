@@ -282,7 +282,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       if (target.closest(".jb-app-overlay,.jb-shade-overlay,.jb-recent-overlay")) return;
       const icon = target.closest<HTMLElement>("[data-home-app],[data-drawer-app]");
       const widget = target.closest<HTMLElement>("[data-home-widget],[data-drawer-widget]");
-      if (target.closest(".jb-drawer-overlay") && !icon && !widget) return;
+      if (target.closest(".jb-drawer-overlay") && !icon && !widget && !target.closest(".jb-drawer-pages")) return;
       if (target.closest("button,input,a") && !icon && !widget) return;
       pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget), fromDrawerPages: Boolean(target.closest(".jb-drawer-pages")) };
       if (icon || widget || target.closest(".jb-drawer-pages")) event.currentTarget.setPointerCapture(event.pointerId);
