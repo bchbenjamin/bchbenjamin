@@ -62,16 +62,20 @@ The Google Search bar asset is cropped from the attributed Galaxy Nexus screensh
 - Android Authority, Android 4.1 vs 4.2 comparison: https://www.androidauthority.com/android-4-1-vs-android-4-2-jelly-bean-149740/ (describes the stock conversation-thread and SMS/MMS bubble interface).
 
 
-## Micromax A110 and Android Water live wallpaper
+## Micromax A110 and Android 4.1 stock wallpaper
 
-- Micromax Canvas 2 A110 launched with Android 4.0.4 and received an official Android 4.1.1 Jelly Bean update in March 2013. The launcher identifies the device as `Micromax A110` and uses the Jelly Bean-era Water ripple interaction.
-- Android Open Source Project live-wallpaper documentation: https://android.googlesource.com/platform/frameworks/base/+/859f455645bc49e32330108b1ea9f85ffb80a2cd/docs/html/resources/articles/live-wallpapers.jd (documents `android.wallpaper.tap` and the Water wallpaper's touch-generated ripples).
+- Micromax Canvas 2 A110 launched with Android 4.0.4 and received an official Android 4.1.1 Jelly Bean update in March 2013. The launcher identifies the device as `Micromax A110` and now uses the checked-in Android 4.1 static wallpaper with the huts.
 - Micromax A110 Canvas 2 review: https://www.gadgets360.com/mobiles/reviews/micromax-a110-superfone-canvas-2-review-324251/ (launch OS and device interface).
 - Micromax A110 Android 4.1.1 update announcement: https://www.gsmarena.com/micromax_launches_jelly_bean_411_for_a110_canvas_2-news-5699.php.
-- The browser implementation uses an original lightweight Canvas renderer; it does not bundle a proprietary APK or copy third-party wallpaper assets.
 
-## Micromax A110 Water wallpaper and launcher brand marks
+## Launcher brand marks
 
-- The Water wallpaper visual is based on the original Xllusion **Water live wallpaper** (package `com.xllusion.livewallpaper.water`, Android 4.0-era release). The repository image is a crop of the wallpaper area from the Phoneky preview at https://prodigits.co.uk/pthumbs/android/thumbs/0/water.jpg; it is not the original APK or a full-resolution export. The web launcher layers its own touch-driven ripple effect over that reference image.
-- Water Live Wallpaper app listing and feature description: https://play.google.com/store/apps/details?id=com.xllusion.livewallpaper.water
 - Chess.com, Lichess, and GitHub marks are sourced from Simple Icons (`https://cdn.simpleicons.org/`); Simple Icons artwork is CC0. Product names and marks remain the property of their respective owners.
+
+
+## Launcher icon artwork
+
+- Termux launcher icon: Termux upstream app resources, `termux/termux-app` (`app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`).
+- Magisk launcher artwork: the square Magisk Logo SVG from Wikimedia Commons, vectorized from topjohnwu/Magisk artwork (GPL-3.0-or-later).
+- Stack Overflow and Google Maps marks: Simple Icons SVG assets (brand artwork; trademark rights remain with their owners).
+- Existing Android system icons are from the AOSP 4.1.2 resource set in this repository.

@@ -21,6 +21,7 @@ export default function AdminGate() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 5000);
     fetch(`${apiBase}/api/v1/admin/session`, {
       credentials: "include",
       headers: { Accept: "application/json" },
@@ -33,11 +34,11 @@ export default function AdminGate() {
       })
       .then(setSession)
       .catch(() => setSession(null))
-      .finally(() => setLoading(false));
-    return () => controller.abort();
+      .finally(() => { window.clearTimeout(timeout); setLoading(false); });
+    return () => { window.clearTimeout(timeout); controller.abort(); };
   }, []);
 
-  if (loading) return <p className="admin-state">Checking your owner session…</p>;
+  if (loading) return <p className="admin-state">Checking owner session…</p>;
   if (!session?.authenticated) {
     return (
       <div className="admin-state">

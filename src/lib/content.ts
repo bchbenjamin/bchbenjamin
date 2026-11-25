@@ -26,7 +26,7 @@ export interface Achievement { label: string; title: string; detail: string; ima
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
 export interface LauncherShortcut { id: string; name: string; url: string; iconUrl?: string; }
-export interface LauncherConfig { customApps: LauncherShortcut[]; chessComProfileUrl: string; lichessProfileUrl: string; wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; }
+export interface LauncherConfig { customApps: LauncherShortcut[]; chessComProfileUrl: string; lichessProfileUrl: string; wallpaper: "water" | "android-default" | "custom"; wallpaperImageUrl: string; appLabels: Record<string,string>; microbeCount: number; microbeSpeed: number; appColumns: number; showLabels: boolean; hiddenApps: string[]; appOrder: string[]; showSearch: boolean; showClock: boolean; showGallery: boolean; showStatusBar: boolean; showDock: boolean; showPageIndicator: boolean; showNavigationBar: boolean; }
 export interface HomeContent {
   heroEyebrow: string; focus: string; aboutTitle: string; aboutParagraphs: string[];
   projectsTitle: string; projectsDescription: string; skillsTitle: string; skillsDescription: string;
@@ -55,7 +55,7 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "skills", type: "skills", enabled: true, order: 50 },
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
-const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "water", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true };
+const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "android-default", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","experience","education","skills","terminal","magisk","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true, showStatusBar: true, showDock: true, showPageIndicator: true, showNavigationBar: true };
 const DEFAULT_HOME_CONTENT: HomeContent = {
   heroEyebrow: "5TH-SEMESTER B.E. COMPUTER SCIENCE / BATCH OF 2028", focus: "Python Development · Data Engineering · Artificial Intelligence · Technical Research & Documentation",
   aboutTitle: "Technical curiosity.\nPractical engineering.",
@@ -179,7 +179,7 @@ export async function getSiteContent(): Promise<SiteContent> {
     if (parsed?.home?.sections) homeSections = parsed.home.sections;
     if (parsed?.home?.content) homeContent = { ...DEFAULT_HOME_CONTENT, ...parsed.home.content };
     const launcher = { ...DEFAULT_LAUNCHER, ...parsed?.launcher };
-    launcher.wallpaper = launcher.wallpaper === "android-default" || launcher.wallpaper === "custom" ? launcher.wallpaper : "water";
+    launcher.wallpaper = launcher.wallpaper === "custom" ? "custom" : "android-default";
     launcher.microbeCount = Math.max(12, Math.min(38, Number(launcher.microbeCount) || 28));
     launcher.microbeSpeed = Math.max(0.1, Math.min(1.5, Number(launcher.microbeSpeed) || 0.65));
     launcher.appColumns = Math.max(3, Math.min(6, Number(launcher.appColumns) || 4));

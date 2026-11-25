@@ -43,8 +43,8 @@ describe("portfolio content", () => {
     expect(await getSiteContent()).toEqual(site);
   });
 
-  it("defaults the launcher to the Micromax A110 water wallpaper and an empty media gallery", () => {
-    expect(site.launcher.wallpaper).toBe("water");
+  it("defaults the launcher to the Android 4.1 huts wallpaper and an empty media gallery", () => {
+    expect(site.launcher.wallpaper).toBe("android-default");
     expect(site.gallery).toEqual([]);
   });
 

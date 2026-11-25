@@ -360,3 +360,35 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 
 .jb-app-icon img{-webkit-user-drag:none;-webkit-touch-callout:none;user-select:none;pointer-events:none}
 .jb-custom-apps img{object-fit:contain}
+
+/* Android 4.1 app drawer, selection toolbar and Termux treatment. */
+.jb-wallpaper{background-image:url('/jellybean/android-4.1-default-wallpaper.jpg')!important;background-position:center;background-size:cover}
+.jb-wallpaper:before{display:none}
+.jb-app-window:has(.jb-terminal) .jb-app-actionbar{display:none}
+.jb-app-window:has(.jb-terminal) .jb-app-content:has(.jb-terminal){inset:0!important}
+.jb-terminal-top{height:46px;min-height:46px;flex:0 0 46px;display:flex;align-items:center;gap:18px;padding:0 15px;background:#15191c;border-bottom:1px solid #343a3e;color:#eee;font-size:15px}
+.jb-terminal-top b{font-size:14px;font-weight:500;color:#e8e8e8}
+.jb-terminal-top .jb-termux-menu,.jb-terminal-top .jb-termux-new{font-size:21px;color:#c8cdd0}
+.jb-terminal-top .jb-termux-session{margin-left:auto;color:#aeb9b0;font-size:12px}
+.jb-termux-prompt{border-top:0;background:#000}
+.jb-termux-prompt label{color:#9ccc65}
+.jb-termux-prompt input{color:#e7f3e8}
+.jb-app-icon-magisk{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+.jb-app-icon-magisk img{object-fit:contain;padding:1px}
+.jb-app-icon-terminal{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+.jb-app-icon-terminal img{object-fit:contain}
+.jb-android-selection-menu{position:fixed;z-index:1000;display:flex;align-items:center;gap:0;padding:4px;background:#30363b;border:1px solid #59646b;border-radius:2px;box-shadow:0 4px 12px #0008;color:#fff}
+.jb-android-selection-menu button{min-width:58px;padding:9px 10px;border:0;background:transparent;color:#fff;font-size:13px}
+.jb-edit-toolbar{background:#202a30;border-bottom:1px solid #43535c;color:#e7edf0}
+.jb-edit-toolbar button{background:#344b58;border:1px solid #71838d;color:white;padding:6px 12px}
+.jb-drawer-overlay{background:#202a32}
+.jb-drawer{background:#202a32!important;padding-top:20px}
+.jb-drawer-tabs{border-bottom:2px solid #60737f!important}
+.jb-drawer-tabs>button.selected{border-color:#80cbc4!important;color:#80cbc4!important}
+.jb-drawer-page{grid-template-rows:repeat(4,minmax(78px,1fr));gap:12px 8px;padding-top:20px}
+.jb-drawer-page button{touch-action:pan-y!important;-webkit-user-select:none;user-select:none}
+.jb-drawer-pages{touch-action:pan-y!important}
+.jb-device{ -webkit-touch-callout:none }
+.jb-app-content{ -webkit-touch-callout:default }
+.admin-workspace-panel{padding-top:0!important}
+.admin-workspace-panel>.admin-state{padding-top:0}
