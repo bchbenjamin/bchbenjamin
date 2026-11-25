@@ -98,3 +98,12 @@ export function isDownwardSwipe(
   const dy = endY - startY;
   return dy > threshold && dy > Math.abs(dx);
 }
+
+export function isLauncherRemoveDrop(
+  pointerY: number,
+  deviceTop: number,
+  zoneHeight = 68
+): boolean {
+  return Number.isFinite(pointerY) && Number.isFinite(deviceTop)
+    && pointerY >= deviceTop && pointerY < deviceTop + zoneHeight;
+}

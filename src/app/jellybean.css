@@ -346,11 +346,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 /* Android-style launcher editing and native brand folder artwork. */
 .jb-world img{-webkit-user-drag:none;-webkit-touch-callout:none;user-select:none;pointer-events:auto}
 .jb-device,.jb-device *{-webkit-tap-highlight-color:transparent}
-.jb-edit-toolbar{position:absolute;z-index:14;top:25px;left:0;right:0;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#101a25eF;border-bottom:1px solid #ffffff35;color:#fff;font-size:12px;letter-spacing:.4px}
-.jb-edit-toolbar button{border:1px solid #8ac8df;border-radius:3px;padding:6px 14px;background:#176987;color:#fff;font-size:11px}
-.jb-device:has(.jb-edit-toolbar) .jb-home-viewport{top:67px}
-.jb-device:has(.jb-edit-toolbar) .jb-status-bar{top:42px}
-.jb-device:has(.jb-edit-toolbar) .jb-home-shortcut-row button,.jb-device:has(.jb-edit-toolbar) .jb-icon-grid button{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
 @keyframes jb-icon-wiggle{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
 .jb-chess-folder{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:18px 0}
 .jb-chess-folder a{display:flex;min-height:132px;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1px solid #cbd4d9;background:#fff;color:#27343b;text-decoration:none;font-size:12px;font-weight:600}
@@ -379,8 +374,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-app-icon-terminal img{object-fit:contain}
 .jb-android-selection-menu{position:fixed;z-index:1000;display:flex;align-items:center;gap:0;padding:4px;background:#30363b;border:1px solid #59646b;border-radius:2px;box-shadow:0 4px 12px #0008;color:#fff}
 .jb-android-selection-menu button{min-width:58px;padding:9px 10px;border:0;background:transparent;color:#fff;font-size:13px}
-.jb-edit-toolbar{background:#202a30;border-bottom:1px solid #43535c;color:#e7edf0}
-.jb-edit-toolbar button{background:#344b58;border:1px solid #71838d;color:white;padding:6px 12px}
 .jb-drawer-overlay{background:#202a32}
 .jb-drawer{background:#202a32!important;padding-top:20px}
 .jb-drawer-tabs{border-bottom:2px solid #60737f!important}
@@ -407,7 +400,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-home-widget-gallery .jb-gallery-strip{min-height:0;flex:1}
 .jb-home-widget-gallery .jb-gallery-strip button{flex-basis:22%;min-width:0}
 .jb-home-widget-gallery .jb-gallery-strip button>span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.jb-device:has(.jb-edit-toolbar) .jb-home-widget{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
 .jb-widget-picker button:active{transform:scale(.97)}
 .jb-android-version{width:100%;border:0;text-align:left;background:transparent;color:inherit;cursor:pointer}
 .jb-android-easter-egg{position:absolute;z-index:10;inset:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#6754a4,#27224f 62%,#100f28);color:#fff;text-align:center}
@@ -423,7 +415,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 @media(max-width:520px){.jb-home-widget-grid{grid-auto-rows:minmax(66px,auto);gap:8px}.jb-home-widget-gallery .jb-gallery-widget{min-height:118px}}
 
 .jb-app-content{position:relative}
-.jb-edit-toolbar small{display:block;margin-top:2px;font-size:9px;opacity:.78}
 .jb-widget-picker button{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab}
 
 /* Jelly Bean Launcher2 folder preview: ring plus three real app icons. */
@@ -472,7 +463,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 /* Five-icon Micromax hotseat; retain Camera and remove the redundant Browser shortcut. */
 .jb-dock:not(.jb-dock-drawer-only){display:grid;grid-template-columns:repeat(5,minmax(0,1fr));justify-items:center;align-items:center}
 .jb-dock:not(.jb-dock-drawer-only)>button{width:100%;}
-.jb-edit-toolbar{gap:10px;flex-wrap:wrap}
 .jb-edit-toolbar>span{flex:1 1 100%}
 .jb-edit-toolbar>button{min-width:72px;padding:8px 14px;border:1px solid #8298a5;background:linear-gradient(#f7fafb,#dce5e9);color:#26343b}
 .jb-camera-app,.jb-calendar-app{color:#26343b}
@@ -514,7 +504,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-dock button{transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease}
 .jb-dock button:active{transform:scale(.86);filter:brightness(1.18)}
 @media(prefers-reduced-motion:reduce){.jb-home-app-grid button,.jb-drawer-page-track,.jb-drawer-page button,.jb-dock button{transition:none!important;animation:none!important}}
-.jb-device:has(.jb-edit-toolbar) .jb-home-app-grid button,.jb-device:has(.jb-edit-toolbar) .jb-drawer-page button{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
 
 /* Android 4.1 AOSP Camera: live viewfinder with the original right-side control rail. */
 .jb-app-window:has(.jb-camera-app){background:#080b0e}
@@ -563,7 +552,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-camera-inline-error{position:absolute;z-index:8;left:8px;right:94px;bottom:8px;padding:7px 9px;background:#421d1d;color:#ffc6c0;font-size:10px}
 @media(max-width:360px){.jb-camera-controls{flex-basis:76px;width:76px}.jb-camera-shutter{width:51px;height:51px;flex-basis:51px}.jb-camera-shutter span{width:32px;height:32px}.jb-camera-settings{right:81px;width:170px}}
 @media(max-height:500px){.jb-camera-controls{flex-direction:row;flex-basis:76px;width:76px;flex-wrap:wrap}.jb-camera-thumbnail{width:32px;height:32px}.jb-camera-mode-picker{flex-direction:row}.jb-camera-mode-picker button{width:30px;height:28px}.jb-camera-shutter{width:43px;height:43px;flex-basis:43px}.jb-camera-shutter span{width:28px;height:28px}.jb-camera-control-button{width:30px;height:28px}}
-.jb-drag-preview{position:absolute;z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;width:86px;margin-left:-43px;margin-top:-43px;filter:drop-shadow(0 8px 10px #000b);transform-origin:center center}
 .jb-drag-preview .jb-app-icon{width:58px;height:58px}
 .jb-drag-preview>span{max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:10px;text-shadow:0 2px 4px #000;text-align:center}
 
@@ -590,4 +578,12 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-camera-controls .jb-camera-control-button svg{width:23px!important;height:23px!important;stroke:#f2f6f8!important;opacity:1!important}
 .jb-icon-github img{filter:brightness(0) invert(1)}
 
-.jb-edit-toolbar .jb-remove-drop-target{background:#713737!important;border:1px solid #bd8585!important;color:#fff!important;opacity:1!important;cursor:default}
+
+/* A110 Launcher: the Remove affordance exists only while an item is being dragged. */
+.jb-a110-remove-zone{position:absolute;z-index:30;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#7b2028f2,#48151be8);border-bottom:1px solid #d58b8b;color:#fff;font-size:14px;font-weight:500;letter-spacing:.4px;pointer-events:none}
+.jb-googleplus-embedded{display:block;width:100%;height:100%;min-height:0;flex:1;border:0;background:#101820}
+.jb-app-content:has(.jb-googleplus-embedded){display:flex;flex-direction:column;overflow:hidden;padding:0!important}
+.jb-app-window:has(.jb-googleplus-embedded){display:flex;flex-direction:column}
+/* Don't shift the workspace when the transient drag affordance appears. */
+.jb-device:has(.jb-a110-remove-zone) .jb-home-viewport{top:25px}
+.jb-device:has(.jb-a110-remove-zone) .jb-status-bar{top:0}

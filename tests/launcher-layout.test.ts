@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDownwardSwipe, normalizeLauncherHomeLayout, placeWidgetWithoutOverlap, removeWidgetPlacement } from "../src/lib/launcher-layout";
+import { isDownwardSwipe, isLauncherRemoveDrop, normalizeLauncherHomeLayout, placeWidgetWithoutOverlap, removeWidgetPlacement } from "../src/lib/launcher-layout";
 
 describe("launcher home layout validation", () => {
   it("keeps valid icon and widget positions", () => {
@@ -63,5 +63,14 @@ describe("launcher gestures and widget removal", () => {
     expect(isDownwardSwipe(100, 100, 110, 190)).toBe(true);
     expect(isDownwardSwipe(100, 100, 190, 110)).toBe(false);
     expect(isDownwardSwipe(100, 100, 110, 150)).toBe(false);
+  });
+});
+
+describe("launcher removal drop zone", () => {
+  it("accepts drops only inside the top removal strip", () => {
+    expect(isLauncherRemoveDrop(20, 0)).toBe(true);
+    expect(isLauncherRemoveDrop(67, 0)).toBe(true);
+    expect(isLauncherRemoveDrop(68, 0)).toBe(false);
+    expect(isLauncherRemoveDrop(10, 20)).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getSiteContent } from "@/lib/content";
+import { getSiteContent, site as staticSite } from "@/lib/content";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
@@ -13,17 +13,21 @@ function favicon(url: string) {
   catch { return "/favicon.ico"; }
 }
 
-export default async function LinksPage() {
-  const site = await getSiteContent();
+export default async function LinksPage({ searchParams }: { searchParams: Promise<{ embedded?: string }> }) {
+  const [{ embedded }, site] = await Promise.all([searchParams, getSiteContent()]);
+  const website = site.owner.website || staticSite.owner.website;
+  const github = site.owner.github || staticSite.owner.github;
+  const linkedin = site.owner.linkedin || staticSite.owner.linkedin;
+  const email = site.owner.email || staticSite.owner.email;
   const candidates = [
     { label: "Portfolio", href: "https://www.bchbenjamin.in", detail: "Personal portfolio and selected work" },
-    ...(site.owner.website ? [{ label: "Website", href: site.owner.website, detail: "Personal website" }] : []),
-    ...(site.owner.github ? [{ label: "GitHub", href: site.owner.github, detail: "Code, repositories and engineering work" }] : []),
-    ...(site.owner.linkedin ? [{ label: "LinkedIn", href: site.owner.linkedin, detail: "Professional profile" }] : []),
-    ...(site.owner.email ? [{ label: "Email", href: `mailto:${site.owner.email}`, detail: site.owner.email }] : [])
+    ...(website ? [{ label: "Website", href: website, detail: "Personal website" }] : []),
+    ...(github ? [{ label: "GitHub", href: github, detail: "Code, repositories and engineering work" }] : []),
+    ...(linkedin ? [{ label: "LinkedIn", href: linkedin, detail: "Professional profile" }] : []),
+    ...(email ? [{ label: "Email", href: `mailto:${email}`, detail: email }] : [])
   ];
   const links = candidates.filter((item, index) => candidates.findIndex(other => other.href === item.href) === index);
-  return <main className="shell inner-page profile-links-page">
+  return <main className={`shell inner-page profile-links-page${embedded === "1" ? " profile-links-embedded" : ""}`}>
     <header className="page-intro" data-reveal>
       <p className="eyebrow"><span className="eyebrow-line" /> PROFILE / LINKS</p>
       <h1>Find me<br /><span>around the web.</span></h1>

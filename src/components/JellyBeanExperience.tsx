@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { SiteContent } from "@/lib/content";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import JellyBeanMessaging from "@/components/JellyBeanMessaging";
-import { DEFAULT_WIDGET_PLACEMENTS, isDownwardSwipe, placeWidgetWithoutOverlap, removeWidgetPlacement } from "@/lib/launcher-layout";
+import { DEFAULT_WIDGET_PLACEMENTS, isDownwardSwipe, isLauncherRemoveDrop, placeWidgetWithoutOverlap, removeWidgetPlacement } from "@/lib/launcher-layout";
 import { sortLauncherApps } from "@/lib/launcher-app-sort";
 
 type AppId = string;
@@ -84,7 +83,6 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const [recentApps, setRecentApps] = useState<string[]>([]);
   const [launcherEditMode, setLauncherEditMode] = useState(false);
   const [selectionMenu, setSelectionMenu] = useState<{x:number;y:number}|null>(null);
-  const [dragPreview, setDragPreview] = useState<{appId:string;x:number;y:number}|null>(null);
   const [activeApp, setActiveApp] = useState<AppId | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [settingsPage, setSettingsPage] = useState<"main" | "about">("main");
@@ -95,7 +93,6 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const eggHoldTimer = useRef<number | null>(null);
   const [ownerElevated, setOwnerElevated] = useState(false);
   const [layoutReady, setLayoutReady] = useState(false);
-  const [layoutMessage, setLayoutMessage] = useState("");
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalLines, setTerminalLines] = useState<string[]>(["Welcome to Termux!", "This is a read-only portfolio environment. Type help to get started."]);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -155,17 +152,14 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 2500);
     async function initialiseLayout() {
-      let isOwnerSignedIn = false;
       try {
         const response = await fetch(`${apiBase}/api/v1/admin/session`, { credentials: "include", cache: "no-store", headers: { Accept: "application/json" }, signal: controller.signal });
         if (response.ok) {
           const session = await response.json() as { authenticated?: boolean; stepUp?: boolean };
-          isOwnerSignedIn = Boolean(session.authenticated);
           if (active && session.authenticated && session.stepUp) {
             setOwnerElevated(true);
             setHomePlacements(site.launcher.homeLayout?.icons ?? {});
             setWidgetPlacements(site.launcher.homeLayout?.widgets ?? {});
-            setLayoutMessage("Owner layout · synchronised across devices");
             setLayoutReady(true);
             return;
           }
@@ -180,7 +174,6 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
           setHomePlacements(parsed.icons ?? {}); setWidgetPlacements(parsed.widgets ?? {});
         } else if (legacy) setHomePlacements(JSON.parse(legacy) as Record<string, { panel: number; slot: number }>);
       } catch { /* Ignore malformed local launcher settings. */ }
-      setLayoutMessage(isOwnerSignedIn ? "Owner signed in · verify the authenticator in Admin to enable shared sync" : "This launcher layout is saved only on this device");
       setLayoutReady(true);
     }
     void initialiseLayout().finally(() => { window.clearTimeout(timeout); });
@@ -189,7 +182,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   useEffect(() => { if (activeApp === "terminal") { window.scrollTo(0, 0); terminalInputRef.current?.focus({ preventScroll: true }); if (terminalOutputRef.current) terminalOutputRef.current.scrollTop = terminalOutputRef.current.scrollHeight; } }, [activeApp, terminalLines]);
 
   const goPanel = useCallback((next: number) => setPanel(Math.max(0, Math.min(4, next))), []);
-  const closeOverlays = useCallback(() => { setActiveApp(null); setDrawer(false); setShade(false); setRecent(false); }, []);
+  const closeOverlays = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); setDrawer(false); setShade(false); setRecent(false); }, [activeApp]);
   const navBack = useCallback(() => {
     if (showJellyBeanEgg) { setShowJellyBeanEgg(false); setBeanShower(false); }
     else if (launcherEditMode) setLauncherEditMode(false);
@@ -197,10 +190,10 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     else if (drawer) setDrawer(false);
     else if (recent) setRecent(false);
     else if (activeApp && selectedProject) setSelectedProject(null);
-    else if (activeApp) setActiveApp(null);
+    else if (activeApp) { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); }
     else goPanel(0);
   }, [showJellyBeanEgg, launcherEditMode, shade, drawer, recent, activeApp, selectedProject, goPanel]);
-  const navHome = useCallback(() => { closeOverlays(); setSelectedProject(null); goPanel(0); }, [closeOverlays, goPanel]);
+  const navHome = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); closeOverlays(); setSelectedProject(null); setLauncherEditMode(false); goPanel(0); }, [activeApp, closeOverlays, goPanel]);
   const navBackRef = useRef(navBack);
   useEffect(() => { navBackRef.current = navBack; }, [navBack]);
   useEffect(() => {
@@ -213,7 +206,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
-  const navRecent = useCallback(() => { setActiveApp(null); setDrawer(false); setShade(false); setRecent(true); }, []);
+  const navRecent = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); setDrawer(false); setShade(false); setRecent(true); }, [activeApp]);
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") { if (launcherEditMode) setLauncherEditMode(false); else closeOverlays(); }
@@ -224,13 +217,12 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeApp, drawer, shade, panel, closeOverlays, goPanel, launcherEditMode]);
 
-  function open(appId: string) { const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url) { if (external.url.startsWith("/")) router.push(external.url); else window.location.assign(external.url); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
+  function open(appId: string) { if (appId === "googleplus") window.history.pushState({ marker: "jb-phone-navigation", app: "googleplus" }, "", "/links"); const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url && appId !== "googleplus") { if (external.url.startsWith("/")) router.push(external.url); else window.location.assign(external.url); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
   function commitHomeLayout(icons: Record<string, { panel: number; slot: number }>, widgets: Record<string, { panel: number; row: number; column: number }>) {
     setHomePlacements(icons);
     setWidgetPlacements(widgets);
     if (!ownerElevated) {
-      try { localStorage.setItem("jb-home-layout", JSON.stringify({ icons, widgets })); setLayoutMessage("Saved on this device"); }
-      catch { setLayoutMessage("Could not save this device's launcher layout"); }
+      try { localStorage.setItem("jb-home-layout", JSON.stringify({ icons, widgets })); } catch { /* The in-memory placement remains active. */ }
       return;
     }
     void (async () => {
@@ -243,10 +235,8 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
           body: JSON.stringify({ icons, widgets })
         });
         if (!response.ok) throw new Error(`Shared launcher sync failed (${response.status})`);
-        setLayoutMessage("Owner layout synchronised across devices");
-      } catch (error) {
+      } catch {
         try { localStorage.setItem("jb-home-layout", JSON.stringify({ icons, widgets })); } catch { /* Keep the in-memory layout even when storage is unavailable. */ }
-        setLayoutMessage(`${error instanceof Error ? error.message : "Shared sync failed"} · kept locally on this device`);
       }
     })();
   }
@@ -289,27 +279,26 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       const widget = target.closest<HTMLElement>("[data-home-widget],[data-drawer-widget]");
       if (target.closest(".jb-drawer-overlay") && !icon && !widget && !target.closest(".jb-drawer-pages")) return;
       if (target.closest("button,input,a") && !icon && !widget) return;
-      pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget), fromDrawerPages: Boolean(target.closest(".jb-drawer-pages")) };
+      pointerStart.current = { x: event.clientX, y: event.clientY, started: event.timeStamp, appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget), fromDrawerPages: Boolean(target.closest(".jb-drawer-pages")) };
       // Capture on the pressed control, not the outer device: capturing on the
       // parent retargets click events and makes app icons appear unresponsive.
-      if (icon || widget) (icon ?? widget)?.setPointerCapture(event.pointerId);
+      if (icon) icon.setPointerCapture(event.pointerId);
       else if (target.closest(".jb-drawer-pages")) event.currentTarget.setPointerCapture(event.pointerId);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
-      if (icon || widget || target.closest(".jb-home-viewport")) { const appId = icon?.dataset.homeApp ?? icon?.dataset.drawerApp; const deviceBounds = event.currentTarget.getBoundingClientRect(); const x = event.clientX - deviceBounds.left; const y = event.clientY - deviceBounds.top; longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (appId) setDragPreview({ appId, x, y }); if (navigator.vibrate) navigator.vibrate(35); }, 500); }
-    }} onPointerMove={(event) => { const start=pointerStart.current; if (!start) return; if (start.appId && Date.now()-start.started>=450) { const rect=event.currentTarget.getBoundingClientRect(); setDragPreview({ appId:start.appId, x:event.clientX-rect.left, y:event.clientY-rect.top }); } if((!start.appId && !start.widgetId) || (start.fromDrawer && !start.fromDrawerWidget) || Date.now()-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { setDragPreview(null); pointerStart.current = null; lastAutoPage.current=-1; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
-      const start = pointerStart.current; pointerStart.current = null; setDragPreview(null);
+      if (icon || widget || target.closest(".jb-home-viewport")) { longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 500); }
+    }} onPointerMove={(event) => { const start=pointerStart.current; if (!start) return; if((!start.appId && !start.widgetId) || (start.fromDrawer && !start.fromDrawerWidget) || event.timeStamp-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { pointerStart.current = null; setLauncherEditMode(false); lastAutoPage.current=-1; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
+      const start = pointerStart.current; pointerStart.current = null; setLauncherEditMode(false);
       if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
       if (!start) return;
-      if (!start.appId && !start.widgetId && Date.now() - start.started >= 500) { setLauncherEditMode(true); suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
+      if (!start.appId && !start.widgetId && event.timeStamp - start.started >= 500) { setLauncherEditMode(true); suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
       const dx = event.clientX - start.x; const dy = event.clientY - start.y;
       const moved = Math.hypot(dx, dy);
       // A downward drawer gesture wins over a long-press/drag that began on an app icon.
-      if (drawer && moved > 70 && isDownwardSwipe(start.x, start.y, event.clientX, event.clientY)) { setDrawer(false); setDragPreview(null); return; }
-      if (start.widgetId && Date.now() - start.started >= 450) {
-        setLauncherEditMode(true);
+      if (drawer && moved > 70 && isDownwardSwipe(start.x, start.y, event.clientX, event.clientY)) { setDrawer(false); return; }
+      if (start.widgetId && event.timeStamp - start.started >= 450) {
         if (moved <= 18) { suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
         const device = event.currentTarget.getBoundingClientRect();
-        if (event.clientY < device.top + 68) {
+        if (isLauncherRemoveDrop(event.clientY, device.top)) {
           const nextWidgets = removeWidgetPlacement(start.widgetId, widgetPlacements);
           commitHomeLayout(homePlacements, nextWidgets);
           setLauncherEditMode(false);
@@ -333,8 +322,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         window.setTimeout(() => { suppressIconClick.current = false; }, 450);
         return;
       }
-      if (start.appId && Date.now() - start.started >= 450) {
-        setLauncherEditMode(true);
+      if (start.appId && event.timeStamp - start.started >= 450) {
         const device = event.currentTarget.getBoundingClientRect();
         if (start.fromDrawer) {
           const destinationPanel = Math.max(0, Math.min(4, start.panel));
@@ -349,7 +337,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
           return;
         }
         if (moved <= 18) { suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
-        if (event.clientY < device.top + 68) {
+        if (isLauncherRemoveDrop(event.clientY, device.top)) {
           commitHomeLayout({ ...homePlacements, [start.appId]: { panel: -1, slot: -1 } }, widgetPlacements);
           suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return;
         }
@@ -378,9 +366,8 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     }}>
 
 
-      {dragPreview && (() => { const draggedApp = visibleApps.find(item => item.id === dragPreview.appId); if (!draggedApp) return null; return <motion.div className="jb-drag-preview" initial={{ scale: .72, opacity: 0 }} animate={{ scale: 1.12, opacity: .96 }} transition={{ type: "spring", stiffness: 500, damping: 28 }} style={{ left: dragPreview.x, top: dragPreview.y }}><AppIcon app={draggedApp} size="large"/><span>{draggedApp.name}</span></motion.div>; })()}
       {selectionMenu && <div className="jb-android-selection-menu" style={{left:selectionMenu.x,top:selectionMenu.y}}><button onClick={()=>{void navigator.clipboard.writeText(window.getSelection()?.toString()??"");setSelectionMenu(null);}}>Copy</button><button onClick={()=>{const range=document.createRange();range.selectNodeContents(document.querySelector(".jb-app-content")??document.body);window.getSelection()?.removeAllRanges();window.getSelection()?.addRange(range);setSelectionMenu(null);}}>Select all</button><button onClick={()=>setSelectionMenu(null)}>⋮</button></div>}
-      {launcherEditMode && <div className="jb-edit-toolbar"><span>Home screen options <small>Long-press an app to place it here. Drag a home icon or widget to the top to remove it. {layoutMessage}</small></span><button className="jb-remove-drop-target" type="button" disabled aria-label="Drag an app or widget here to remove it">⌫ Remove</button><button onClick={() => { setDrawerTab("widgets"); setDrawer(true); setLauncherEditMode(false); }}>Widgets</button><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
+      {launcherEditMode && <div className="jb-a110-remove-zone" aria-hidden="true"><span>Remove</span></div>}
       {site.launcher.showStatusBar !== false && <div className="jb-status-bar" onClick={() => setShade(true)} role="button" tabIndex={0} aria-label="Open notifications and quick settings">
         <div className="jb-status-left" aria-hidden="true" />
         <div className="jb-status-right"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="signal" /><SystemStatusIcon kind="battery" /><span className="jb-status-time">{clock}</span></div>
@@ -391,7 +378,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         <div className="jb-panels" style={{ transform: `translateX(-${panel * 100}%)` }}>
           {panels.map((index) => <section className="jb-panel" key={index} aria-label={`Home screen ${index + 1}`}>
             <div className="jb-home-widget-grid" data-widget-grid={index}>
-              {widgetsByPanel[index].map(widget => <div key={widget.id} data-home-widget={widget.id} data-widget-panel={index} className={`jb-home-widget jb-home-widget-${widget.id}`} style={{ gridColumn: `${widget.column + 1} / span ${widget.id === "clock" ? 2 : 4}`, gridRow: `${widget.row + 1} / span ${widget.id === "search" ? 1 : 2}` }}>
+              {widgetsByPanel[index].map(widget => <div key={widget.id} data-home-widget={widget.id} data-widget-panel={index} role="button" tabIndex={0} aria-label={`Move ${widget.id} home screen widget`} className={`jb-home-widget jb-home-widget-${widget.id}`} onPointerDown={(event) => { event.stopPropagation(); pointerStart.current = { x: event.clientX, y: event.clientY, started: event.timeStamp, widgetId: widget.id, panel: index }; event.currentTarget.setPointerCapture(event.pointerId); if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 500); }} onPointerUp={(event) => { const start = pointerStart.current; if (!start || start.widgetId !== widget.id || event.timeStamp - start.started < 450) return; const device = event.currentTarget.closest(".jb-device"); if (!device || Math.hypot(event.clientX - start.x, event.clientY - start.y) <= 18 || !isLauncherRemoveDrop(event.clientY, device.getBoundingClientRect().top)) return; event.stopPropagation(); pointerStart.current = null; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; setLauncherEditMode(false); commitHomeLayout(homePlacements, removeWidgetPlacement(widget.id, widgetPlacements)); suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); }} style={{ gridColumn: `${widget.column + 1} / span ${widget.id === "clock" ? 2 : 4}`, gridRow: `${widget.row + 1} / span ${widget.id === "search" ? 1 : 2}` }}>
                 {widget.id === "search" && <div className="jb-search-widget" role="img" aria-label="Google Search"><Image src="/jellybean/search-widget.png" alt="" width={680} height={61} unoptimized /></div>}
                 {widget.id === "clock" && <div className="jb-clock-widget" aria-label={`Analog clock showing ${clock}`}><div className="jb-analog-clock"><Image src="/jellybean/clock/dial.png" alt="" fill sizes="180px" unoptimized/><Image className="jb-clock-hand jb-clock-hour-hand" src="/jellybean/clock/hour.png" alt="" fill sizes="180px" style={{ transform: `rotate(${hourAngle}deg)` }} unoptimized/><Image className="jb-clock-hand jb-clock-minute-hand" src="/jellybean/clock/minute.png" alt="" fill sizes="180px" style={{ transform: `rotate(${minuteAngle}deg)` }} unoptimized/></div></div>}
                 {widget.id === "gallery" && <div className="jb-gallery-widget"><div className="jb-widget-heading"><span>GALLERY</span><button type="button" onClick={() => open("gallery")}>OPEN</button></div><div className="jb-gallery-strip">{site.gallery.slice(0, 5).map(media => <button key={media.id} onClick={() => open("gallery")} aria-label={`Open ${media.source_caption || media.caption || media.source_title || media.original_filename}`}><span className="jb-gallery-thumb">{media.content_type.startsWith("video/") ? <span className="jb-video-thumb">▶</span> : <Image src={media.url} alt="" width={120} height={72} unoptimized/>}</span><span>{media.source_caption || media.caption || media.source_title || media.original_filename}</span></button>)}</div></div>}
@@ -442,7 +429,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         {showJellyBeanEgg && <div className={`jb-android-easter-egg${beanShower ? " is-bean-shower" : ""}`}><button type="button" className="jb-egg-close" onClick={()=>{setShowJellyBeanEgg(false);setBeanShower(false);}}>‹ About phone</button><p>ANDROID 4.1.1</p><button type="button" className="jb-giant-jellybean" aria-label="Jelly Bean Easter egg" onPointerDown={()=>{eggHoldTimer.current=window.setTimeout(()=>setBeanShower(true),550);}} onPointerUp={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onPointerLeave={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onPointerCancel={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onClick={()=>setBeanShower(true)}><span className="jb-egg-face">☺</span></button><h2>Jelly Bean</h2><small>Touch and hold the bean</small>{beanShower && <div className="jb-floating-beans" aria-hidden="true">{Array.from({length:18},(_,index)=><i key={index} style={{left:`${(index*37)%92+4}%`,animationDelay:`${(index%6)*-.7}s`,background:["#e94e78","#ffc247","#6db7e9","#9b73d3","#5fc79a"][index%5]}}/>)}</div>}</div>}
         {activeApp === "chess" && <><h3>CHESS</h3><p>Choose a chess platform.</p><div className="jb-chess-folder"><a href={site.launcher.chessComProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/chessdotcom.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Chess.com profile</span></a><a href={site.launcher.lichessProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/lichess.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Lichess profile</span></a></div></>}
         {activeApp === "github" && <><h3>GITHUB</h3>{site.owner.github ? <><p>Explore public repositories and current engineering work.</p><a className="jb-project-action" href={site.owner.github} target="_blank" rel="noreferrer">OPEN GITHUB ↗</a></> : <p>No public GitHub profile is configured.</p>}</>}
-        {activeApp === "googleplus" && <><h3>GOOGLE+</h3><p>All public profile and portfolio links in one place.</p><a className="jb-project-action" href="/links" target="_blank" rel="noreferrer">OPEN PROFILE LINKS ↗</a></>}
+        {activeApp === "googleplus" && <iframe className="jb-googleplus-embedded" src="/links?embedded=1" title="Google+ profile links" /> }
       </div></div></div>}
     </div>
   </main>;
