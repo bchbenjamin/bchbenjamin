@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { SiteContent } from "@/lib/content";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import JellyBeanMessaging from "@/components/JellyBeanMessaging";
 import { DEFAULT_WIDGET_PLACEMENTS, placeWidgetWithoutOverlap } from "@/lib/launcher-layout";
+import { sortLauncherApps } from "@/lib/launcher-app-sort";
 
 type AppId = string;
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -114,7 +115,6 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const projects = site.projects;
   const currentProject = projects.find((project) => project.slug === selectedProject) ?? null;
   const visibleApps = useMemo(() => {
-    const order = Array.isArray(site.launcher.appOrder) ? site.launcher.appOrder : [];
     const hidden = Array.isArray(site.launcher.hiddenApps) ? site.launcher.hiddenApps : [];
     const builtIns = APPS.filter((item) => !hidden.includes(item.id)).flatMap(item => {
       const projectSlug = item.id === "breach-defend" ? "breach-defend" : item.id === "hermes-quizzer" ? "hermes-the-quizzer" : item.id === "street-safety" ? "street-safety-device" : null;
@@ -130,8 +130,11 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       return [{ ...item, name: project.name, url: destination, iconUrl: `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(destination)}` }];
     });
     const custom = (site.launcher.customApps ?? []).filter(item => item && item.id && item.name && item.url).map(item => ({ id: item.id, name: item.name, icon: "custom", color: "#5d8297", panel: 4, url: item.url, iconUrl: item.iconUrl || `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(item.url)}` }));
-    return [...builtIns, ...custom].sort((a,b) => (order.indexOf(a.id) < 0 ? 999 : order.indexOf(a.id))-(order.indexOf(b.id) < 0 ? 999 : order.indexOf(b.id))).map(item => ({ ...item, name: site.launcher.appLabels[item.id] || item.name }));
-  }, [site.projects, site.launcher.hiddenApps, site.launcher.appOrder, site.launcher.appLabels, site.launcher.customApps]);
+    // AOSP Launcher2 sorts the complete all-apps model by the displayed application label.
+    // appOrder is intentionally excluded: the drawer is always alphabetical.
+    return sortLauncherApps([...builtIns, ...custom]
+      .map(item => ({ ...item, name: site.launcher.appLabels[item.id] || item.name })));
+  }, [site.projects, site.launcher.hiddenApps, site.launcher.appLabels, site.launcher.customApps]);
   const app = visibleApps.find((item) => item.id === activeApp) ?? APPS.find((item) => item.id === activeApp) ?? null;
   const panels = useMemo(() => [0, 1, 2, 3, 4], []);
   const homeAppsByPanel = useMemo(() => panels.map(index => visibleApps
@@ -277,7 +280,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   }
 
   return <main className="jb-world">
-    <div className={`jb-device${site.launcher.showLabels ? "" : " jb-hide-labels"}`} aria-label="Micromax Canvas 2 A110 launcher" onContextMenu={(event) => { event.preventDefault(); const selection=window.getSelection()?.toString(); if(selection?.trim()) setSelectionMenu({x:Math.min(event.clientX,window.innerWidth-190),y:Math.max(8,event.clientY-54)}); }} onDragStart={(event) => event.preventDefault()} onClickCapture={(event) => { if (suppressIconClick.current) { event.preventDefault(); event.stopPropagation(); suppressIconClick.current = false; } }} onPointerDown={(event) => {
+    <div className={`jb-device${site.launcher.showLabels ? "" : " jb-hide-labels"}${drawer ? " jb-drawer-open" : ""}`} aria-label="Micromax Canvas 2 A110 launcher" onContextMenu={(event) => { event.preventDefault(); const selection=window.getSelection()?.toString(); if(selection?.trim()) setSelectionMenu({x:Math.min(event.clientX,window.innerWidth-190),y:Math.max(8,event.clientY-54)}); }} onDragStart={(event) => event.preventDefault()} onClickCapture={(event) => { if (suppressIconClick.current) { event.preventDefault(); event.stopPropagation(); suppressIconClick.current = false; } }} onPointerDown={(event) => {
       if (!layoutReady) return;
       const target = event.target as HTMLElement;
       if (target.closest(".jb-app-overlay,.jb-shade-overlay,.jb-recent-overlay")) return;
@@ -381,7 +384,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
               </div>)}
             </div>
             <div className="jb-home-app-grid" aria-label={`Home screen ${index + 1} app shortcuts`}>
-              {homeAppsByPanel[index].map((item) => <motion.button layout layoutId={`launcher-app-${item.id}`} key={item.id} data-home-app={item.id} data-home-panel={index} type="button" onClick={() => item.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(item.id)} whileTap={{ scale: 0.88 }} transition={{ type: "spring", stiffness: 520, damping: 34 }}><AppIcon app={item}/><span>{item.name}</span></motion.button>)}
+              {homeAppsByPanel[index].map((item) => <button key={item.id} data-home-app={item.id} data-home-panel={index} type="button" onClick={() => item.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(item.id)}><AppIcon app={item}/><span>{item.name}</span></button>)}
             </div>
           </section>)}
         </div>
@@ -398,11 +401,13 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       </div>}
       {site.launcher.showNavigationBar !== false && <div className="jb-navigation-bar"><div className="jb-tablet-nav"><button onClick={navBack} aria-label="Back"><SystemNavigationIcon kind="back" /></button><button onClick={navHome} aria-label="Home"><SystemNavigationIcon kind="home" /></button><button onClick={navRecent} aria-label="Recent apps"><SystemNavigationIcon kind="recent" /></button></div><button className="jb-tablet-status" onClick={() => setShade(true)} aria-label="Open notifications"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="battery" /><span>{clock}</span><span className="jb-tablet-notification-mark">●</span></button></div>}
 
-      {drawer && <div className="jb-overlay jb-drawer-overlay"><div className="jb-drawer"><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <motion.button layout layoutId={`launcher-app-${a.id}`} key={a.id} data-drawer-app={a.id} onClick={() => a.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(a.id)} whileTap={{ scale: 0.88 }} transition={{ type: "spring", stiffness: 520, damping: 34 }}><AppIcon app={a} size="large" /><span className="jb-drawer-app-label">{a.name}</span></motion.button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
+      <AnimatePresence>
+      {drawer && <motion.div key="jb-app-drawer-overlay" className="jb-overlay jb-drawer-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}><motion.div className="jb-drawer" initial={{ scale: 7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 7, opacity: 0 }} transition={{ duration: 0.35, delay: 0.1, ease: [0.2, 0.7, 0.2, 1] }}><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <button key={a.id} data-drawer-app={a.id} onClick={() => a.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(a.id)}><AppIcon app={a} size="large" /><span className="jb-drawer-app-label">{a.name}</span></button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
         {site.launcher.showClock&&<button data-drawer-widget="clock" onClick={()=>addWidgetToCurrentPage("clock")}><span className="jb-widget-preview-clock"><span className="jb-analog-clock"><Image src="/jellybean/clock/dial.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/hour.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/minute.png" alt="" fill sizes="90px" unoptimized/></span></span><b>Analog clock</b><small>2 × 2 · tap to add, long-press to drag</small></button>}
         {site.launcher.showSearch&&<button data-drawer-widget="search" onClick={()=>addWidgetToCurrentPage("search")}><span className="jb-widget-preview-search"><Image src="/jellybean/search-widget.png" alt="" width={220} height={20} unoptimized/></span><b>Google Search</b><small>4 × 1 · tap to add, long-press to drag</small></button>}
         {site.launcher.showGallery&&<button data-drawer-widget="gallery" onClick={()=>addWidgetToCurrentPage("gallery")}><span className="jb-widget-preview-gallery">{projects.slice(0,3).map(project=><ProjectArtwork key={project.slug} project={project}/>)}</span><b>Gallery</b><small>4 × 2 · tap to add, long-press to drag</small></button>}
-      </div>}</div></div>}
+      </div>}</motion.div></motion.div>}
+      </AnimatePresence>
 
       {shade && <div className="jb-overlay jb-shade-overlay" onClick={() => setShade(false)}><div className="jb-notification-shade" onClick={(e) => e.stopPropagation()} onTouchStart={(e) => { const t=e.touches[0]; touchStart.current={x:t.clientX,y:t.clientY}; }} onTouchEnd={(e) => { if (!touchStart.current) return; const t=e.changedTouches[0]; if (touchStart.current.y-t.clientY>65) setShade(false); touchStart.current=null; }}><div className="jb-shade-head"><div><b>{clock}</b><span>{dateLabel}</span></div><div className="jb-shade-controls"><Image className="jb-shade-rotation" src="/jellybean/ic_notify_rotation_off_normal.png" alt="Rotation lock" width={36} height={36} unoptimized /><button type="button" className="jb-shade-settings-button" onClick={() => { setShade(false); setSettingsPage("main"); setActiveApp("settings"); }} aria-label="Open Settings"><Image src="/jellybean/icons/aosp-4.1.2/settings.png" alt="" width={36} height={36} unoptimized /></button><Image className="jb-shade-clear" src="/jellybean/ic_notify_clear_normal.png" alt="Dismiss all notifications" width={36} height={36} unoptimized /></div></div><div className="jb-notification-empty"><span className="jb-notification-symbol"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 34h28l-4-5V18a10 10 0 0 0-20 0v11z" fill="none" stroke="currentColor" strokeWidth="2.4"/><path d="M19 38q5 6 10 0" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/></svg></span><b>No notifications</b></div></div></div>}
 
