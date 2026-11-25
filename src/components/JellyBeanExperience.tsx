@@ -23,6 +23,8 @@ const APPS: AppInfo[] = [
   { id: "about", name: "About", icon: "person", color: "#4c9bd6", panel: 0 },
   { id: "gallery", name: "Gallery", icon: "gallery", color: "#e8a34c", panel: 0 },
   { id: "projects", name: "Projects", icon: "projects", color: "#48a7a0", panel: 1 },
+  { id: "camera", name: "Camera", icon: "camera", color: "#6d8290", panel: 1 },
+  { id: "calendar", name: "Calendar", icon: "calendar", color: "#d65b4b", panel: 1 },
   { id: "breach-defend", name: "Project shortcut", icon: "breach", color: "#d65b4b", panel: 1 },
   { id: "hermes-quizzer", name: "Project shortcut", icon: "quizzer", color: "#4b8cc7", panel: 1 },
   { id: "street-safety", name: "Project shortcut", icon: "safety", color: "#d49a3e", panel: 3 },
@@ -44,7 +46,7 @@ const APPS: AppInfo[] = [
 /* eslint-disable @next/next/no-img-element -- custom admin-provided icon URLs are intentionally unoptimized. */
 function AppIcon({ app, size = "normal" }: { app: AppInfo; size?: "normal" | "large" }) {
   const assets: Record<string, string> = {
-    person: "aosp-4.1.2/contacts.png", gallery: "aosp-4.1.2/gallery.png", projects: "aosp-4.1.2/market.png", skills: "aosp-4.1.2/calculator.png",
+    person: "aosp-4.1.2/contacts.png", camera: "aosp-4.1.2/camera.png", calendar: "aosp-4.1.2/calendar.png", gallery: "aosp-4.1.2/gallery.png", projects: "aosp-4.1.2/market.png", skills: "aosp-4.1.2/calculator.png",
     message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png", github: "https://github.com/favicon.ico", terminal: "termux-new.png", magisk: "magisk.svg",
     briefcase: "aosp-4.1.2/clock.png", school: "aosp-4.1.2/calendar.png", email: "aosp-4.1.2/email.png", achievements: "aosp-4.1.2/market.png", journey: "aosp-4.1.2/browser.png", googleplus: "google-plus-2012.svg"
   };
@@ -285,11 +287,12 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget) };
       if (icon || widget) event.currentTarget.setPointerCapture(event.pointerId);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
-      if (icon || widget) longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 450);
+      if (icon || widget || target.closest(".jb-home-viewport")) longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (navigator.vibrate) navigator.vibrate(35); }, 500);
     }} onPointerMove={(event) => { const start=pointerStart.current; if((!start?.appId && !start?.widgetId) || (start.fromDrawer && !start.fromDrawerWidget) || Date.now()-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { pointerStart.current = null; lastAutoPage.current=-1; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
       const start = pointerStart.current; pointerStart.current = null;
       if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
       if (!start) return;
+      if (!start.appId && !start.widgetId && Date.now() - start.started >= 500) { setLauncherEditMode(true); suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
       const dx = event.clientX - start.x; const dy = event.clientY - start.y;
       const moved = Math.hypot(dx, dy);
       if (start.widgetId && Date.now() - start.started >= 450) {
@@ -357,7 +360,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
 
 
       {selectionMenu && <div className="jb-android-selection-menu" style={{left:selectionMenu.x,top:selectionMenu.y}}><button onClick={()=>{void navigator.clipboard.writeText(window.getSelection()?.toString()??"");setSelectionMenu(null);}}>Copy</button><button onClick={()=>{const range=document.createRange();range.selectNodeContents(document.querySelector(".jb-app-content")??document.body);window.getSelection()?.removeAllRanges();window.getSelection()?.addRange(range);setSelectionMenu(null);}}>Select all</button><button onClick={()=>setSelectionMenu(null)}>⋮</button></div>}
-      {launcherEditMode && <div className="jb-edit-toolbar"><span>Rearrange · drag apps and widgets · drag icons to top to remove <small>{layoutMessage}</small></span><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
+      {launcherEditMode && <div className="jb-edit-toolbar"><span>Home screen options <small>Apps live in the app drawer. Long-press an empty area to open these options. {layoutMessage}</small></span><button onClick={() => { setDrawerTab("widgets"); setDrawer(true); setLauncherEditMode(false); }}>Widgets</button><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
       {site.launcher.showStatusBar !== false && <div className="jb-status-bar" onClick={() => setShade(true)} role="button" tabIndex={0} aria-label="Open notifications and quick settings">
         <div className="jb-status-left" aria-hidden="true" />
         <div className="jb-status-right"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="signal" /><SystemStatusIcon kind="battery" /><span className="jb-status-time">{clock}</span></div>
@@ -374,28 +377,13 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
                 {widget.id === "gallery" && <div className="jb-gallery-widget"><div className="jb-widget-heading"><span>GALLERY</span><button type="button" onClick={() => open("gallery")}>OPEN</button></div><div className="jb-gallery-strip">{site.gallery.slice(0, 5).map(media => <button key={media.id} onClick={() => open("gallery")} aria-label={`Open ${media.source_caption || media.caption || media.source_title || media.original_filename}`}><span className="jb-gallery-thumb">{media.content_type.startsWith("video/") ? <span className="jb-video-thumb">▶</span> : <Image src={media.url} alt="" width={120} height={72} unoptimized/>}</span><span>{media.source_caption || media.caption || media.source_title || media.original_filename}</span></button>)}</div></div>}
               </div>)}
             </div>
-            {index === 0 && <>
-              <div className="jb-home-shortcut-row">{homeAppsByPanel[0].map((a, slot) => <button key={a.id} data-home-app={a.id} data-home-panel="0" style={{ gridColumn: (homePlacements[a.id]?.slot ?? slot) % 4 + 1, gridRow: Math.floor((homePlacements[a.id]?.slot ?? slot) / 4) + 1 }} onClick={() => { if (suppressIconClick.current) { suppressIconClick.current = false; return; } open(a.id); }}><AppIcon app={a} /><span>{a.name}</span></button>)}</div>
-            </>}
-            {index === 1 && <>
-              <div className="jb-icon-grid">{homeAppsByPanel[1].map((a, slot) => <button key={a.id} data-home-app={a.id} data-home-panel="1" style={{ gridColumn: (homePlacements[a.id]?.slot ?? slot) % 4 + 1, gridRow: Math.floor((homePlacements[a.id]?.slot ?? slot) / 4) + 1 }} onClick={() => { if (suppressIconClick.current) { suppressIconClick.current = false; return; } open(a.id); }}><AppIcon app={a} /><span>{a.name}</span></button>)}</div>
-            </>}
-            {index === 2 && <>
-              <div className="jb-icon-grid jb-icon-grid-large">{homeAppsByPanel[2].map((a, slot) => <button key={a.id} data-home-app={a.id} data-home-panel="2" style={{ gridColumn: (homePlacements[a.id]?.slot ?? slot) % 4 + 1, gridRow: Math.floor((homePlacements[a.id]?.slot ?? slot) / 4) + 1 }} onClick={() => { if (suppressIconClick.current) { suppressIconClick.current = false; return; } if (a.id === "github") window.open(site.owner.github, "_blank", "noopener,noreferrer"); else open(a.id); }}><AppIcon app={a} size="large" /><span>{a.name}</span></button>)}</div>
-            </>}
-            {index === 3 && <div className="jb-icon-grid">{homeAppsByPanel[3].map((a, slot) => <button key={a.id} data-home-app={a.id} data-home-panel="3" style={{ gridColumn: (homePlacements[a.id]?.slot ?? slot) % 4 + 1, gridRow: Math.floor((homePlacements[a.id]?.slot ?? slot) / 4) + 1 }} onClick={() => { if (suppressIconClick.current) { suppressIconClick.current = false; return; } open(a.id); }}><AppIcon app={a} /><span>{a.name}</span></button>)}</div>}
-            {index === 4 && <div className="jb-icon-grid">{homeAppsByPanel[4].map((a, slot) => <button key={a.id} data-home-app={a.id} data-home-panel="4" style={{ gridColumn: (homePlacements[a.id]?.slot ?? slot) % 4 + 1, gridRow: Math.floor((homePlacements[a.id]?.slot ?? slot) / 4) + 1 }} onClick={() => { if (suppressIconClick.current) { suppressIconClick.current = false; return; } open(a.id); }}><AppIcon app={a} /><span>{a.name}</span></button>)}</div>}
           </section>)}
         </div>
       </div>
 
       {site.launcher.showPageIndicator !== false && <div className="jb-page-indicator" aria-label="Home screen pages">{panels.map((p) => <button key={p} className={panel === p ? "active" : ""} onClick={() => goPanel(p)} aria-label={`Go to home screen ${p + 1}`} />)}</div>}
-      {site.launcher.showDock !== false && <div className="jb-dock">
-        <button onClick={() => open("contactDetails")} aria-label="Phone"><Image src="/jellybean/icons/aosp-4.1.2/phone.png" alt="" width={48} height={48} unoptimized /></button>
-        <button onClick={() => open("about")} aria-label="People"><Image src="/jellybean/icons/aosp-4.1.2/contacts.png" alt="" width={48} height={48} unoptimized /></button>
+      {site.launcher.showDock !== false && <div className="jb-dock jb-dock-drawer-only">
         <button className="jb-app-drawer-button" onClick={() => { setDrawerPage(0); setDrawer(value => !value); }} aria-label={drawer ? "Close app drawer" : "Open app drawer"}><Image src="/jellybean/icons/aosp-4.1.2/all-apps.png" alt="" width={48} height={48} unoptimized /></button>
-        <button onClick={() => open("contact")} aria-label="Messaging"><Image src="/jellybean/icons/aosp-4.1.2/messaging.png" alt="" width={48} height={48} unoptimized /></button>
-        <button onClick={() => { if (site.owner.github) window.open(site.owner.github, "_blank", "noopener,noreferrer"); }} aria-label="Browser"><Image src="/jellybean/icons/aosp-4.1.2/browser.png" alt="" width={48} height={48} unoptimized /></button>
       </div>}
       {site.launcher.showNavigationBar !== false && <div className="jb-navigation-bar"><div className="jb-tablet-nav"><button onClick={navBack} aria-label="Back"><SystemNavigationIcon kind="back" /></button><button onClick={navHome} aria-label="Home"><SystemNavigationIcon kind="home" /></button><button onClick={navRecent} aria-label="Recent apps"><SystemNavigationIcon kind="recent" /></button></div><button className="jb-tablet-status" onClick={() => setShade(true)} aria-label="Open notifications"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="battery" /><span>{clock}</span><span className="jb-tablet-notification-mark">●</span></button></div>}
 
@@ -410,6 +398,8 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       {recent && <div className="jb-overlay jb-recent-overlay"><div className="jb-recent-stack">{recentApps.length ? recentApps.map(id=>{const item=visibleApps.find(candidate=>candidate.id===id) ?? APPS.find(candidate=>candidate.id===id);return item?<button key={id} onClick={()=>open(id)}><AppIcon app={item} size="large"/><b>{item.name}</b></button>:null;}) : <p>No recent apps</p>}<button onClick={navHome}><span className="jb-recent-home">○</span><b>Home</b></button></div></div>}
       {app && <div className="jb-overlay jb-app-overlay"><div className="jb-app-window"><header className="jb-app-actionbar"><button onClick={navBack} aria-label="Back">‹</button><div><b>{currentProject?.name ?? app.name}</b></div></header><div className="jb-app-content">
         {activeApp === "about" && <><div className="jb-about-hero"><div className="jb-about-avatar">{site.owner.monogram}</div><h2>{site.owner.name}</h2><p>{site.owner.role}</p></div><h3>MY STORY</h3><p>{site.owner.intro}</p>{site.owner.location && <div className="jb-info-row"><span>LOCATION</span><b>{site.owner.location}</b></div>}{site.owner.github && <div className="jb-info-row"><span>GITHUB</span><a href={site.owner.github} target="_blank" rel="noreferrer">Open profile ↗</a></div>}</>}
+        {activeApp === "camera" && <LocalCamera />}
+        {activeApp === "calendar" && <LocalCalendar birthday={null} />}
         {activeApp === "gallery" && <><h3>GALLERY</h3>{site.gallery.length ? <div className="jb-media-gallery">{site.gallery.map((media) => <article className="jb-media-card" key={media.id}>{media.content_type.startsWith("video/") ? <video src={media.url} controls playsInline preload="metadata" /> : <Image src={media.url} alt={media.alt_text || media.source_caption || media.caption || media.source_title || media.original_filename} width={640} height={420} unoptimized /> }<div><b>{media.source_caption || media.caption || media.alt_text || media.source_title || media.original_filename}</b>{media.source_title && <small>{media.source_title}</small>}{media.uploaded_at && <small>{new Date(media.uploaded_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</small>}</div></article>)}</div> : <div className="jb-gallery-empty"><span>▧</span><b>No media found</b><small>No items in this album.</small></div>}</>}
         {activeApp === "projects" && (currentProject ? <><button className="jb-back-link" onClick={() => setSelectedProject(null)}>‹ ALL PROJECTS</button><div className="jb-project-detail-art"><ProjectArtwork project={currentProject} /></div><h3>{currentProject.category}</h3><h2 className="jb-project-detail-title">{currentProject.name}</h2><p>{currentProject.description || currentProject.summary}</p><div className="jb-chip-row">{currentProject.stack.map((s) => <span key={s}>{s}</span>)}</div><div className="jb-info-row"><span>PERIOD</span><b>{currentProject.period || "—"}</b></div>{currentProject.liveUrl && <a className="jb-project-action" href={currentProject.liveUrl} target="_blank" rel="noreferrer">LIVE PROJECT ↗</a>}</> : <><h3>SELECTED PROJECTS</h3>{projects.filter(p => isCurrentProjectDeployment(p.liveUrl)).length ? projects.filter(p => isCurrentProjectDeployment(p.liveUrl)).map((p) => <button className="jb-list-card jb-project-list-button" key={p.slug} onClick={() => setSelectedProject(p.slug)}><span className="jb-project-favicon"><Image src={`https://www.google.com/s2/favicons?sz=96&domain_url=${encodeURIComponent(p.liveUrl!)}`} alt="" width={32} height={32} unoptimized /></span><span className="jb-project-copy"><b>{p.name}</b><small>{p.category} · {p.period}</small><p>{p.summary}</p><span>OPEN DEPLOYMENT ›</span></span></button>) : <p className="jb-project-empty">No active project deployments are configured yet. Source repositories are intentionally not listed here.</p>}</>)}
         {activeApp === "experience" && <><h3>EXPERIENCE</h3>{site.experience.map((e, i) => <article className="jb-list-card" key={`${e.title}-${i}`}><b>{e.title}</b><small>{e.organization} · {e.period}</small><p>{e.description}</p></article>)}</>}
@@ -429,6 +419,69 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       </div></div></div>}
     </div>
   </main>;
+}
+
+function LocalCamera() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const [streaming, setStreaming] = useState(false);
+  const [negative, setNegative] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [error, setError] = useState("");
+  const [facing, setFacing] = useState<"user" | "environment">("environment");
+  const stopCamera = useCallback(() => { streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; setStreaming(false); }, []);
+  useEffect(() => () => { recorderRef.current?.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }, []);
+  async function startCamera(nextFacing = facing) {
+    setError("");
+    if (!navigator.mediaDevices?.getUserMedia) { setError("Camera access requires HTTPS and a browser that supports getUserMedia."); return; }
+    stopCamera();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: nextFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true });
+      streamRef.current = stream;
+      if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play(); }
+      setStreaming(true);
+    } catch (e) { setError(e instanceof Error ? e.message : "Camera or microphone permission was denied."); }
+  }
+  function download(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+  function takePhoto() {
+    const video = videoRef.current; if (!video || !video.videoWidth) return;
+    const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d"); if (!context) return;
+    context.filter = negative ? "invert(1)" : "none"; context.drawImage(video, 0, 0, canvas.width, canvas.height); context.filter = "none";
+    canvas.toBlob(blob => { if (blob) download(blob, `portfolio-camera-${new Date().toISOString().replace(/[:.]/g,"-")}${negative ? "-negative" : ""}.jpg`); }, "image/jpeg", .94);
+  }
+  function startRecording() {
+    if (!streamRef.current) return;
+    const mime = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(type => MediaRecorder.isTypeSupported(type));
+    try {
+      chunksRef.current = []; const recorder = new MediaRecorder(streamRef.current, mime ? { mimeType: mime } : undefined); recorderRef.current = recorder;
+      recorder.ondataavailable = event => { if (event.data.size) chunksRef.current.push(event.data); };
+      recorder.onstop = () => { const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "video/webm" }); if (blob.size) download(blob, `portfolio-video-${new Date().toISOString().replace(/[:.]/g,"-")}.webm`); setRecording(false); };
+      recorder.start(250); setRecording(true);
+    } catch (e) { setError(e instanceof Error ? e.message : "Video recording is not supported by this browser."); }
+  }
+  return <section className="jb-camera-app"><h3>CAMERA</h3><p>Captured media stays in this browser session and downloads directly to your device. Nothing is uploaded.</p><div className="jb-camera-view"><video ref={videoRef} autoPlay muted playsInline className={negative ? "is-negative" : ""}/>{!streaming && <div className="jb-camera-placeholder">Camera preview</div>}</div><div className="jb-camera-controls">{!streaming ? <button onClick={() => void startCamera()}>Enable camera</button> : <><button onClick={takePhoto}>Take photo</button>{recording ? <button onClick={() => recorderRef.current?.stop()}>Stop & download video</button> : <button onClick={startRecording}>Record video</button>}<button onClick={() => { const next = facing === "user" ? "environment" : "user"; setFacing(next); void startCamera(next); }}>Flip camera</button><button onClick={stopCamera}>Stop camera</button></>}<button className={negative ? "selected" : ""} onClick={() => setNegative(value => !value)}>Negative {negative ? "ON" : "OFF"}</button></div>{error && <p className="jb-camera-error" role="alert">{error}</p>}<small>Photos: JPEG · Videos: WebM · Negative mode is applied to photos and preview.</small></section>;
+}
+
+function LocalCalendar({ birthday }: { birthday: string | null }) {
+  const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [selected, setSelected] = useState(() => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`; });
+  const year = month.getFullYear(), monthIndex = month.getMonth();
+  const events = [
+    { date: "2011-06-28", title: "Google+ launched", detail: "Google introduced Google+ to the public in an initial field-test phase." },
+    { date: "2012-06-27", title: "Android 4.1 Jelly Bean announced", detail: "Jelly Bean was announced at Google I/O 2012." },
+    { date: "2012-07-09", title: "Android 4.1 rollout began", detail: "The Android 4.1 update began rolling out to Galaxy Nexus devices." },
+    { date: "2012-10-29", title: "Android 4.2 announced", detail: "Android 4.2 was announced as the next Jelly Bean release." }
+  ];
+  const birthdayEvent = birthday ? { date: birthday.length === 10 ? birthday : "", title: "Birthday", detail: "Your birthday" } : null;
+  const allEvents = [...events, ...(birthdayEvent?.date ? [birthdayEvent] : [])];
+  const first = new Date(year, monthIndex, 1).getDay(); const days = new Date(year, monthIndex + 1, 0).getDate();
+  const selectedEvents = allEvents.filter(event => event.date === selected);
+  return <section className="jb-calendar-app"><h3>CALENDAR</h3><div className="jb-calendar-toolbar"><button onClick={() => setMonth(new Date(year,monthIndex-1,1))}>‹</button><b>{month.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}</b><button onClick={() => setMonth(new Date(year,monthIndex+1,1))}>›</button></div><div className="jb-calendar-grid">{["S","M","T","W","T","F","S"].map((day,i)=><b key={`${day}-${i}`}>{day}</b>)}{Array.from({length:first},(_,i)=><span key={`blank-${i}`}/>)}{Array.from({length:days},(_,i)=>{const date=`${year}-${String(monthIndex+1).padStart(2,"0")}-${String(i+1).padStart(2,"0")}`;const has=allEvents.some(event=>event.date===date);return <button key={date} className={`${selected===date?"selected":""} ${has?"has-event":""}`} onClick={()=>setSelected(date)}>{i+1}{has&&<i/>}</button>;})}</div><div className="jb-calendar-events"><b>{new Date(`${selected}T12:00:00`).toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</b>{selectedEvents.length ? selectedEvents.map(event=><article key={event.title}><strong>{event.title}</strong><p>{event.detail}</p></article>) : <p>No saved events for this date.</p>}</div><small>Public historical dates are fixed references. Your birthday is shown once its exact date is configured.</small></section>;
 }
 
 function useClock() {

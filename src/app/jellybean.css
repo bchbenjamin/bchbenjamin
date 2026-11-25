@@ -468,3 +468,33 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 /* Keep page dots fully above the hotseat; never let dock hit-testing cover them. */
 .jb-page-indicator{bottom:110px;z-index:7;pointer-events:auto}
 @media(max-width:520px){.jb-page-indicator{bottom:calc(110px + env(safe-area-inset-bottom))}}
+
+/* App registry is the sole home for app shortcuts; home screens contain widgets only. */
+.jb-dock-drawer-only{display:flex!important;justify-content:center!important;align-items:center!important;grid-template-columns:none!important}
+.jb-dock-drawer-only>button{width:58px!important}
+.jb-edit-toolbar{gap:10px;flex-wrap:wrap}
+.jb-edit-toolbar>span{flex:1 1 100%}
+.jb-edit-toolbar>button{min-width:72px;padding:8px 14px;border:1px solid #8298a5;background:linear-gradient(#f7fafb,#dce5e9);color:#26343b}
+.jb-camera-app,.jb-calendar-app{color:#26343b}
+.jb-camera-app>p,.jb-camera-app>small,.jb-calendar-app>small{font-size:12px;line-height:1.5;color:#65747c}
+.jb-camera-view{position:relative;width:100%;aspect-ratio:4/3;max-height:52vh;overflow:hidden;background:#101820;border:1px solid #aeb9bf;display:grid;place-items:center}
+.jb-camera-view video{width:100%;height:100%;object-fit:cover}
+.jb-camera-view video.is-negative{filter:invert(1)}
+.jb-camera-placeholder{position:absolute;color:#b9c7cf;font-size:13px}
+.jb-camera-controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.jb-camera-controls button,.jb-calendar-toolbar button{padding:9px 12px;border:1px solid #aebdc5;background:linear-gradient(#fff,#e4ebee);color:#26343b;font-size:12px}
+.jb-camera-controls button.selected{background:#d8eaf2;border-color:#2788b4;color:#126b91}
+.jb-camera-error{padding:10px;background:#fff0ef;border:1px solid #e3aaa5;color:#9c3028!important;overflow-wrap:anywhere}
+.jb-calendar-toolbar{display:flex;align-items:center;justify-content:space-between;margin:12px 0}
+.jb-calendar-toolbar b{font-size:17px;font-weight:500}
+.jb-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center}
+.jb-calendar-grid>b{padding:7px 0;color:#6c7c84;font-size:11px}
+.jb-calendar-grid>button{position:relative;aspect-ratio:1;border:0;background:#f0f3f4;color:#26343b;font-size:12px}
+.jb-calendar-grid>button.selected{background:#247fa7;color:#fff;border-radius:50%}
+.jb-calendar-grid>button i{position:absolute;bottom:4px;left:calc(50% - 2px);width:4px;height:4px;border-radius:50%;background:#d85a43}
+.jb-calendar-grid>button.selected i{background:#fff}
+.jb-calendar-events{margin-top:18px;padding:12px;background:#f2f5f6;border:1px solid #d5dde1;min-height:90px}
+.jb-calendar-events>b{display:block;margin-bottom:10px;font-size:12px}
+.jb-calendar-events article{padding:8px 0;border-top:1px solid #dce2e5}
+.jb-calendar-events strong{font-size:13px}
+.jb-calendar-events p,.jb-calendar-events>p{margin:4px 0 0;font-size:11px;line-height:1.5;color:#63727a}
