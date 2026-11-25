@@ -394,6 +394,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         <button className="jb-app-drawer-button" onClick={() => { setDrawerPage(0); setDrawer(value => !value); }} aria-label={drawer ? "Close app drawer" : "Open app drawer"}><Image src="/jellybean/icons/aosp-4.1.2/all-apps.png" alt="" width={48} height={48} unoptimized /></button>
         <button onClick={() => open("contact")} aria-label="Messaging"><Image src="/jellybean/icons/aosp-4.1.2/messaging.png" alt="" width={48} height={48} unoptimized /></button>
         <button onClick={() => { if (site.owner.github) window.open(site.owner.github, "_blank", "noopener,noreferrer"); }} aria-label="Browser"><Image src="/jellybean/icons/aosp-4.1.2/browser.png" alt="" width={48} height={48} unoptimized /></button>
+        <button onClick={() => open("camera")} aria-label="Camera"><Image src="/jellybean/icons/aosp-4.1.2/camera.png" alt="" width={48} height={48} unoptimized /></button>
       </div>}
       {site.launcher.showNavigationBar !== false && <div className="jb-navigation-bar"><div className="jb-tablet-nav"><button onClick={navBack} aria-label="Back"><SystemNavigationIcon kind="back" /></button><button onClick={navHome} aria-label="Home"><SystemNavigationIcon kind="home" /></button><button onClick={navRecent} aria-label="Recent apps"><SystemNavigationIcon kind="recent" /></button></div><button className="jb-tablet-status" onClick={() => setShade(true)} aria-label="Open notifications"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="battery" /><span>{clock}</span><span className="jb-tablet-notification-mark">●</span></button></div>}
 
@@ -436,34 +437,50 @@ function LocalCamera() {
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const touchStart = useRef<{x:number;y:number}|null>(null);
   const [streaming, setStreaming] = useState(false);
-  const [negative, setNegative] = useState(false);
   const [recording, setRecording] = useState(false);
   const [mode, setMode] = useState<"photo" | "video">("photo");
   const [error, setError] = useState("");
   const [facing, setFacing] = useState<"user" | "environment">("environment");
+  const [zoom, setZoom] = useState(1);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [flash, setFlash] = useState<"off"|"auto"|"on">("auto");
+  const [lastCapture, setLastCapture] = useState<{url:string;kind:"photo"|"video"}|null>(null);
+  const [reviewing, setReviewing] = useState(false);
+  const [focus, setFocus] = useState<{x:number;y:number}|null>(null);
   const stopCamera = useCallback(() => { streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; setStreaming(false); }, []);
-  useEffect(() => () => { if (recorderRef.current?.state === "recording") recorderRef.current.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }, []);
-  async function startCamera(nextFacing = facing) {
+  async function startCamera(nextFacing = facing, withAudio = mode === "video") {
     setError("");
     if (!navigator.mediaDevices?.getUserMedia) { setError("Camera access requires HTTPS and browser camera support."); return; }
     stopCamera();
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: nextFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: nextFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: withAudio });
       streamRef.current = stream;
       if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play(); }
       setStreaming(true);
-    } catch (e) { setError(e instanceof Error ? e.message : "Camera or microphone permission was denied."); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Camera permission was denied."); }
   }
+  useEffect(() => {
+    const request = window.setTimeout(() => { void startCamera(); }, 0);
+    return () => { window.clearTimeout(request); if (recorderRef.current?.state === "recording") recorderRef.current.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); };
+    // The camera is intentionally requested once when the app opens, as a native camera app does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function download(blob: Blob, filename: string) {
-    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+  function rememberCapture(blob: Blob, kind: "photo"|"video") {
+    const url = URL.createObjectURL(blob);
+    setLastCapture(previous => { if (previous) URL.revokeObjectURL(previous.url); return {url,kind}; });
+    setReviewing(false);
   }
   function takePhoto() {
     const video = videoRef.current; if (!video || !video.videoWidth) return;
     const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     const context = canvas.getContext("2d"); if (!context) return;
-    context.filter = negative ? "invert(1)" : "none"; context.drawImage(video, 0, 0, canvas.width, canvas.height); context.filter = "none";
-    canvas.toBlob(blob => { if (blob) download(blob, `portfolio-camera-${new Date().toISOString().replace(/[:.]/g,"-")}${negative ? "-negative" : ""}.jpg`); }, "image/jpeg", .95);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(blob => { if (blob) { rememberCapture(blob,"photo"); download(blob, `IMG_${Date.now()}.jpg`); } }, "image/jpeg", .95);
   }
   function startRecording() {
     if (!streamRef.current || typeof MediaRecorder === "undefined") { setError("Video recording is not supported by this browser."); return; }
@@ -471,25 +488,33 @@ function LocalCamera() {
     try {
       chunksRef.current = []; const recorder = new MediaRecorder(streamRef.current, mime ? { mimeType: mime } : undefined); recorderRef.current = recorder;
       recorder.ondataavailable = event => { if (event.data.size) chunksRef.current.push(event.data); };
-      recorder.onstop = () => { const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "video/webm" }); if (blob.size) download(blob, `portfolio-video-${new Date().toISOString().replace(/[:.]/g,"-")}.webm`); setRecording(false); };
+      recorder.onstop = () => { const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "video/webm" }); if (blob.size) { rememberCapture(blob,"video"); download(blob, `VID_${Date.now()}.webm`); } setRecording(false); };
       recorder.start(250); setRecording(true);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not start video recording."); }
   }
   function shutter() { if (!streaming) { void startCamera(); return; } if (mode === "photo") takePhoto(); else if (recording) recorderRef.current?.stop(); else startRecording(); }
-  return <section className="jb-camera-app" aria-label="Camera">
-    <div className="jb-camera-topbar">
-      <button type="button" aria-label="Negative filter" className={negative ? "active" : ""} onClick={() => setNegative(value => !value)}><span className="jb-camera-negative-icon">◐</span><small>FILTER</small></button>
-      <span className="jb-camera-top-title">CAMERA</span>
-      <button type="button" aria-label="Switch camera" onClick={() => { const next = facing === "user" ? "environment" : "user"; setFacing(next); if (streaming) void startCamera(next); }}><span className="jb-camera-switch-icon">⟳</span><small>FLIP</small></button>
+  function changeMode(next: "photo"|"video") { setMode(next); if (streaming && next === "video" && !streamRef.current?.getAudioTracks().length) void startCamera(facing, true); }
+  function flipCamera() { const next = facing === "user" ? "environment" : "user"; setFacing(next); if (streaming) void startCamera(next); }
+  function focusAt(event: React.PointerEvent<HTMLDivElement>) { const rect=event.currentTarget.getBoundingClientRect(); setFocus({x:event.clientX-rect.left,y:event.clientY-rect.top}); window.setTimeout(()=>setFocus(null),1100); }
+  return <section className="jb-camera-app" aria-label="Android Jelly Bean Camera">
+    <div className="jb-camera-view" onPointerDown={event=>{touchStart.current={x:event.clientX,y:event.clientY};}} onPointerUp={event=>{if(!touchStart.current)return;const dx=event.clientX-touchStart.current.x;if(dx < -55 && lastCapture)setReviewing(true);else if(dx > 55)setReviewing(false);touchStart.current=null;}} onClick={focusAt}>
+      <video ref={videoRef} autoPlay muted playsInline style={{transform:`scale(${zoom}) scaleX(${facing === "user" ? -1 : 1})`}} />
+      {!streaming && !reviewing && <div className="jb-camera-start-overlay"><span className="jb-camera-lens">◉</span><b>{error ? "Camera unavailable" : "Camera"}</b><small>{error || "Tap the shutter to start the camera"}</small><button type="button" onClick={event=>{event.stopPropagation();void startCamera();}}>START CAMERA</button></div>}
+      {focus && streaming && <span className="jb-camera-focus-ring" style={{left:focus.x,top:focus.y}}/>}
+      {recording && <div className="jb-camera-recording"><i/> Recording</div>}
+      {reviewing && lastCapture && <div className="jb-camera-review"><button type="button" onClick={()=>setReviewing(false)} aria-label="Return to camera">‹ Camera</button>{lastCapture.kind === "photo" ? <img src={lastCapture.url} alt="Most recent photo"/> : <video src={lastCapture.url} controls autoPlay playsInline/>}<span>Swipe right to return to camera</span></div>}
+      {streaming && !reviewing && <div className="jb-camera-zoom"><span>+</span><input aria-label="Zoom" type="range" min="1" max="4" step="0.1" value={zoom} onChange={event=>setZoom(Number(event.target.value))}/><span>−</span></div>}
     </div>
-    <div className="jb-camera-view"><video ref={videoRef} autoPlay muted playsInline className={negative ? "is-negative" : ""}/>{!streaming && <div className="jb-camera-start-overlay"><span className="jb-camera-lens">◎</span><b>{error ? "Camera unavailable" : "Ready to capture"}</b><small>{error || "Tap the shutter to allow camera access"}</small><button type="button" onClick={() => void startCamera()}>ENABLE CAMERA</button></div>}{recording && <div className="jb-camera-recording"><i/> REC</div>}</div>
+    <aside className="jb-camera-controls" aria-label="Camera controls">
+      <button className="jb-camera-thumbnail" type="button" aria-label="Review last capture" onClick={()=>lastCapture&&setReviewing(true)}>{lastCapture?.kind === "photo" ? <img src={lastCapture.url} alt=""/> : lastCapture ? <span>▶</span> : <span className="jb-camera-empty-thumbnail">▧</span>}</button>
+      <div className="jb-camera-mode-picker" role="group" aria-label="Capture mode"><button type="button" className={mode === "video" ? "active" : ""} onClick={()=>changeMode("video")} aria-label="Video mode"><svg viewBox="0 0 24 24"><path d="M3 6h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3zM17 10l4-3v10l-4-3z"/></svg></button><button type="button" className={mode === "photo" ? "active" : ""} onClick={()=>changeMode("photo")} aria-label="Photo mode"><svg viewBox="0 0 24 24"><path d="M4 7h4l2-2h4l2 2h4a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="4"/></svg></button></div>
+      <button type="button" className={`jb-camera-shutter ${mode === "video" ? "video-mode" : ""} ${recording ? "recording" : ""}`} aria-label={recording ? "Stop recording" : mode === "photo" ? "Take photo" : "Start recording"} onClick={shutter}><span/></button>
+      <button type="button" className="jb-camera-control-button" onClick={flipCamera} aria-label="Switch front and rear camera"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.5-3"/></svg></button>
+      <button type="button" className={`jb-camera-control-button ${settingsOpen ? "active" : ""}`} onClick={()=>setSettingsOpen(value=>!value)} aria-label="Camera settings"><svg viewBox="0 0 24 24"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6z"/><path d="m19.4 13.5 1.2.9-1.2 2.1-1.5-.5a7.7 7.7 0 0 1-1.5.9l-.3 1.6h-2.5l-.4-1.6a7.7 7.7 0 0 1-1.6-.9l-1.5.5-1.2-2.1 1.2-.9a7 7 0 0 1 0-1.8l-1.2-.9 1.2-2.1 1.5.5a7.7 7.7 0 0 1 1.6-.9l.4-1.6h2.5l.3 1.6a7.7 7.7 0 0 1 1.5.9l1.5-.5 1.2 2.1-1.2.9a7 7 0 0 1 0 1.8z"/></svg></button>
+      {settingsOpen && <div className="jb-camera-settings"><b>Camera settings</b><label>Flash <select value={flash} onChange={event=>setFlash(event.target.value as "off"|"auto"|"on")}><option value="auto">Auto</option><option value="on">On</option><option value="off">Off</option></select></label><label>Camera <span>{facing === "environment" ? "Back" : "Front"}</span></label><label>Zoom <span>{zoom.toFixed(1)}×</span></label><small>Photos and videos download to this device only.</small></div>}
+      <span className="jb-camera-mode-label">{recording ? "REC" : mode === "photo" ? "CAMERA" : "VIDEO"}</span>
+    </aside>
     {error && streaming && <div className="jb-camera-inline-error" role="alert">{error}</div>}
-    <div className="jb-camera-bottom">
-      <div className="jb-camera-mode-switch" role="group" aria-label="Capture mode"><button type="button" className={mode === "video" ? "selected" : ""} onClick={() => setMode("video")}>VIDEO</button><button type="button" className={mode === "photo" ? "selected" : ""} onClick={() => setMode("photo")}>PHOTO</button></div>
-      <div className="jb-camera-capture-row"><button type="button" className="jb-camera-gallery-shortcut" aria-label="Photos download directly to device" onClick={() => setError("Captured photos and videos are downloaded directly to your device; nothing is stored in this app.")}>▧</button><button type="button" className={`jb-camera-shutter ${mode === "video" ? "video-mode" : ""} ${recording ? "recording" : ""}`} aria-label={recording ? "Stop recording" : mode === "photo" ? "Take photo" : "Start recording"} onClick={shutter}><span/></button><button type="button" className="jb-camera-flip-shortcut" aria-label="Flip camera" onClick={() => { const next = facing === "user" ? "environment" : "user"; setFacing(next); if (streaming) void startCamera(next); }}>↻</button></div>
-      <div className="jb-camera-footnote">{recording ? "RECORDING VIDEO · TAP TO STOP" : mode === "photo" ? "TAP SHUTTER TO TAKE PHOTO" : "TAP SHUTTER TO RECORD VIDEO"}</div>
-      <div className="jb-camera-privacy">MEDIA DOWNLOADS LOCALLY · NOT UPLOADED</div>
-    </div>
   </section>;
 }
 

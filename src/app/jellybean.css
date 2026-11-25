@@ -469,8 +469,8 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-page-indicator{bottom:110px;z-index:7;pointer-events:auto}
 @media(max-width:520px){.jb-page-indicator{bottom:calc(110px + env(safe-area-inset-bottom))}}
 
-/* Keep the five-slot Jelly Bean hotseat while home screens remain widget-only. */
-.jb-dock:not(.jb-dock-drawer-only){display:grid;grid-template-columns:repeat(5,minmax(0,1fr));justify-items:center;align-items:center}
+/* Keep the Jelly Bean hotseat consistent; Camera is an additional sixth shortcut. */
+.jb-dock:not(.jb-dock-drawer-only){display:grid;grid-template-columns:repeat(6,minmax(0,1fr));justify-items:center;align-items:center}
 .jb-dock:not(.jb-dock-drawer-only)>button{width:100%;}
 .jb-edit-toolbar{gap:10px;flex-wrap:wrap}
 .jb-edit-toolbar>span{flex:1 1 100%}
@@ -516,43 +516,53 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 @media(prefers-reduced-motion:reduce){.jb-home-app-grid button,.jb-drawer-page-track,.jb-drawer-page button,.jb-dock button{transition:none!important;animation:none!important}}
 .jb-device:has(.jb-edit-toolbar) .jb-home-app-grid button,.jb-device:has(.jb-edit-toolbar) .jb-drawer-page button{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
 
-/* AOSP Jelly Bean camera: immersive viewfinder, Holo chrome and physical shutter. */
+/* Android 4.1 AOSP Camera: live viewfinder with the original right-side control rail. */
 .jb-app-window:has(.jb-camera-app){background:#080b0e}
 .jb-app-window:has(.jb-camera-app) .jb-app-actionbar{display:none}
 .jb-app-window:has(.jb-camera-app) .jb-app-content{padding:0!important;overflow:hidden;background:#080b0e;color:#fff}
-.jb-camera-app{height:100%;min-height:100%;display:flex;flex-direction:column;background:#080b0e;color:#fff;overflow:hidden;user-select:none}
-.jb-camera-topbar{height:58px;flex:0 0 58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:linear-gradient(#26333d,#111a21);border-bottom:1px solid #ffffff20}
-.jb-camera-topbar button{width:54px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;background:transparent;color:#e7f2f7}
-.jb-camera-topbar button.active{color:#33b5e5}
-.jb-camera-topbar button small{font-size:8px;letter-spacing:1px;color:#b6c5cc}
-.jb-camera-top-title{font-size:11px;letter-spacing:2px;color:#dce9ef}
-.jb-camera-negative-icon,.jb-camera-switch-icon{font-size:25px;line-height:26px}
-.jb-camera-view{position:relative;flex:1;min-height:120px;width:100%;overflow:hidden;background:radial-gradient(ellipse at center,#29343b,#080b0e 75%);border:0;display:grid;place-items:center;aspect-ratio:auto;max-height:none}
-.jb-camera-view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.jb-camera-view video.is-negative{filter:invert(1)}
-.jb-camera-start-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:24px;text-align:center;color:#eaf3f7;background:linear-gradient(#101a22aa,#080b0ecc)}
-.jb-camera-lens{font-size:54px;color:#75c7e5;text-shadow:0 0 22px #33b5e566}
+.jb-camera-app{height:100%;min-height:100%;display:flex;position:relative;background:#000;color:#fff;overflow:hidden;user-select:none}
+.jb-camera-view{position:relative;flex:1;min-width:0;overflow:hidden;background:radial-gradient(ellipse at center,#27333a,#05080a 78%);touch-action:pan-y}
+.jb-camera-view>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:center;transition:transform .12s ease}
+.jb-camera-start-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;background:linear-gradient(#10182088,#05080acc)}
+.jb-camera-lens{font-size:52px;color:#b8cbd5;text-shadow:0 0 20px #b8d8e655}
 .jb-camera-start-overlay b{font-size:16px;font-weight:400}
-.jb-camera-start-overlay small{max-width:260px;color:#aebfc8;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
-.jb-camera-start-overlay button{margin-top:8px;padding:11px 24px;border:1px solid #68c5e7;background:linear-gradient(#258eb8,#12658c);color:#fff;font-size:10px;letter-spacing:1.2px;box-shadow:0 2px 8px #0008}
-.jb-camera-recording{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:7px;padding:6px 9px;background:#0009;color:#fff;font-size:11px;letter-spacing:1px}
-.jb-camera-recording i{width:8px;height:8px;border-radius:50%;background:#f44336;box-shadow:0 0 8px #f44336}
-.jb-camera-inline-error{padding:6px 10px;background:#421d1d;color:#ffc6c0;font-size:10px}
-.jb-camera-bottom{flex:0 0 auto;padding:12px 18px max(12px,env(safe-area-inset-bottom));background:linear-gradient(#1c2932,#0b1116);border-top:1px solid #ffffff25}
-.jb-camera-mode-switch{display:flex;justify-content:center;gap:0;margin:0 auto 9px}
-.jb-camera-mode-switch button{min-width:74px;padding:7px 12px;border:1px solid #51636e;background:#1c2b35;color:#aebfc8;font-size:9px;letter-spacing:1.4px}
-.jb-camera-mode-switch button:first-child{border-radius:2px 0 0 2px}
-.jb-camera-mode-switch button:last-child{border-radius:0 2px 2px 0}
-.jb-camera-mode-switch button.selected{background:#d7eaf2;color:#1b5c79;border-color:#a6d9ed;font-weight:700}
-.jb-camera-capture-row{height:76px;display:flex;align-items:center;justify-content:space-between;max-width:280px;margin:0 auto}
-.jb-camera-capture-row>button{display:grid;place-items:center;width:48px;height:48px;border:0;background:transparent;color:#dce8ed;font-size:29px}
-.jb-camera-capture-row .jb-camera-shutter{width:68px;height:68px;border:4px solid #eaf3f7;border-radius:50%;background:#dce6eb;box-shadow:0 0 0 2px #263a46,inset 0 0 0 2px #71818a}
-.jb-camera-shutter span{width:52px;height:52px;border-radius:50%;background:linear-gradient(#fff,#d7e0e5);box-shadow:inset 0 1px 2px #fff}
-.jb-camera-shutter.video-mode span{width:22px;height:22px;border-radius:50%;background:#e94b43}
-.jb-camera-shutter.recording span{width:22px;height:22px;border-radius:5px;background:#e53935}
-.jb-camera-footnote{text-align:center;margin-top:4px;color:#d9e6eb;font-size:8px;letter-spacing:1.2px}
-.jb-camera-privacy{text-align:center;margin-top:7px;color:#82949e;font-size:7px;letter-spacing:1px}
-@media(max-height:650px){.jb-camera-topbar{height:48px;flex-basis:48px}.jb-camera-bottom{padding-top:7px}.jb-camera-capture-row{height:62px}.jb-camera-capture-row .jb-camera-shutter{width:58px;height:58px}.jb-camera-shutter span{width:44px;height:44px}}
+.jb-camera-start-overlay small{max-width:230px;color:#b7c4cb;font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+.jb-camera-start-overlay button{margin-top:8px;padding:10px 22px;border:1px solid #8ba6b5;border-radius:2px;background:linear-gradient(#536d7c,#273d49);color:#fff;font-size:10px;letter-spacing:1px;text-shadow:0 1px 2px #000}
+.jb-camera-controls{position:relative;z-index:3;flex:0 0 86px;width:86px;display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:7px 5px;background:linear-gradient(90deg,#303b43,#151d23 28%,#090e12);border-left:1px solid #ffffff2b;box-shadow:-2px 0 8px #0008}
+.jb-camera-controls button{color:#e7edf0}
+.jb-camera-thumbnail{width:43px;height:43px;display:grid;place-items:center;overflow:hidden;border:2px solid #aab8bf;border-radius:2px;background:linear-gradient(#56646c,#202b32);box-shadow:0 1px 3px #0009}
+.jb-camera-thumbnail img{width:100%;height:100%;object-fit:cover}
+.jb-camera-thumbnail>span{font-size:20px;color:#e8f0f3}
+.jb-camera-empty-thumbnail{font-size:23px!important}
+.jb-camera-mode-picker{display:flex;flex-direction:column;gap:2px;padding:3px;border:1px solid #63747e;border-radius:3px;background:#10191f}
+.jb-camera-mode-picker button{width:37px;height:34px;display:grid;place-items:center;border:0;border-radius:2px;background:transparent;color:#8798a2}
+.jb-camera-mode-picker button.active{background:linear-gradient(#6c8796,#344c5b);color:#fff;box-shadow:inset 0 1px #ffffff55}
+.jb-camera-mode-picker svg,.jb-camera-control-button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.jb-camera-shutter{width:57px;height:57px;flex:0 0 57px;display:grid;place-items:center;border:4px solid #d5dce0;border-radius:50%;background:radial-gradient(circle,#f7f8f8 0 58%,#8b969c 61% 68%,#29343b 72%);box-shadow:0 0 0 2px #080d11,0 2px 5px #000b}
+.jb-camera-shutter span{width:37px;height:37px;border:1px solid #9ba8ae;border-radius:50%;background:linear-gradient(145deg,#fff,#c7d0d4);box-shadow:inset 0 1px 2px #fff}
+.jb-camera-shutter.video-mode span{width:21px;height:21px;border:0;border-radius:50%;background:#c93b32}
+.jb-camera-shutter.recording span{width:19px;height:19px;border:0;border-radius:3px;background:#d33b32}
+.jb-camera-control-button{width:38px;height:34px;display:grid;place-items:center;border:1px solid #63747e;border-radius:2px;background:linear-gradient(#3a4b55,#1b2931);box-shadow:inset 0 1px #ffffff30}
+.jb-camera-control-button.active{background:#5c7c8d;color:#fff}
+.jb-camera-mode-label{font-size:8px;letter-spacing:1px;color:#b5c4cb}
+.jb-camera-zoom{position:absolute;right:12px;top:50%;height:160px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 5px;transform:translateY(-50%);background:#111a2090;border:1px solid #ffffff40;border-radius:3px;color:#fff;font-size:12px}
+.jb-camera-zoom input{width:110px;transform:rotate(-90deg);accent-color:#b7d2df}
+.jb-camera-focus-ring{position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;border:2px solid #b9e2f4;border-radius:50%;box-shadow:0 0 0 1px #172b36,0 0 12px #8dd5ff;pointer-events:none;animation:jb-camera-focus 1.1s ease-out forwards}
+@keyframes jb-camera-focus{0%{opacity:1;transform:scale(.8)}65%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
+.jb-camera-recording{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:7px;padding:6px 9px;background:#000a;color:#fff;font-size:11px;letter-spacing:1px}
+.jb-camera-recording i{width:8px;height:8px;border-radius:50%;background:#e33;box-shadow:0 0 7px #e33}
+.jb-camera-settings{position:absolute;right:91px;bottom:8px;z-index:6;width:190px;padding:11px;background:linear-gradient(#354852,#15232b);border:1px solid #8da2ad;border-radius:2px;box-shadow:0 4px 14px #000b;color:#fff;font-size:11px}
+.jb-camera-settings>b{display:block;margin-bottom:8px;color:#d9e9f0;font-size:12px;font-weight:500}
+.jb-camera-settings label{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #ffffff22;color:#c6d4da}
+.jb-camera-settings select{max-width:90px;padding:3px;border:1px solid #7c909a;background:#17252d;color:#fff;font-size:10px}
+.jb-camera-settings small{display:block;margin-top:8px;color:#aabcc5;font-size:9px;line-height:1.4}
+.jb-camera-review{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#05080b;color:#fff}
+.jb-camera-review>img,.jb-camera-review>video{width:100%;height:calc(100% - 65px);object-fit:contain}
+.jb-camera-review>button{align-self:flex-start;margin:8px 12px 0;padding:6px 10px;border:1px solid #82949e;background:#263943;color:#fff;font-size:11px}
+.jb-camera-review>span{font-size:9px;color:#aab8bf}
+.jb-camera-inline-error{position:absolute;z-index:8;left:8px;right:94px;bottom:8px;padding:7px 9px;background:#421d1d;color:#ffc6c0;font-size:10px}
+@media(max-width:360px){.jb-camera-controls{flex-basis:76px;width:76px}.jb-camera-shutter{width:51px;height:51px;flex-basis:51px}.jb-camera-shutter span{width:32px;height:32px}.jb-camera-settings{right:81px;width:170px}}
+@media(max-height:500px){.jb-camera-controls{flex-direction:row;flex-basis:76px;width:76px;flex-wrap:wrap}.jb-camera-thumbnail{width:32px;height:32px}.jb-camera-mode-picker{flex-direction:row}.jb-camera-mode-picker button{width:30px;height:28px}.jb-camera-shutter{width:43px;height:43px;flex-basis:43px}.jb-camera-shutter span{width:28px;height:28px}.jb-camera-control-button{width:30px;height:28px}}
 .jb-drag-preview{position:absolute;z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;width:86px;margin-left:-43px;margin-top:-43px;filter:drop-shadow(0 8px 10px #000b);transform-origin:center center}
 .jb-drag-preview .jb-app-icon{width:58px;height:58px}
 .jb-drag-preview>span{max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:10px;text-shadow:0 2px 4px #000;text-align:center}
