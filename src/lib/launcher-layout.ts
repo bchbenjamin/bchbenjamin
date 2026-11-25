@@ -77,3 +77,24 @@ export function placeWidgetWithoutOverlap(
   next[widgetId] = candidate;
   return next;
 }
+
+export function removeWidgetPlacement(
+  widgetId: string,
+  current: Record<string, WidgetPosition>
+): Record<string, WidgetPosition> {
+  const next = { ...current };
+  delete next[widgetId];
+  return next;
+}
+
+export function isDownwardSwipe(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  threshold = 70
+): boolean {
+  const dx = endX - startX;
+  const dy = endY - startY;
+  return dy > threshold && dy > Math.abs(dx);
+}

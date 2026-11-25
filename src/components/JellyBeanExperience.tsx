@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { SiteContent } from "@/lib/content";
 import ProjectArtwork from "@/components/ProjectArtwork";
 import JellyBeanMessaging from "@/components/JellyBeanMessaging";
-import { DEFAULT_WIDGET_PLACEMENTS, placeWidgetWithoutOverlap } from "@/lib/launcher-layout";
+import { DEFAULT_WIDGET_PLACEMENTS, isDownwardSwipe, placeWidgetWithoutOverlap, removeWidgetPlacement } from "@/lib/launcher-layout";
 import { sortLauncherApps } from "@/lib/launcher-app-sort";
 
 type AppId = string;
@@ -34,8 +34,8 @@ const APPS: AppInfo[] = [
   { id: "education", name: "Education", icon: "school", color: "#b38a55", panel: 1 },
   { id: "skills", name: "Skills", icon: "skills", color: "#6a9b63", panel: 2 },
   { id: "terminal", name: "Termux", icon: "terminal", color: "#303b43", panel: 2 },
-  { id: "github", name: "GitHub", icon: "github", color: "#555b66", panel: 2 },
-  { id: "googleplus", name: "Google+", icon: "googleplus", color: "#d34836", panel: 4, url: "/links" },
+  { id: "github", name: "GitHub", icon: "github", color: "#555b66", panel: 2, url: "https://github.com/bchbenjamin" },
+  { id: "googleplus", name: "Google+", icon: "googleplus", color: "#d34836", panel: 4 },
   { id: "contact", name: "Messaging", icon: "message", color: "#6eaa61", panel: 4 },
   { id: "settings", name: "Settings", icon: "settings", color: "#6a9b63", panel: 2 },
   { id: "chess", name: "Chess", icon: "folder", color: "#b59a70", panel: 3, folder: true },
@@ -49,7 +49,7 @@ const APPS: AppInfo[] = [
 function AppIcon({ app, size = "normal" }: { app: AppInfo; size?: "normal" | "large" }) {
   const assets: Record<string, string> = {
     person: "aosp-4.1.2/contacts.png", camera: "aosp-4.1.2/camera.png", calendar: "aosp-4.1.2/calendar.png", gallery: "aosp-4.1.2/gallery.png", projects: "aosp-4.1.2/market.png", skills: "aosp-4.1.2/calculator.png",
-    message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png", github: "https://github.com/favicon.ico", terminal: "termux-new.png", magisk: "magisk.svg",
+    message: "aosp-4.1.2/messaging.png", settings: "aosp-4.1.2/settings.png", github: "brands/github.svg", terminal: "termux-new.png", magisk: "magisk.svg",
     briefcase: "aosp-4.1.2/clock.png", school: "aosp-4.1.2/calendar.png", email: "aosp-4.1.2/email.png", achievements: "aosp-4.1.2/market.png", journey: "aosp-4.1.2/browser.png", googleplus: "google-plus-2012.svg"
   };
   const asset = app.iconUrl || assets[app.icon];
@@ -99,6 +99,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalLines, setTerminalLines] = useState<string[]>(["Welcome to Termux!", "This is a read-only portfolio environment. Type help to get started."]);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const drawerTouchStart = useRef<{ x: number; y: number } | null>(null);
   const pointerStart = useRef<{ x: number; y: number; started: number; appId?: string; widgetId?: "search" | "clock" | "gallery"; panel: number; fromDrawer?: boolean; fromDrawerWidget?: boolean; fromDrawerPages?: boolean } | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressIconClick = useRef(false);
@@ -116,7 +117,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const currentProject = projects.find((project) => project.slug === selectedProject) ?? null;
   const visibleApps = useMemo(() => {
     const hidden = Array.isArray(site.launcher.hiddenApps) ? site.launcher.hiddenApps : [];
-    const builtIns = APPS.filter((item) => !hidden.includes(item.id)).flatMap(item => {
+    const builtIns = APPS.filter((item) => item.id === "googleplus" || !hidden.includes(item.id)).flatMap(item => {
       const projectSlug = item.id === "breach-defend" ? "breach-defend" : item.id === "hermes-quizzer" ? "hermes-the-quizzer" : item.id === "street-safety" ? "street-safety-device" : null;
       if (!projectSlug) return [item];
       const project = site.projects.find(candidate => candidate.slug === projectSlug);
@@ -223,7 +224,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeApp, drawer, shade, panel, closeOverlays, goPanel, launcherEditMode]);
 
-  function open(appId: string) { const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url) { if (external.url.startsWith("/")) router.push(external.url); else window.open(external.url, "_blank", "noopener,noreferrer"); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
+  function open(appId: string) { const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url) { if (external.url.startsWith("/")) router.push(external.url); else window.location.assign(external.url); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
   function commitHomeLayout(icons: Record<string, { panel: number; slot: number }>, widgets: Record<string, { panel: number; row: number; column: number }>) {
     setHomePlacements(icons);
     setWidgetPlacements(widgets);
@@ -289,7 +290,10 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       if (target.closest(".jb-drawer-overlay") && !icon && !widget && !target.closest(".jb-drawer-pages")) return;
       if (target.closest("button,input,a") && !icon && !widget) return;
       pointerStart.current = { x: event.clientX, y: event.clientY, started: Date.now(), appId: icon?.dataset.homeApp ?? icon?.dataset.drawerApp, widgetId: (widget?.dataset.homeWidget ?? widget?.dataset.drawerWidget) as "search" | "clock" | "gallery" | undefined, panel: Number(icon?.dataset.homePanel ?? widget?.dataset.widgetPanel ?? panel), fromDrawer: Boolean(icon?.dataset.drawerApp), fromDrawerWidget: Boolean(widget?.dataset.drawerWidget), fromDrawerPages: Boolean(target.closest(".jb-drawer-pages")) };
-      if (icon || widget || target.closest(".jb-drawer-pages")) event.currentTarget.setPointerCapture(event.pointerId);
+      // Capture on the pressed control, not the outer device: capturing on the
+      // parent retargets click events and makes app icons appear unresponsive.
+      if (icon || widget) (icon ?? widget)?.setPointerCapture(event.pointerId);
+      else if (target.closest(".jb-drawer-pages")) event.currentTarget.setPointerCapture(event.pointerId);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
       if (icon || widget || target.closest(".jb-home-viewport")) { const appId = icon?.dataset.homeApp ?? icon?.dataset.drawerApp; const deviceBounds = event.currentTarget.getBoundingClientRect(); const x = event.clientX - deviceBounds.left; const y = event.clientY - deviceBounds.top; longPressTimer.current = setTimeout(() => { setLauncherEditMode(true); if (appId) setDragPreview({ appId, x, y }); if (navigator.vibrate) navigator.vibrate(35); }, 500); }
     }} onPointerMove={(event) => { const start=pointerStart.current; if (!start) return; if (start.appId && Date.now()-start.started>=450) { const rect=event.currentTarget.getBoundingClientRect(); setDragPreview({ appId:start.appId, x:event.clientX-rect.left, y:event.clientY-rect.top }); } if((!start.appId && !start.widgetId) || (start.fromDrawer && !start.fromDrawerWidget) || Date.now()-start.started<450) return; const bounds=event.currentTarget.getBoundingClientRect(); const edge=36; if(event.clientX>bounds.right-edge && panel<4 && lastAutoPage.current!==panel){lastAutoPage.current=panel+1;setPanel(panel+1);} else if(event.clientX<bounds.left+edge && panel>0 && lastAutoPage.current!==panel){lastAutoPage.current=panel-1;setPanel(panel-1);} else if(event.clientX>bounds.left+edge && event.clientX<bounds.right-edge){lastAutoPage.current=-1;} }} onPointerCancel={() => { setDragPreview(null); pointerStart.current = null; lastAutoPage.current=-1; if (longPressTimer.current) clearTimeout(longPressTimer.current); longPressTimer.current = null; }} onPointerUp={(event) => {
@@ -299,9 +303,20 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       if (!start.appId && !start.widgetId && Date.now() - start.started >= 500) { setLauncherEditMode(true); suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
       const dx = event.clientX - start.x; const dy = event.clientY - start.y;
       const moved = Math.hypot(dx, dy);
+      // A downward drawer gesture wins over a long-press/drag that began on an app icon.
+      if (drawer && moved > 70 && isDownwardSwipe(start.x, start.y, event.clientX, event.clientY)) { setDrawer(false); setDragPreview(null); return; }
       if (start.widgetId && Date.now() - start.started >= 450) {
         setLauncherEditMode(true);
         if (moved <= 18) { suppressIconClick.current = true; window.setTimeout(() => { suppressIconClick.current = false; }, 450); return; }
+        const device = event.currentTarget.getBoundingClientRect();
+        if (event.clientY < device.top + 68) {
+          const nextWidgets = removeWidgetPlacement(start.widgetId, widgetPlacements);
+          commitHomeLayout(homePlacements, nextWidgets);
+          setLauncherEditMode(false);
+          suppressIconClick.current = true;
+          window.setTimeout(() => { suppressIconClick.current = false; }, 450);
+          return;
+        }
         const destinationPanel = Math.max(0, Math.min(4, panel));
         const grid = event.currentTarget.querySelector<HTMLElement>(`[data-widget-grid="${destinationPanel}"]`);
         const bounds = grid?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
@@ -353,7 +368,6 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         return;
       }
       if (drawer && start.fromDrawerPages && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.15) { setDrawerPage(page => Math.max(0, Math.min(drawerPages.length - 1, page + (dx < 0 ? 1 : -1)))); return; }
-      if (drawer && dy > 70 && dy > Math.abs(dx)) { setDrawer(false); return; }
       if (shade && dy < -70 && Math.abs(dy) > Math.abs(dx)) { setShade(false); return; }
       if (activeApp || drawer || recent || shade || launcherEditMode) return;
       const target = event.target as HTMLElement;
@@ -366,7 +380,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
 
       {dragPreview && (() => { const draggedApp = visibleApps.find(item => item.id === dragPreview.appId); if (!draggedApp) return null; return <motion.div className="jb-drag-preview" initial={{ scale: .72, opacity: 0 }} animate={{ scale: 1.12, opacity: .96 }} transition={{ type: "spring", stiffness: 500, damping: 28 }} style={{ left: dragPreview.x, top: dragPreview.y }}><AppIcon app={draggedApp} size="large"/><span>{draggedApp.name}</span></motion.div>; })()}
       {selectionMenu && <div className="jb-android-selection-menu" style={{left:selectionMenu.x,top:selectionMenu.y}}><button onClick={()=>{void navigator.clipboard.writeText(window.getSelection()?.toString()??"");setSelectionMenu(null);}}>Copy</button><button onClick={()=>{const range=document.createRange();range.selectNodeContents(document.querySelector(".jb-app-content")??document.body);window.getSelection()?.removeAllRanges();window.getSelection()?.addRange(range);setSelectionMenu(null);}}>Select all</button><button onClick={()=>setSelectionMenu(null)}>⋮</button></div>}
-      {launcherEditMode && <div className="jb-edit-toolbar"><span>Home screen options <small>Long-press an app icon to place it on the home screen. Long-press an empty area for options. {layoutMessage}</small></span><button onClick={() => { setDrawerTab("widgets"); setDrawer(true); setLauncherEditMode(false); }}>Widgets</button><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
+      {launcherEditMode && <div className="jb-edit-toolbar"><span>Home screen options <small>Long-press an app to place it here. Drag a home icon or widget to the top to remove it. {layoutMessage}</small></span><button className="jb-remove-drop-target" type="button" disabled aria-label="Drag an app or widget here to remove it">⌫ Remove</button><button onClick={() => { setDrawerTab("widgets"); setDrawer(true); setLauncherEditMode(false); }}>Widgets</button><button onClick={() => setLauncherEditMode(false)}>Done</button></div>}
       {site.launcher.showStatusBar !== false && <div className="jb-status-bar" onClick={() => setShade(true)} role="button" tabIndex={0} aria-label="Open notifications and quick settings">
         <div className="jb-status-left" aria-hidden="true" />
         <div className="jb-status-right"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="signal" /><SystemStatusIcon kind="battery" /><span className="jb-status-time">{clock}</span></div>
@@ -384,7 +398,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
               </div>)}
             </div>
             <div className="jb-home-app-grid" aria-label={`Home screen ${index + 1} app shortcuts`}>
-              {homeAppsByPanel[index].map((item) => <button key={item.id} data-home-app={item.id} data-home-panel={index} type="button" onClick={() => item.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(item.id)}><AppIcon app={item}/><span>{item.name}</span></button>)}
+              {homeAppsByPanel[index].map((item) => <button key={item.id} data-home-app={item.id} data-home-panel={index} type="button" onClick={() => open(item.id)}><AppIcon app={item}/><span>{item.name}</span></button>)}
             </div>
           </section>)}
         </div>
@@ -396,18 +410,15 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         <button onClick={() => open("about")} aria-label="People"><Image src="/jellybean/icons/aosp-4.1.2/contacts.png" alt="" width={48} height={48} unoptimized /></button>
         <button className="jb-app-drawer-button" onClick={() => { setDrawerPage(0); setDrawer(value => !value); }} aria-label={drawer ? "Close app drawer" : "Open app drawer"}><Image src="/jellybean/icons/aosp-4.1.2/all-apps.png" alt="" width={48} height={48} unoptimized /></button>
         <button onClick={() => open("contact")} aria-label="Messaging"><Image src="/jellybean/icons/aosp-4.1.2/messaging.png" alt="" width={48} height={48} unoptimized /></button>
-        <button onClick={() => { if (site.owner.github) window.open(site.owner.github, "_blank", "noopener,noreferrer"); }} aria-label="Browser"><Image src="/jellybean/icons/aosp-4.1.2/browser.png" alt="" width={48} height={48} unoptimized /></button>
         <button onClick={() => open("camera")} aria-label="Camera"><Image src="/jellybean/icons/aosp-4.1.2/camera.png" alt="" width={48} height={48} unoptimized /></button>
       </div>}
       {site.launcher.showNavigationBar !== false && <div className="jb-navigation-bar"><div className="jb-tablet-nav"><button onClick={navBack} aria-label="Back"><SystemNavigationIcon kind="back" /></button><button onClick={navHome} aria-label="Home"><SystemNavigationIcon kind="home" /></button><button onClick={navRecent} aria-label="Recent apps"><SystemNavigationIcon kind="recent" /></button></div><button className="jb-tablet-status" onClick={() => setShade(true)} aria-label="Open notifications"><SystemStatusIcon kind="wifi" /><SystemStatusIcon kind="battery" /><span>{clock}</span><span className="jb-tablet-notification-mark">●</span></button></div>}
 
-      <AnimatePresence>
-      {drawer && <motion.div key="jb-app-drawer-overlay" className="jb-overlay jb-drawer-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}><motion.div className="jb-drawer" initial={{ scale: 7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 7, opacity: 0 }} transition={{ duration: 0.35, delay: 0.1, ease: [0.2, 0.7, 0.2, 1] }}><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <button key={a.id} data-drawer-app={a.id} onClick={() => a.id === "github" ? (site.owner.github && window.open(site.owner.github, "_blank", "noopener,noreferrer")) : open(a.id)}><AppIcon app={a} size="large" /><span className="jb-drawer-app-label">{a.name}</span></button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
+      {drawer && <div className="jb-overlay jb-drawer-overlay"><div className="jb-drawer" onTouchStart={(event) => { const touch = event.touches[0]; drawerTouchStart.current = { x: touch.clientX, y: touch.clientY }; }} onTouchEnd={(event) => { const start = drawerTouchStart.current; drawerTouchStart.current = null; if (!start) return; const touch = event.changedTouches[0]; if (isDownwardSwipe(start.x, start.y, touch.clientX, touch.clientY)) setDrawer(false); }}><div className="jb-drawer-tabs"><button className={drawerTab === "apps" ? "selected" : ""} onClick={() => { setDrawerTab("apps"); setDrawerPage(0); }}>APPS</button><button className={drawerTab === "widgets" ? "selected" : ""} onClick={() => setDrawerTab("widgets")}>WIDGETS</button><button className="jb-drawer-close" onClick={() => setDrawer(false)} aria-label="Close app drawer">×</button></div>{drawerTab === "apps" ? <><div className="jb-drawer-pages" aria-label={`App drawer page ${drawerPage + 1} of ${drawerPages.length}`}><div className="jb-drawer-page-track" style={{ transform: `translateX(-${drawerPage * 100}%)` }}>{drawerPages.map((pageApps, pageIndex) => <div className="jb-drawer-page" key={pageIndex} style={{ gridTemplateColumns: `repeat(${site.launcher.appColumns}, minmax(0, 1fr))` }}>{pageApps.map((a) => <button key={a.id} data-drawer-app={a.id} onClick={() => open(a.id)}><AppIcon app={a} size="large" /><span className="jb-drawer-app-label">{a.name}</span></button>)}</div>)}</div></div>{drawerPages.length > 1 && <div className="jb-drawer-page-indicators">{drawerPages.map((_, index) => <button key={index} className={drawerPage === index ? "active" : ""} onClick={() => setDrawerPage(index)} aria-label={`App drawer page ${index + 1}`} />)}</div>}</> : <div className="jb-widget-picker">
         {site.launcher.showClock&&<button data-drawer-widget="clock" onClick={()=>addWidgetToCurrentPage("clock")}><span className="jb-widget-preview-clock"><span className="jb-analog-clock"><Image src="/jellybean/clock/dial.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/hour.png" alt="" fill sizes="90px" unoptimized/><Image className="jb-clock-hand" src="/jellybean/clock/minute.png" alt="" fill sizes="90px" unoptimized/></span></span><b>Analog clock</b><small>2 × 2 · tap to add, long-press to drag</small></button>}
         {site.launcher.showSearch&&<button data-drawer-widget="search" onClick={()=>addWidgetToCurrentPage("search")}><span className="jb-widget-preview-search"><Image src="/jellybean/search-widget.png" alt="" width={220} height={20} unoptimized/></span><b>Google Search</b><small>4 × 1 · tap to add, long-press to drag</small></button>}
         {site.launcher.showGallery&&<button data-drawer-widget="gallery" onClick={()=>addWidgetToCurrentPage("gallery")}><span className="jb-widget-preview-gallery">{projects.slice(0,3).map(project=><ProjectArtwork key={project.slug} project={project}/>)}</span><b>Gallery</b><small>4 × 2 · tap to add, long-press to drag</small></button>}
-      </div>}</motion.div></motion.div>}
-      </AnimatePresence>
+      </div>}</div></div>}
 
       {shade && <div className="jb-overlay jb-shade-overlay" onClick={() => setShade(false)}><div className="jb-notification-shade" onClick={(e) => e.stopPropagation()} onTouchStart={(e) => { const t=e.touches[0]; touchStart.current={x:t.clientX,y:t.clientY}; }} onTouchEnd={(e) => { if (!touchStart.current) return; const t=e.changedTouches[0]; if (touchStart.current.y-t.clientY>65) setShade(false); touchStart.current=null; }}><div className="jb-shade-head"><div><b>{clock}</b><span>{dateLabel}</span></div><div className="jb-shade-controls"><Image className="jb-shade-rotation" src="/jellybean/ic_notify_rotation_off_normal.png" alt="Rotation lock" width={36} height={36} unoptimized /><button type="button" className="jb-shade-settings-button" onClick={() => { setShade(false); setSettingsPage("main"); setActiveApp("settings"); }} aria-label="Open Settings"><Image src="/jellybean/icons/aosp-4.1.2/settings.png" alt="" width={36} height={36} unoptimized /></button><Image className="jb-shade-clear" src="/jellybean/ic_notify_clear_normal.png" alt="Dismiss all notifications" width={36} height={36} unoptimized /></div></div><div className="jb-notification-empty"><span className="jb-notification-symbol"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 34h28l-4-5V18a10 10 0 0 0-20 0v11z" fill="none" stroke="currentColor" strokeWidth="2.4"/><path d="M19 38q5 6 10 0" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/></svg></span><b>No notifications</b></div></div></div>}
 
@@ -501,7 +512,7 @@ function LocalCamera() {
   function changeMode(next: "photo"|"video") { setMode(next); if (streaming && next === "video" && !streamRef.current?.getAudioTracks().length) void startCamera(facing, true); }
   function flipCamera() { const next = facing === "user" ? "environment" : "user"; setFacing(next); if (streaming) void startCamera(next); }
   function focusAt(event: React.PointerEvent<HTMLDivElement>) { const rect=event.currentTarget.getBoundingClientRect(); setFocus({x:event.clientX-rect.left,y:event.clientY-rect.top}); window.setTimeout(()=>setFocus(null),1100); }
-  return <section className="jb-camera-app" aria-label="Android Jelly Bean Camera">
+  return <section className="jb-camera-app" aria-label="Micromax A110 Camera">
     <div className="jb-camera-view" onPointerDown={event=>{touchStart.current={x:event.clientX,y:event.clientY};}} onPointerUp={event=>{if(!touchStart.current)return;const dx=event.clientX-touchStart.current.x;if(dx < -55 && lastCapture)setReviewing(true);else if(dx > 55)setReviewing(false);touchStart.current=null;}} onClick={focusAt}>
       <video ref={videoRef} autoPlay muted playsInline style={{transform:`scale(${zoom}) scaleX(${facing === "user" ? -1 : 1})`}} />
       {!streaming && !reviewing && <div className="jb-camera-start-overlay"><span className="jb-camera-lens">◉</span><b>{error ? "Camera unavailable" : "Camera"}</b><small>{error || "Tap the shutter to start the camera"}</small><button type="button" onClick={event=>{event.stopPropagation();void startCamera();}}>START CAMERA</button></div>}
@@ -510,13 +521,12 @@ function LocalCamera() {
       {reviewing && lastCapture && <div className="jb-camera-review"><button type="button" onClick={()=>setReviewing(false)} aria-label="Return to camera">‹ Camera</button>{lastCapture.kind === "photo" ? <img src={lastCapture.url} alt="Most recent photo"/> : <video src={lastCapture.url} controls autoPlay playsInline/>}<span>Swipe right to return to camera</span></div>}
       {streaming && !reviewing && <div className="jb-camera-zoom"><span>+</span><input aria-label="Zoom" type="range" min="1" max="4" step="0.1" value={zoom} onChange={event=>setZoom(Number(event.target.value))}/><span>−</span></div>}
     </div>
-    <aside className="jb-camera-controls" aria-label="Camera controls">
-      <button className="jb-camera-thumbnail" type="button" aria-label="Review last capture" onClick={()=>lastCapture&&setReviewing(true)}>{lastCapture?.kind === "photo" ? <img src={lastCapture.url} alt=""/> : lastCapture ? <span>▶</span> : <span className="jb-camera-empty-thumbnail">▧</span>}</button>
-      <div className="jb-camera-mode-picker" role="group" aria-label="Capture mode"><button type="button" className={mode === "video" ? "active" : ""} onClick={()=>changeMode("video")} aria-label="Video mode"><svg viewBox="0 0 24 24"><path d="M3 6h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3zM17 10l4-3v10l-4-3z"/></svg></button><button type="button" className={mode === "photo" ? "active" : ""} onClick={()=>changeMode("photo")} aria-label="Photo mode"><svg viewBox="0 0 24 24"><path d="M4 7h4l2-2h4l2 2h4a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="4"/></svg></button></div>
-      <button type="button" className={`jb-camera-shutter ${mode === "video" ? "video-mode" : ""} ${recording ? "recording" : ""}`} aria-label={recording ? "Stop recording" : mode === "photo" ? "Take photo" : "Start recording"} onClick={shutter}><span/></button>
-      <button type="button" className="jb-camera-control-button" onClick={flipCamera} aria-label="Switch front and rear camera"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.5-3"/></svg></button>
-      <button type="button" className={`jb-camera-control-button ${settingsOpen ? "active" : ""}`} onClick={()=>setSettingsOpen(value=>!value)} aria-label="Camera settings"><svg viewBox="0 0 24 24"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6z"/><path d="m19.4 13.5 1.2.9-1.2 2.1-1.5-.5a7.7 7.7 0 0 1-1.5.9l-.3 1.6h-2.5l-.4-1.6a7.7 7.7 0 0 1-1.6-.9l-1.5.5-1.2-2.1 1.2-.9a7 7 0 0 1 0-1.8l-1.2-.9 1.2-2.1 1.5.5a7.7 7.7 0 0 1 1.6-.9l.4-1.6h2.5l.3 1.6a7.7 7.7 0 0 1 1.5.9l1.5-.5 1.2 2.1-1.2.9a7 7 0 0 1 0 1.8z"/></svg></button>
-      {settingsOpen && <div className="jb-camera-settings"><b>Camera settings</b><label>Flash <select value={flash} onChange={event=>setFlash(event.target.value as "off"|"auto"|"on")}><option value="auto">Auto</option><option value="on">On</option><option value="off">Off</option></select></label><label>Camera <span>{facing === "environment" ? "Back" : "Front"}</span></label><label>Zoom <span>{zoom.toFixed(1)}×</span></label><small>Photos and videos download to this device only.</small></div>}
+    <aside className="jb-camera-controls" aria-label="Micromax A110 camera controls">
+      <button type="button" className={`jb-camera-control-button ${settingsOpen ? "active" : ""}`} onClick={()=>setSettingsOpen(value=>!value)} aria-label="Camera settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6z"/><path d="m19.4 13.5 1.2.9-1.2 2.1-1.5-.5a7.7 7.7 0 0 1-1.5.9l-.3 1.6h-2.5l-.4-1.6a7.7 7.7 0 0 1-1.6-.9l-1.5.5-1.2-2.1 1.2-.9a7 7 0 0 1 0-1.8l-1.2-.9 1.2-2.1 1.5.5a7.7 7.7 0 0 1 1.6-.9l.4-1.6h2.5l.3 1.6a7.7 7.7 0 0 1 1.5.9l1.5-.5 1.2 2.1-1.2.9a7 7 0 0 1 0 1.8z"/></svg></button>
+      <button type="button" className="jb-camera-control-button" onClick={()=>changeMode(mode === "photo" ? "video" : "photo")} aria-label={mode === "photo" ? "Switch to video mode" : "Switch to camera mode"} title={mode === "photo" ? "Video mode" : "Camera mode"}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{mode === "photo" ? <><rect x="2.5" y="6" width="13.5" height="12" rx="1.5"/><path d="m16 10 5-3v10l-5-3z"/></> : <><path d="M3 7h4l2-2h6l2 2h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></>}</svg></button>
+      <button className="jb-camera-thumbnail" type="button" aria-label="View gallery" title="Gallery" onClick={()=>lastCapture&&setReviewing(true)}>{lastCapture?.kind === "photo" ? <img src={lastCapture.url} alt=""/> : lastCapture ? <span>▶</span> : <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>}</button>
+      <button type="button" className={`jb-camera-shutter ${mode === "video" ? "video-mode" : ""} ${recording ? "recording" : ""}`} aria-label={recording ? "Stop recording" : mode === "photo" ? "Take photo" : "Start recording"} onClick={shutter} title={mode === "photo" ? "Take picture" : "Record video"}><span/></button>
+      {settingsOpen && <div className="jb-camera-settings"><b>Camera settings</b><label>Flash <select value={flash} onChange={event=>setFlash(event.target.value as "off"|"auto"|"on")}><option value="auto">Auto</option><option value="on">On</option><option value="off">Off</option></select></label><label>Camera <span>{facing === "environment" ? "Back" : "Front"}</span></label><button type="button" className="jb-camera-settings-flip" onClick={flipCamera}>Switch camera</button><label>Zoom <span>{zoom.toFixed(1)}×</span></label><small>Photos and videos download to this device only.</small></div>}
       <span className="jb-camera-mode-label">{recording ? "REC" : mode === "photo" ? "CAMERA" : "VIDEO"}</span>
     </aside>
     {error && streaming && <div className="jb-camera-inline-error" role="alert">{error}</div>}

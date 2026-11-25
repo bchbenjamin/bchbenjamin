@@ -469,8 +469,8 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-page-indicator{bottom:110px;z-index:7;pointer-events:auto}
 @media(max-width:520px){.jb-page-indicator{bottom:calc(110px + env(safe-area-inset-bottom))}}
 
-/* Keep the Jelly Bean hotseat consistent; Camera is an additional sixth shortcut. */
-.jb-dock:not(.jb-dock-drawer-only){display:grid;grid-template-columns:repeat(6,minmax(0,1fr));justify-items:center;align-items:center}
+/* Five-icon Micromax hotseat; retain Camera and remove the redundant Browser shortcut. */
+.jb-dock:not(.jb-dock-drawer-only){display:grid;grid-template-columns:repeat(5,minmax(0,1fr));justify-items:center;align-items:center}
 .jb-dock:not(.jb-dock-drawer-only)>button{width:100%;}
 .jb-edit-toolbar{gap:10px;flex-wrap:wrap}
 .jb-edit-toolbar>span{flex:1 1 100%}
@@ -567,12 +567,27 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-drag-preview .jb-app-icon{width:58px;height:58px}
 .jb-drag-preview>span{max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:10px;text-shadow:0 2px 4px #000;text-align:center}
 
-/* AOSP Launcher2 (Android 4.1.2): workspace shrink + independent all-apps zoom.
-   App shortcuts remain children of the workspace; they are never shared/morphed
-   into their separate all-apps representations. */
-.jb-home-viewport{transform:scale(1);transform-origin:50% 50%;transition:transform 300ms cubic-bezier(.2,.7,.2,1);will-change:transform}
-.jb-device.jb-drawer-open .jb-home-viewport{transform:scale(.7)}
-.jb-drawer-overlay{background:rgba(12,20,28,.92)!important;backdrop-filter:none!important}
-.jb-drawer{transform-origin:50% 50%;will-change:transform,opacity}
+/* Micromax A110 launcher: drawer visibility is immediate; only horizontal page changes animate. */
+.jb-home-viewport{transform:none!important;transition:none!important;will-change:auto}
+.jb-drawer-overlay{background:rgba(12,20,28,.92)!important;backdrop-filter:none!important;animation:none!important;transition:none!important}
+.jb-drawer{transform:none!important;opacity:1!important;animation:none!important;transition:none!important}
 .jb-drawer-page-track{transition:transform .22s cubic-bezier(.2,.7,.2,1)}
-@media(prefers-reduced-motion:reduce){.jb-home-viewport{transition:none!important}}
+
+/* No transition when entering or leaving the app drawer. */
+.jb-home-viewport,.jb-drawer-overlay,.jb-drawer{transition:none!important;animation:none!important}
+.jb-drawer{transform:none!important;opacity:1!important}
+
+/* Micromax A110 camera rail: four clearly visible controls from the handset guide. */
+.jb-camera-controls .jb-camera-control-button,.jb-camera-controls .jb-camera-thumbnail{color:#f2f6f8;flex:0 0 38px;width:38px;height:38px;min-height:38px;padding:0;display:grid;place-items:center;box-sizing:border-box}
+.jb-camera-controls .jb-camera-control-button svg,.jb-camera-controls .jb-camera-thumbnail svg{display:block;width:23px;height:23px;min-width:23px;min-height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.jb-camera-controls .jb-camera-thumbnail{border:1px solid #82939c;border-radius:2px;background:linear-gradient(#53646e,#1c2930);overflow:hidden}
+.jb-camera-controls .jb-camera-thumbnail img{display:block;width:100%;height:100%;object-fit:cover}
+.jb-camera-settings-flip{display:block;width:100%;padding:6px 8px;border:1px solid #718894;background:#263b45;color:#fff;text-align:left;font-size:10px}
+.jb-dock:not(.jb-dock-drawer-only)>button{min-width:0}
+
+/* Override the legacy light button skin so A110 camera SVG glyphs remain visible. */
+.jb-camera-controls .jb-camera-control-button{padding:0!important;border:1px solid #63747e!important;background:linear-gradient(#3a4b55,#1b2931)!important;color:#f2f6f8!important;box-shadow:inset 0 1px #ffffff30!important}
+.jb-camera-controls .jb-camera-control-button svg{width:23px!important;height:23px!important;stroke:#f2f6f8!important;opacity:1!important}
+.jb-icon-github img{filter:brightness(0) invert(1)}
+
+.jb-edit-toolbar .jb-remove-drop-target{background:#713737!important;border:1px solid #bd8585!important;color:#fff!important;opacity:1!important;cursor:default}
