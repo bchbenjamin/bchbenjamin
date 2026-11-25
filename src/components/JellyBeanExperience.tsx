@@ -14,6 +14,13 @@ const APPS: AppInfo[] = [
   { id: "about", name: "About", icon: "person", color: "#4c9bd6", panel: 0 },
   { id: "gallery", name: "Gallery", icon: "gallery", color: "#e8a34c", panel: 0 },
   { id: "projects", name: "Projects", icon: "projects", color: "#48a7a0", panel: 1 },
+  { id: "breach-defend", name: "Breach & Defend", icon: "breach", color: "#d65b4b", panel: 1, url: "https://github.com/bchbenjamin/aws-vigyaanrang" },
+  { id: "hermes-quizzer", name: "Hermes the Quizzer", icon: "quizzer", color: "#4b8cc7", panel: 1, url: "https://github.com/bchbenjamin/hermes" },
+  { id: "bengaluruduru", name: "BengaluruDuru", icon: "civic", color: "#399b83", panel: 2, url: "https://github.com/bchbenjamin/bfb.2.2" },
+  { id: "ease-health", name: "Ease Health", icon: "health", color: "#4aa89a", panel: 2, url: "https://github.com/bchbenjamin/Integrated-Patient-Care-Management-System" },
+  { id: "street-safety", name: "Street Safety", icon: "safety", color: "#d49a3e", panel: 3, url: "https://kev-ai-device.vercel.app/" },
+  { id: "academic-results", name: "Academic Results", icon: "results", color: "#7867b4", panel: 3, url: "https://github.com/bchbenjamin/results" },
+  { id: "peer-management", name: "Peer Management", icon: "peers", color: "#568bba", panel: 3, url: "https://github.com/bchbenjamin/peer-management" },
   { id: "experience", name: "Experience", icon: "briefcase", color: "#8a79c6", panel: 1 },
   { id: "education", name: "Education", icon: "school", color: "#b38a55", panel: 1 },
   { id: "skills", name: "Skills", icon: "skills", color: "#6a9b63", panel: 2 },
@@ -47,7 +54,14 @@ function AppIcon({ app, size = "normal" }: { app: AppInfo; size?: "normal" | "la
     achievements: "M15 6h18v8c0 8-4 13-9 13s-9-5-9-13z M15 11H7v4c0 6 4 9 10 9 M33 11h8v4c0 6-4 9-10 9 M24 27v8 M16 41h16 M19 35h10",
     journey: "M24 43s-15-14-15-25a15 15 0 1 1 30 0c0 11-15 25-15 25z M24 23a5 5 0 1 0 0-10 5 5 0 0 0 0 10z",
 
-    folder: "M4 13V9a3 3 0 0 1 3-3h11l4 4h9a3 3 0 0 1 3 3v19a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z M4 15h36l-4 19H8z"
+    folder: "M4 13V9a3 3 0 0 1 3-3h11l4 4h9a3 3 0 0 1 3 3v19a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z M4 15h36l-4 19H8z",
+    breach: "M24 4 40 10v12c0 10-7 17-16 22C15 39 8 32 8 22V10z M17 24l5 5 10-11",
+    quizzer: "M8 6h32v36H8z M15 15h18 M15 22h18 M15 29h8 M29 31q0-5 5-5t5 4q0 3-5 5v2 M34 39h.1",
+    civic: "M5 18 24 7l19 11H5z M9 21v15 M18 21v15 M30 21v15 M39 21v15 M5 40h38",
+    health: "M24 42S6 31 6 18a10 10 0 0 1 18-6 10 10 0 0 1 18 6c0 13-18 24-18 24z M24 17v14 M17 24h14",
+    safety: "M24 4 40 10v12c0 10-7 17-16 22C15 39 8 32 8 22V10z M24 15v11 M24 32h.1",
+    results: "M8 5h32v38H8z M15 14h18 M15 22h18 M15 30h8 M27 31l4 4 7-9",
+    peers: "M16 21a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M32 21a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M3 40c0-8 5-12 13-12s13 4 13 12 M26 29c8-3 17 2 18 11"
   };
   return <span className={`jb-app-icon jb-app-icon-${size} jb-icon-${app.icon}`} style={{ "--app-color": app.color } as CSSProperties}>
     {app.iconUrl ? <img src={app.iconUrl} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} draggable={false} /> : asset ? <Image src={asset.startsWith("http") || asset.startsWith("/") ? asset : `/jellybean/icons/${asset}`} alt="" width={size === "large" ? 56 : 48} height={size === "large" ? 56 : 48} unoptimized draggable={false} /> : <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d={glyphs[app.icon] ?? "M8 8h32v32H8z"} /></svg>}
@@ -128,6 +142,18 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     else goPanel(0);
   }, [launcherEditMode, shade, drawer, recent, activeApp, selectedProject, goPanel]);
   const navHome = useCallback(() => { closeOverlays(); setSelectedProject(null); goPanel(0); }, [closeOverlays, goPanel]);
+  const navBackRef = useRef(navBack);
+  useEffect(() => { navBackRef.current = navBack; }, [navBack]);
+  useEffect(() => {
+    const marker = "jb-phone-navigation";
+    window.history.pushState({ marker }, "", window.location.href);
+    const onPopState = () => {
+      navBackRef.current();
+      window.history.pushState({ marker }, "", window.location.href);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
   const navRecent = useCallback(() => { setActiveApp(null); setDrawer(false); setShade(false); setRecent(true); }, []);
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
