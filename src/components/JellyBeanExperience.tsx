@@ -205,7 +205,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeApp, drawer, shade, panel, closeOverlays, goPanel, launcherEditMode]);
 
-  function open(appId: string) { const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url) { window.open(external.url, "_blank", "noopener,noreferrer"); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
+  function open(appId: string) { const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url) { if (external.url.startsWith("/")) router.push(external.url); else window.open(external.url, "_blank", "noopener,noreferrer"); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
   function commitHomeLayout(icons: Record<string, { panel: number; slot: number }>, widgets: Record<string, { panel: number; row: number; column: number }>) {
     setHomePlacements(icons);
     setWidgetPlacements(widgets);
