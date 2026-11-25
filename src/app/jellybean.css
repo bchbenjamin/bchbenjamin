@@ -515,3 +515,41 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 .jb-dock button:active{transform:scale(.86);filter:brightness(1.18)}
 @media(prefers-reduced-motion:reduce){.jb-home-app-grid button,.jb-drawer-page-track,.jb-drawer-page button,.jb-dock button{transition:none!important;animation:none!important}}
 .jb-device:has(.jb-edit-toolbar) .jb-home-app-grid button,.jb-device:has(.jb-edit-toolbar) .jb-drawer-page button{animation:jb-icon-wiggle .18s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #0009)}
+
+/* AOSP Jelly Bean camera: immersive viewfinder, Holo chrome and physical shutter. */
+.jb-app-window:has(.jb-camera-app){background:#080b0e}
+.jb-app-window:has(.jb-camera-app) .jb-app-actionbar{display:none}
+.jb-app-window:has(.jb-camera-app) .jb-app-content{padding:0!important;overflow:hidden;background:#080b0e;color:#fff}
+.jb-camera-app{height:100%;min-height:100%;display:flex;flex-direction:column;background:#080b0e;color:#fff;overflow:hidden;user-select:none}
+.jb-camera-topbar{height:58px;flex:0 0 58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:linear-gradient(#26333d,#111a21);border-bottom:1px solid #ffffff20}
+.jb-camera-topbar button{width:54px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;background:transparent;color:#e7f2f7}
+.jb-camera-topbar button.active{color:#33b5e5}
+.jb-camera-topbar button small{font-size:8px;letter-spacing:1px;color:#b6c5cc}
+.jb-camera-top-title{font-size:11px;letter-spacing:2px;color:#dce9ef}
+.jb-camera-negative-icon,.jb-camera-switch-icon{font-size:25px;line-height:26px}
+.jb-camera-view{position:relative;flex:1;min-height:120px;width:100%;overflow:hidden;background:radial-gradient(ellipse at center,#29343b,#080b0e 75%);border:0;display:grid;place-items:center;aspect-ratio:auto;max-height:none}
+.jb-camera-view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.jb-camera-view video.is-negative{filter:invert(1)}
+.jb-camera-start-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:24px;text-align:center;color:#eaf3f7;background:linear-gradient(#101a22aa,#080b0ecc)}
+.jb-camera-lens{font-size:54px;color:#75c7e5;text-shadow:0 0 22px #33b5e566}
+.jb-camera-start-overlay b{font-size:16px;font-weight:400}
+.jb-camera-start-overlay small{max-width:260px;color:#aebfc8;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.jb-camera-start-overlay button{margin-top:8px;padding:11px 24px;border:1px solid #68c5e7;background:linear-gradient(#258eb8,#12658c);color:#fff;font-size:10px;letter-spacing:1.2px;box-shadow:0 2px 8px #0008}
+.jb-camera-recording{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:7px;padding:6px 9px;background:#0009;color:#fff;font-size:11px;letter-spacing:1px}
+.jb-camera-recording i{width:8px;height:8px;border-radius:50%;background:#f44336;box-shadow:0 0 8px #f44336}
+.jb-camera-inline-error{padding:6px 10px;background:#421d1d;color:#ffc6c0;font-size:10px}
+.jb-camera-bottom{flex:0 0 auto;padding:12px 18px max(12px,env(safe-area-inset-bottom));background:linear-gradient(#1c2932,#0b1116);border-top:1px solid #ffffff25}
+.jb-camera-mode-switch{display:flex;justify-content:center;gap:0;margin:0 auto 9px}
+.jb-camera-mode-switch button{min-width:74px;padding:7px 12px;border:1px solid #51636e;background:#1c2b35;color:#aebfc8;font-size:9px;letter-spacing:1.4px}
+.jb-camera-mode-switch button:first-child{border-radius:2px 0 0 2px}
+.jb-camera-mode-switch button:last-child{border-radius:0 2px 2px 0}
+.jb-camera-mode-switch button.selected{background:#d7eaf2;color:#1b5c79;border-color:#a6d9ed;font-weight:700}
+.jb-camera-capture-row{height:76px;display:flex;align-items:center;justify-content:space-between;max-width:280px;margin:0 auto}
+.jb-camera-capture-row>button{display:grid;place-items:center;width:48px;height:48px;border:0;background:transparent;color:#dce8ed;font-size:29px}
+.jb-camera-capture-row .jb-camera-shutter{width:68px;height:68px;border:4px solid #eaf3f7;border-radius:50%;background:#dce6eb;box-shadow:0 0 0 2px #263a46,inset 0 0 0 2px #71818a}
+.jb-camera-shutter span{width:52px;height:52px;border-radius:50%;background:linear-gradient(#fff,#d7e0e5);box-shadow:inset 0 1px 2px #fff}
+.jb-camera-shutter.video-mode span{width:22px;height:22px;border-radius:50%;background:#e94b43}
+.jb-camera-shutter.recording span{width:22px;height:22px;border-radius:5px;background:#e53935}
+.jb-camera-footnote{text-align:center;margin-top:4px;color:#d9e6eb;font-size:8px;letter-spacing:1.2px}
+.jb-camera-privacy{text-align:center;margin-top:7px;color:#82949e;font-size:7px;letter-spacing:1px}
+@media(max-height:650px){.jb-camera-topbar{height:48px;flex-basis:48px}.jb-camera-bottom{padding-top:7px}.jb-camera-capture-row{height:62px}.jb-camera-capture-row .jb-camera-shutter{width:58px;height:58px}.jb-camera-shutter span{width:44px;height:44px}}

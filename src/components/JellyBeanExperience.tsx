@@ -437,13 +437,14 @@ function LocalCamera() {
   const [streaming, setStreaming] = useState(false);
   const [negative, setNegative] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [mode, setMode] = useState<"photo" | "video">("photo");
   const [error, setError] = useState("");
   const [facing, setFacing] = useState<"user" | "environment">("environment");
   const stopCamera = useCallback(() => { streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; setStreaming(false); }, []);
-  useEffect(() => () => { recorderRef.current?.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }, []);
+  useEffect(() => () => { if (recorderRef.current?.state === "recording") recorderRef.current.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }, []);
   async function startCamera(nextFacing = facing) {
     setError("");
-    if (!navigator.mediaDevices?.getUserMedia) { setError("Camera access requires HTTPS and a browser that supports getUserMedia."); return; }
+    if (!navigator.mediaDevices?.getUserMedia) { setError("Camera access requires HTTPS and browser camera support."); return; }
     stopCamera();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: nextFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true });
@@ -453,26 +454,41 @@ function LocalCamera() {
     } catch (e) { setError(e instanceof Error ? e.message : "Camera or microphone permission was denied."); }
   }
   function download(blob: Blob, filename: string) {
-    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click(); anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
   function takePhoto() {
     const video = videoRef.current; if (!video || !video.videoWidth) return;
     const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     const context = canvas.getContext("2d"); if (!context) return;
     context.filter = negative ? "invert(1)" : "none"; context.drawImage(video, 0, 0, canvas.width, canvas.height); context.filter = "none";
-    canvas.toBlob(blob => { if (blob) download(blob, `portfolio-camera-${new Date().toISOString().replace(/[:.]/g,"-")}${negative ? "-negative" : ""}.jpg`); }, "image/jpeg", .94);
+    canvas.toBlob(blob => { if (blob) download(blob, `portfolio-camera-${new Date().toISOString().replace(/[:.]/g,"-")}${negative ? "-negative" : ""}.jpg`); }, "image/jpeg", .95);
   }
   function startRecording() {
-    if (!streamRef.current) return;
+    if (!streamRef.current || typeof MediaRecorder === "undefined") { setError("Video recording is not supported by this browser."); return; }
     const mime = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(type => MediaRecorder.isTypeSupported(type));
     try {
       chunksRef.current = []; const recorder = new MediaRecorder(streamRef.current, mime ? { mimeType: mime } : undefined); recorderRef.current = recorder;
       recorder.ondataavailable = event => { if (event.data.size) chunksRef.current.push(event.data); };
       recorder.onstop = () => { const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "video/webm" }); if (blob.size) download(blob, `portfolio-video-${new Date().toISOString().replace(/[:.]/g,"-")}.webm`); setRecording(false); };
       recorder.start(250); setRecording(true);
-    } catch (e) { setError(e instanceof Error ? e.message : "Video recording is not supported by this browser."); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not start video recording."); }
   }
-  return <section className="jb-camera-app"><h3>CAMERA</h3><p>Captured media stays in this browser session and downloads directly to your device. Nothing is uploaded.</p><div className="jb-camera-view"><video ref={videoRef} autoPlay muted playsInline className={negative ? "is-negative" : ""}/>{!streaming && <div className="jb-camera-placeholder">Camera preview</div>}</div><div className="jb-camera-controls">{!streaming ? <button onClick={() => void startCamera()}>Enable camera</button> : <><button onClick={takePhoto}>Take photo</button>{recording ? <button onClick={() => recorderRef.current?.stop()}>Stop & download video</button> : <button onClick={startRecording}>Record video</button>}<button onClick={() => { const next = facing === "user" ? "environment" : "user"; setFacing(next); void startCamera(next); }}>Flip camera</button><button onClick={stopCamera}>Stop camera</button></>}<button className={negative ? "selected" : ""} onClick={() => setNegative(value => !value)}>Negative {negative ? "ON" : "OFF"}</button></div>{error && <p className="jb-camera-error" role="alert">{error}</p>}<small>Photos: JPEG · Videos: WebM · Negative mode is applied to photos and preview.</small></section>;
+  function shutter() { if (!streaming) { void startCamera(); return; } if (mode === "photo") takePhoto(); else if (recording) recorderRef.current?.stop(); else startRecording(); }
+  return <section className="jb-camera-app" aria-label="Camera">
+    <div className="jb-camera-topbar">
+      <button type="button" aria-label="Negative filter" className={negative ? "active" : ""} onClick={() => setNegative(value => !value)}><span className="jb-camera-negative-icon">◐</span><small>FILTER</small></button>
+      <span className="jb-camera-top-title">CAMERA</span>
+      <button type="button" aria-label="Switch camera" onClick={() => { const next = facing === "user" ? "environment" : "user"; setFacing(next); if (streaming) void startCamera(next); }}><span className="jb-camera-switch-icon">⟳</span><small>FLIP</small></button>
+    </div>
+    <div className="jb-camera-view"><video ref={videoRef} autoPlay muted playsInline className={negative ? "is-negative" : ""}/>{!streaming && <div className="jb-camera-start-overlay"><span className="jb-camera-lens">◎</span><b>{error ? "Camera unavailable" : "Ready to capture"}</b><small>{error || "Tap the shutter to allow camera access"}</small><button type="button" onClick={() => void startCamera()}>ENABLE CAMERA</button></div>}{recording && <div className="jb-camera-recording"><i/> REC</div>}</div>
+    {error && streaming && <div className="jb-camera-inline-error" role="alert">{error}</div>}
+    <div className="jb-camera-bottom">
+      <div className="jb-camera-mode-switch" role="group" aria-label="Capture mode"><button type="button" className={mode === "video" ? "selected" : ""} onClick={() => setMode("video")}>VIDEO</button><button type="button" className={mode === "photo" ? "selected" : ""} onClick={() => setMode("photo")}>PHOTO</button></div>
+      <div className="jb-camera-capture-row"><button type="button" className="jb-camera-gallery-shortcut" aria-label="Photos download directly to device" onClick={() => setError("Captured photos and videos are downloaded directly to your device; nothing is stored in this app.")}>▧</button><button type="button" className={`jb-camera-shutter ${mode === "video" ? "video-mode" : ""} ${recording ? "recording" : ""}`} aria-label={recording ? "Stop recording" : mode === "photo" ? "Take photo" : "Start recording"} onClick={shutter}><span/></button><button type="button" className="jb-camera-flip-shortcut" aria-label="Flip camera" onClick={() => { const next = facing === "user" ? "environment" : "user"; setFacing(next); if (streaming) void startCamera(next); }}>↻</button></div>
+      <div className="jb-camera-footnote">{recording ? "RECORDING VIDEO · TAP TO STOP" : mode === "photo" ? "TAP SHUTTER TO TAKE PHOTO" : "TAP SHUTTER TO RECORD VIDEO"}</div>
+      <div className="jb-camera-privacy">MEDIA DOWNLOADS LOCALLY · NOT UPLOADED</div>
+    </div>
+  </section>;
 }
 
 function LocalCalendar({ birthdayMonthDay }: { birthdayMonthDay: string }) {
