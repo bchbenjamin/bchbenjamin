@@ -12,6 +12,7 @@ export default function SiteFooter({ ownerName, github, linkedin, email }: { own
         </Link>
         <p className="footer-note">Thoughtfully built. Constantly iterating.</p>
         <div className="footer-links">
+          <Link href="/privacy">Privacy</Link>
           {github && <a href={github} target="_blank" rel="noreferrer">GitHub ↗</a>}
           {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</a>}
           {email && <><a href={"mailto:" + email}>Email ↗</a><CopyEmailButton email={email} /></>}
