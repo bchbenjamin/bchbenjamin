@@ -1,5 +1,4 @@
 import Image from "next/image";
-import ProjectVisual from "@/components/ProjectVisual";
 import type { Project } from "@/lib/content";
 
 export default function ProjectArtwork({ project, priority = false }: { project: Project; priority?: boolean }) {
@@ -16,6 +15,6 @@ export default function ProjectArtwork({ project, priority = false }: { project:
     <video src={video.url} muted autoPlay loop playsInline preload="metadata" aria-label={`${project.name} video preview`} />
   ) : null;
   const mediaBadge = types.length > 0 && <span className="project-media-types" aria-label={`Project media: ${types.map((item) => `${item.count} ${item.label.toLowerCase()}`).join(", ")}`}>{types.map((item) => <i key={item.key}>{item.label} <b>{item.count}</b></i>)}</span>;
-  if (!preview) return <div className="project-artwork-shell"><ProjectVisual variant={project.visual} name={project.name} />{mediaBadge}</div>;
+  if (!preview) return mediaBadge ? <div className="project-media-summary">{mediaBadge}</div> : null;
   return <div className="project-visual project-visual-image">{preview}{mediaBadge}</div>;
 }

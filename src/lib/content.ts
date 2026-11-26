@@ -16,13 +16,15 @@ export interface Project {
   repo?: string;
   liveUrl?: string;
   period?: string;
+  association?: string;
+  contributors?: string;
   imageUrl?: string;
   imageAlt?: string;
   media: ProjectMedia[];
   visual: "awarespan" | "siddhi" | "aiida" | "clipz";
   featured: boolean;
 }
-export interface ExperienceEntry { label: string; title: string; organization: string; period: string; description: string; repo?: string; }
+export interface ExperienceEntry { label: string; title: string; organization: string; period: string; description: string; repo?: string; location?: string; skills?: string[]; }
 export interface EducationEntry { qualification: string; fieldOfStudy: string; institution: string; period: string; description: string; grade?: string; }
 export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; issuer?: string; credentialUrl?: string; issuedLabel?: string; }
 export interface SkillGroup { name: string; skills: string[]; }
@@ -149,6 +151,8 @@ async function loadSiteContent(): Promise<SiteContent> {
       repo: row.repositoryUrl || row.repository_url ? String(row.repositoryUrl ?? row.repository_url) : undefined,
       liveUrl: row.liveUrl ? String(row.liveUrl) : undefined,
       period: row.displayPeriod ? String(row.displayPeriod) : undefined,
+      association: row.association ? String(row.association) : undefined,
+      contributors: row.contributors ? String(row.contributors) : undefined,
       imageUrl: Array.isArray(row.media) && row.media.length ? (() => {
         const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
         return image?.url ? `${MEDIA_BASE}${String(image.url)}` : undefined;
@@ -174,7 +178,7 @@ async function loadSiteContent(): Promise<SiteContent> {
     label: String(row.employmentType ?? "EXPERIENCE").toUpperCase(),
     title: String(row.roleTitle), organization: String(row.organization),
     period: String(row.displayPeriod ?? periodLabel(row.startedOn as string | null, row.endedOn as string | null, Boolean(row.isCurrent))),
-    description: String(row.description ?? ""), repo: row.repositoryUrl ? String(row.repositoryUrl) : undefined
+    description: String(row.description ?? ""), location: row.location ? String(row.location) : undefined, skills: Array.isArray(row.skills) ? row.skills.map(String) : undefined, repo: row.repositoryUrl ? String(row.repositoryUrl) : undefined
   }));
   const liveEducation: EducationEntry[] = (educationRows ?? []).filter((row) => row.institution && row.qualification).map((row) => ({
     qualification: String(row.qualification), fieldOfStudy: String(row.fieldOfStudy ?? ""), institution: String(row.institution),

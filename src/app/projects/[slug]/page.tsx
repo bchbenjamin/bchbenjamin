@@ -42,7 +42,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         <div className="detail-overview" data-reveal>
           <p className="eyebrow">OVERVIEW / THE WHY</p>
           <h2>What it is<br /><span>and why it matters.</span></h2>
-          <p>{project.description}</p>
+          {project.description && <p style={{whiteSpace:"pre-wrap"}}>{project.description}</p>}{project.association && <p>{project.association}</p>}{project.contributors && <p>Contributors: {project.contributors}</p>}
         </div>
         <Surface as="aside" className="detail-facts">
           {project.role && <div><span>MY ROLE</span><strong>{project.role}</strong></div>}
