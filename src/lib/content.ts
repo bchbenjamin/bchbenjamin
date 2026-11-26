@@ -118,7 +118,7 @@ function emptyLiveSite(): SiteContent {
 }
 
 async function loadSiteContent(): Promise<SiteContent> {
-  if (!API_BASE) return site;
+  if (!API_BASE) return process.env.NODE_ENV === "production" ? emptyLiveSite() : site;
   type PublicBundle = { profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
   const bundle = await readPublic<PublicBundle>("portfolio");
   const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = bundle ? [
@@ -256,7 +256,7 @@ export const getSiteContent = cache(loadSiteContent);
 export async function getPublicProjectBySlug(slug: string): Promise<Project | undefined> {
   // A configured live API is authoritative: never fall back to stale snapshot content
   // when the project is unpublished, hidden or the API is temporarily unavailable.
-  if (!API_BASE) return getProjectBySlug(slug);
+  if (!API_BASE && process.env.NODE_ENV !== "production") return getProjectBySlug(slug);
   const content = await getSiteContent();
   return content.projects.find((project) => project.slug === slug);
 }

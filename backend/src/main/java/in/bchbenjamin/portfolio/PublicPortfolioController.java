@@ -166,7 +166,7 @@ public class PublicPortfolioController {
         for (Map<String, Object> row : rows) {
             Map<String, Object> groupFields = parseObject(row.get("group_public_fields"));
             Map<String, Object> skillFields = parseObject(row.get("skill_public_fields"));
-            if (Boolean.FALSE.equals(groupFields.get("name"))) continue;
+            if (!isVisible(groupFields, "name")) continue;
             Map<String, Object> output = new LinkedHashMap<>();
             output.put("group_name", row.get("group_name"));
             if (isVisible(groupFields, "description")) output.put("group_description", row.get("group_description"));
