@@ -17,7 +17,16 @@ export function GET(request:Request){
 
 export async function POST(request:Request){
  const origin=request.headers.get("origin");
- if(origin && origin!==new URL(request.url).origin)return new Response(null,{status:403,headers});
+ // Next.js may normalize the URL to its internal listener behind a reverse proxy.
+ // The browser's Fetch Metadata rejects cross-site requests independently.
+ if(request.headers.get("sec-fetch-site")==="cross-site")return new Response(null,{status:403,headers});
+ if(origin){
+  const requestOrigin=new URL(request.url);
+  let originUrl:URL;
+  try{originUrl=new URL(origin);}catch{return new Response(null,{status:403,headers});}
+  const host=request.headers.get("host");
+  if(originUrl.origin!==requestOrigin.origin && originUrl.host!==host)return new Response(null,{status:403,headers});
+ }
  if(request.headers.get("content-type")!=="application/octet-stream")return new Response(null,{status:415,headers});
  const length=request.headers.get("content-length");
  if(length!==null&&Number(length)>MAX_UPLOAD)return new Response(null,{status:413,headers});
