@@ -77,13 +77,14 @@ export function getProjectBySlug(slug: string): Project | undefined { return pro
 // at the API using NEXT_PUBLIC_API_BASE_URL.
 const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || "";
 const vercelOrigin = vercelHost ? (/^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`) : "";
+const MEDIA_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
 const API_BASE = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || vercelOrigin).replace(/\/$/, "");
 
 export async function fetchPublicJson<T>(url: string): Promise<T | null> {
   // The container and database may both be waking up on the first visit.
   // Retry transient failures once, but never retry an authorization failure,
   // an unpublished resource, or a rate-limit response.
-  for (const timeout of [3500, 6500]) {
+  for (const timeout of [12000, 22000]) {
     try {
       const response = await fetch(url, {
         cache: "no-store", signal: AbortSignal.timeout(timeout),
@@ -116,7 +117,11 @@ function emptyLiveSite(): SiteContent {
 
 async function loadSiteContent(): Promise<SiteContent> {
   if (!API_BASE) return site;
-  const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = await Promise.all([
+  type PublicBundle = { profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
+  const bundle = await readPublic<PublicBundle>("portfolio");
+  const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = bundle ? [
+    bundle.profile, bundle.projects, bundle.gallery, bundle.experience, bundle.education, bundle.achievements, bundle.skills, bundle.siteConfiguration
+  ] as const : await Promise.all([
     readPublic<Record<string, unknown>>("profile"),
     readPublic<Record<string, unknown>[]>("projects"),
     readPublic<Record<string, unknown>[]>("gallery"),
@@ -126,10 +131,8 @@ async function loadSiteContent(): Promise<SiteContent> {
     readPublic<Record<string, unknown>[]>("skills"),
     readPublic<Record<string, unknown>>("site-configuration")
   ]);
-  // No stale local snapshot is used when the live API is configured. A hidden field or an
-  // unavailable API must never cause old public-build data to reappear.
-  if (!profile) return emptyLiveSite();
-
+  // Independent successful collections remain visible even if profile loading fails.
+  const publicProfile = profile ?? {};
   const localBySlug = new Map(site.projects.map((project) => [project.slug, project]));
   const liveProjects: Project[] = (projectRows ?? []).filter((row) => row.name && row.slug).map((row) => {
     const slug = String(row.slug);
@@ -148,9 +151,9 @@ async function loadSiteContent(): Promise<SiteContent> {
       period: row.displayPeriod ? String(row.displayPeriod) : undefined,
       imageUrl: Array.isArray(row.media) && row.media.length ? (() => {
         const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
-        return image?.url ? `${API_BASE}${String(image.url)}` : undefined;
+        return image?.url ? `${MEDIA_BASE}${String(image.url)}` : undefined;
       })() : undefined,
-      media: Array.isArray(row.media) ? (row.media as Record<string, unknown>[]).map((asset) => ({ id: String(asset.id), original_filename: String(asset.original_filename ?? ""), content_type: String(asset.content_type ?? ""), alt_text: String(asset.alt_text ?? ""), caption: String(asset.caption ?? ""), url: `${API_BASE}${String(asset.url ?? "")}` })) : [],
+      media: Array.isArray(row.media) ? (row.media as Record<string, unknown>[]).map((asset) => ({ id: String(asset.id), original_filename: String(asset.original_filename ?? ""), content_type: String(asset.content_type ?? ""), alt_text: String(asset.alt_text ?? ""), caption: String(asset.caption ?? ""), url: `${MEDIA_BASE}${String(asset.url ?? "")}` })) : [],
       imageAlt: Array.isArray(row.media) && row.media.length ? (() => {
         const image = (row.media as Record<string, unknown>[]).find((asset) => String(asset.content_type ?? "").startsWith("image/"));
         return image?.alt_text ? String(image.alt_text) : undefined;
@@ -161,7 +164,7 @@ async function loadSiteContent(): Promise<SiteContent> {
   });
   const liveGallery: GalleryMedia[] = (galleryRows ?? []).map(row => ({
     id: String(row.id), original_filename: String(row.original_filename ?? ""), content_type: String(row.content_type ?? ""),
-    alt_text: String(row.alt_text ?? ""), caption: String(row.caption ?? ""), url: `${API_BASE}${String(row.url ?? "")}`,
+    alt_text: String(row.alt_text ?? ""), caption: String(row.caption ?? ""), url: `${MEDIA_BASE}${String(row.url ?? "")}`,
     source_type: row.source_type ? String(row.source_type) : undefined,
     source_title: row.source_title ? String(row.source_title) : undefined,
     source_caption: row.source_caption ? String(row.source_caption) : undefined,
@@ -181,7 +184,7 @@ async function loadSiteContent(): Promise<SiteContent> {
   }));
   const liveAchievements: Achievement[] = (achievementRows ?? []).filter((row) => row.title).map((row) => ({
     label: String(row.category ?? "MILESTONE"), title: String(row.title), detail: String(row.detail ?? ""),
-    imageUrl: row.imageUrl ? `${API_BASE}${String(row.imageUrl)}` : undefined,
+    imageUrl: row.imageUrl ? `${MEDIA_BASE}${String(row.imageUrl)}` : undefined,
     media: [],
     issuedLabel: row.issuedLabel ? String(row.issuedLabel) : undefined,
     issuer: row.issuer ? String(row.issuer) : undefined,
@@ -222,15 +225,15 @@ async function loadSiteContent(): Promise<SiteContent> {
     };
   } catch { /* Keep the known safe section layout and content if configuration is malformed. */ }
 
-  const liveOwnerName = String(profile.fullName ?? "");
+  const liveOwnerName = String(publicProfile.fullName ?? "");
   const ownerInitials = liveOwnerName.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("") || "";
   return {
     ...emptyLiveSite(),
     owner: {
-      name: liveOwnerName, monogram: ownerInitials, role: String(profile.headline ?? ""),
-      location: String(profile.location ?? ""), email: String(profile.email ?? ""),
-      website: String(profile.websiteUrl ?? ""), github: String(profile.githubUrl ?? ""), linkedin: String(profile.linkedinUrl ?? ""),
-      headline: String(profile.headline ?? ""), intro: String(profile.summary ?? "")
+      name: liveOwnerName, monogram: ownerInitials, role: String(publicProfile.headline ?? ""),
+      location: String(publicProfile.location ?? ""), email: String(publicProfile.email ?? ""),
+      website: String(publicProfile.websiteUrl ?? ""), github: String(publicProfile.githubUrl ?? ""), linkedin: String(publicProfile.linkedinUrl ?? ""),
+      headline: String(publicProfile.headline ?? ""), intro: String(publicProfile.summary ?? "")
     },
     projects: liveProjects,
     gallery: liveGallery,

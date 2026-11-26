@@ -26,6 +26,24 @@ public class PublicPortfolioController {
         this.mapper = mapper;
     }
 
+    @GetMapping("/portfolio")
+    public Map<String, Object> portfolio() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        try { result.put("profile", profile()); }
+        catch (ResponseStatusException e) {
+            if (e.getStatusCode() != HttpStatus.NOT_FOUND) throw e;
+            result.put("profile", Map.of());
+        }
+        result.put("projects", projects());
+        result.put("experience", experience());
+        result.put("education", education());
+        result.put("achievements", achievements());
+        result.put("skills", skills());
+        result.put("gallery", gallery());
+        result.put("siteConfiguration", siteConfiguration());
+        return result;
+    }
+
     @GetMapping("/profile")
     public Map<String, Object> profile() {
         List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM profile WHERE published = TRUE ORDER BY updated_at DESC LIMIT 1");
@@ -98,7 +116,7 @@ public class PublicPortfolioController {
     public List<Map<String, Object>> achievements() {
         List<Map<String, Object>> rows = jdbc.queryForList("""
             SELECT a.*, (SELECT '/api/v1/public/media/' || m.id::text
-                FROM media_relationships mr JOIN media_assets m ON m.id = mr.media_id
+                FROM media_relationships mr JOIN public_media_assets m ON m.id = mr.media_id
                 WHERE mr.resource_type = 'achievement' AND mr.resource_id = a.id AND mr.purpose = 'gallery'
                   AND m.visibility = 'PUBLIC' AND m.content_type LIKE 'image/%'
                 ORDER BY mr.sort_order, m.uploaded_at DESC LIMIT 1) AS gallery_image_url
@@ -117,22 +135,22 @@ public class PublicPortfolioController {
             SELECT m.id, m.original_filename, m.content_type, m.alt_text, m.caption,
                    '/api/v1/public/media/' || m.id::text AS url,
                    source.source_type, source.source_title, source.source_caption, m.uploaded_at
-            FROM media_assets m
+            FROM public_media_assets m
             LEFT JOIN LATERAL (
                 SELECT mr.resource_type AS source_type,
                     CASE mr.resource_type
-                        WHEN 'project' THEN (SELECT p.name FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE)
-                        WHEN 'achievement' THEN (SELECT a.title FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE)
-                        WHEN 'experience' THEN (SELECT e.role_title FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE)
-                        WHEN 'education' THEN (SELECT d.qualification FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE)
-                        WHEN 'profile' THEN (SELECT pr.full_name FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE)
+                        WHEN 'project' THEN (SELECT p.name FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE AND (CASE WHEN jsonb_typeof(p.public_fields->'name')='boolean' THEN p.public_fields->'name'='true'::jsonb ELSE COALESCE(p.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'achievement' THEN (SELECT a.title FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE AND (CASE WHEN jsonb_typeof(a.public_fields->'title')='boolean' THEN a.public_fields->'title'='true'::jsonb ELSE COALESCE(a.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'experience' THEN (SELECT e.role_title FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE AND (CASE WHEN jsonb_typeof(e.public_fields->'roleTitle')='boolean' THEN e.public_fields->'roleTitle'='true'::jsonb ELSE COALESCE(e.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'education' THEN (SELECT d.qualification FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE AND (CASE WHEN jsonb_typeof(d.public_fields->'qualification')='boolean' THEN d.public_fields->'qualification'='true'::jsonb ELSE COALESCE(d.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'profile' THEN (SELECT pr.full_name FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE AND (CASE WHEN jsonb_typeof(pr.public_fields->'fullName')='boolean' THEN pr.public_fields->'fullName'='true'::jsonb ELSE COALESCE(pr.public_fields->'*'='true'::jsonb,FALSE) END))
                     END AS source_title,
                     CASE mr.resource_type
-                        WHEN 'project' THEN (SELECT p.summary FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE)
-                        WHEN 'achievement' THEN (SELECT a.detail FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE)
-                        WHEN 'experience' THEN (SELECT e.description FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE)
-                        WHEN 'education' THEN (SELECT d.description FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE)
-                        WHEN 'profile' THEN (SELECT pr.headline FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE)
+                        WHEN 'project' THEN (SELECT p.description FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE AND (CASE WHEN jsonb_typeof(p.public_fields->'description')='boolean' THEN p.public_fields->'description'='true'::jsonb ELSE COALESCE(p.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'achievement' THEN (SELECT a.detail FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE AND (CASE WHEN jsonb_typeof(a.public_fields->'detail')='boolean' THEN a.public_fields->'detail'='true'::jsonb ELSE COALESCE(a.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'experience' THEN (SELECT e.description FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE AND (CASE WHEN jsonb_typeof(e.public_fields->'description')='boolean' THEN e.public_fields->'description'='true'::jsonb ELSE COALESCE(e.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'education' THEN (SELECT d.description FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE AND (CASE WHEN jsonb_typeof(d.public_fields->'description')='boolean' THEN d.public_fields->'description'='true'::jsonb ELSE COALESCE(d.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'profile' THEN (SELECT pr.summary FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE AND (CASE WHEN jsonb_typeof(pr.public_fields->'summary')='boolean' THEN pr.public_fields->'summary'='true'::jsonb ELSE COALESCE(pr.public_fields->'*'='true'::jsonb,FALSE) END))
                     END AS source_caption
                 FROM media_relationships mr
                 WHERE mr.media_id = m.id
@@ -147,7 +165,7 @@ public class PublicPortfolioController {
     @GetMapping("/files")
     public List<Map<String, Object>> files() {
         return jdbc.queryForList("""
-            SELECT m.id, m.original_filename, m.content_type, m.byte_size, m.caption,
+            SELECT m.id, m.original_filename, m.content_type, m.byte_size, m.caption, m.storage_path,
                 '/api/v1/public/media/' || m.id::text AS url,
                 CASE
                     WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN achievements a ON a.id=mr.resource_id
@@ -164,7 +182,7 @@ public class PublicPortfolioController {
                     WHEN m.content_type LIKE 'video/%' THEN 'Videos'
                     ELSE 'Documents'
                 END AS category
-            FROM media_assets m
+            FROM public_media_assets m
             WHERE m.visibility='PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%' OR m.content_type='application/pdf')
             ORDER BY lower(m.original_filename), m.id
             """);
@@ -181,7 +199,7 @@ public class PublicPortfolioController {
         return jdbc.queryForList("""
             SELECT m.id, m.original_filename, m.content_type, m.alt_text, m.caption,
                    '/api/v1/public/media/' || m.id::text AS url
-            FROM media_relationships mr JOIN media_assets m ON m.id = mr.media_id
+            FROM media_relationships mr JOIN public_media_assets m ON m.id = mr.media_id
             WHERE mr.resource_type = ? AND mr.resource_id = ? AND m.visibility = 'PUBLIC'
             ORDER BY mr.sort_order, m.uploaded_at DESC
             """, type, resourceId);

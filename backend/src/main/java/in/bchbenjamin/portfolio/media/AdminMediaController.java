@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
@@ -43,16 +44,21 @@ public class AdminMediaController {
     @GetMapping
     public List<Map<String, Object>> list() {
         return jdbc.queryForList("""
-            SELECT id, original_filename, content_type, byte_size, alt_text, caption, visibility, uploaded_by, uploaded_at, updated_at
+            SELECT id, original_filename, content_type, byte_size, alt_text, caption, visibility, storage_path, follow_record, uploaded_by, uploaded_at, updated_at
             FROM media_assets ORDER BY uploaded_at DESC LIMIT 250
             """);
     }
 
+    @Transactional
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> upload(@RequestParam("file") MultipartFile file,
                                       @RequestParam(defaultValue = "") String altText,
                                       @RequestParam(defaultValue = "") String caption,
                                       @RequestParam(defaultValue = "PRIVATE") String visibility,
+                                      @RequestParam(defaultValue = "") String storagePath,
+                                      @RequestParam(defaultValue = "false") boolean followRecord,
+                                      @RequestParam(required = false) String resourceType,
+                                      @RequestParam(required = false) UUID resourceId,
                                       @AuthenticationPrincipal OidcUser actor) throws IOException {
         if (file.isEmpty() || file.getSize() > MAX_BYTES) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a file up to 12 MB");
         String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase();
@@ -60,12 +66,14 @@ public class AdminMediaController {
         if (!ALLOWED_TYPES.contains(contentType) || !matchesSignature(contentType, bytes)) {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "File content does not match an allowed image, video or PDF type");
         }
-        String state = visibility.equalsIgnoreCase("PUBLIC") ? "PUBLIC" : "PRIVATE";
+        if (followRecord && (resourceType == null || resourceId == null)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Select a record to follow");
+        String state = followRecord || visibility.equalsIgnoreCase("PUBLIC") ? "PUBLIC" : "PRIVATE";
         UUID id = jdbc.queryForObject("""
-            INSERT INTO media_assets (original_filename, content_type, byte_size, alt_text, caption, visibility, file_bytes, uploaded_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id
+            INSERT INTO media_assets (original_filename, content_type, byte_size, alt_text, caption, visibility, file_bytes, uploaded_by, storage_path, follow_record)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id
             """, UUID.class, safeFilename(file.getOriginalFilename()), contentType, file.getSize(), trim(altText, 300),
-            trim(caption, 16000), state, bytes, actor.getSubject());
+            trim(caption, 16000), state, bytes, actor.getSubject(), normalizePath(storagePath), followRecord);
+        if (resourceType != null && resourceId != null) link(id, new LinkRequest(resourceType, resourceId, "gallery", 0), actor);
         audit.record(actor, "UPLOAD", "media", id);
         return get(id);
     }
@@ -73,14 +81,14 @@ public class AdminMediaController {
     @GetMapping("/{id}")
     public Map<String, Object> get(@PathVariable UUID id) {
         return jdbc.query("""
-            SELECT id, original_filename, content_type, byte_size, alt_text, caption, visibility, uploaded_by, uploaded_at, updated_at
+            SELECT id, original_filename, content_type, byte_size, alt_text, caption, visibility, storage_path, follow_record, uploaded_by, uploaded_at, updated_at
             FROM media_assets WHERE id = ?
             """, rs -> {
                 if (!rs.next()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media asset not found");
                 return Map.ofEntries(Map.entry("id", rs.getObject("id")), Map.entry("originalFilename", rs.getString("original_filename")),
                     Map.entry("contentType", rs.getString("content_type")), Map.entry("byteSize", rs.getLong("byte_size")),
                     Map.entry("altText", rs.getString("alt_text")), Map.entry("caption", rs.getString("caption")),
-                    Map.entry("visibility", rs.getString("visibility")), Map.entry("uploadedBy", rs.getString("uploaded_by")),
+                    Map.entry("visibility", rs.getString("visibility")), Map.entry("storagePath", rs.getString("storage_path")), Map.entry("followRecord", rs.getBoolean("follow_record")), Map.entry("uploadedBy", rs.getString("uploaded_by")),
                     Map.entry("uploadedAt", rs.getTimestamp("uploaded_at")));
             }, id);
     }
@@ -91,8 +99,10 @@ public class AdminMediaController {
         String altText = body.get("altText") == null ? "" : trim(String.valueOf(body.get("altText")), 300);
         String caption = body.get("caption") == null ? "" : trim(String.valueOf(body.get("caption")), 16000);
         String visibility = "PUBLIC".equalsIgnoreCase(String.valueOf(body.get("visibility"))) ? "PUBLIC" : "PRIVATE";
-        int changed = jdbc.update("UPDATE media_assets SET alt_text = ?, caption = ?, visibility = ?, updated_at = now() WHERE id = ?",
-            altText, caption, visibility, id);
+        String path = body.containsKey("storagePath") ? normalizePath(String.valueOf(body.get("storagePath"))) : null;
+        Boolean follow = body.get("followRecord") instanceof Boolean flag ? flag : null;
+        int changed = jdbc.update("UPDATE media_assets SET alt_text = ?, caption = ?, visibility = ?, storage_path = COALESCE(?,storage_path), follow_record=COALESCE(?,follow_record), updated_at = now() WHERE id = ?",
+            altText, caption, visibility, path, follow, id);
         if (changed == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media asset not found");
         audit.record(actor, "UPDATE", "media", id);
         return get(id);
@@ -171,6 +181,23 @@ public class AdminMediaController {
             case "video/webm" -> bytes.length >= 4 && (bytes[0] & 0xff) == 0x1a && (bytes[1] & 0xff) == 0x45 && (bytes[2] & 0xff) == 0xdf && (bytes[3] & 0xff) == 0xa3;
             default -> false;
         };
+    }
+
+    static String normalizePath(String value) {
+        if (value == null || value.isBlank()) return "";
+        String path = value.strip().replace('\\', '/');
+        if (path.startsWith("/") || path.endsWith("/") || path.length() > 500) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use a relative folder path below Portfolio");
+        }
+        String[] parts = path.split("/", -1);
+        if (parts.length > 12) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Maximum directory depth is 12");
+        for (String part : parts) {
+            if (part.isBlank() || part.equals(".") || part.equals("..") || part.length() > 100 ||
+                part.chars().anyMatch(c -> c < 32 || c == 127 || c == ':' || c == '<' || c == '>' || c == '|' || c == '?' || c == '*')) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid folder name");
+            }
+        }
+        return String.join("/", parts);
     }
 
     private static String safeFilename(String filename) {

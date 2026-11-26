@@ -9,3 +9,11 @@ describe("read-only portfolio file system",()=>{
   expect(fileSize(2048)).toBe("2.0 KB");
  });
 });
+
+import {folderEntries} from "../src/lib/public-files";
+it("builds arbitrary nested directories from owner-selected paths",()=>{
+ const files=[{id:"1",original_filename:"Course.pdf",category:"Certificates",storage_path:"Certificates/2026/NPTEL",content_type:"application/pdf",byte_size:5,caption:"",url:""}];
+ expect(folderEntries(files,[]).folders).toEqual(["Certificates"]);
+ expect(folderEntries(files,["Certificates"]).folders).toEqual(["2026"]);
+ expect(folderEntries(files,["Certificates","2026","NPTEL"]).entries).toEqual(files);
+});

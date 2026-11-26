@@ -184,6 +184,39 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
+    void recordAttachmentsFollowPublicationAndInheritOnlyPublicCaptions() throws Exception {
+        UUID record = jdbc.queryForObject("""
+            INSERT INTO achievements(category,title,detail,published,public_fields)
+            VALUES ('Certification','Attachment test certificate','Full certificate description',FALSE,
+                    '{"title":true,"detail":true,"category":true}') RETURNING id
+            """,UUID.class);
+        UUID asset = jdbc.queryForObject("""
+            INSERT INTO media_assets(original_filename,content_type,byte_size,visibility,file_bytes,uploaded_by,storage_path,follow_record)
+            VALUES ('attachment-test.png','image/png',8,'PUBLIC',decode('89504e470d0a1a0a','hex'),
+                    'integration-test','Certificates/2026/Example',TRUE) RETURNING id
+            """, UUID.class);
+        try {
+            jdbc.update("INSERT INTO media_relationships(media_id,resource_type,resource_id,purpose) VALUES (?,'achievement',?,'gallery')",asset,record);
+            mockMvc.perform(get("/api/v1/public/media/"+asset)).andExpect(status().isNotFound());
+            mockMvc.perform(get("/api/v1/public/gallery")).andExpect(jsonPath("$[?(@.id == '"+asset+"')]").isEmpty());
+            jdbc.update("UPDATE achievements SET published=TRUE WHERE id=?",record);
+            mockMvc.perform(get("/api/v1/public/media/"+asset)).andExpect(status().isOk());
+            mockMvc.perform(get("/api/v1/public/files")).andExpect(jsonPath("$[?(@.id == '"+asset+"')].storage_path").value(org.hamcrest.Matchers.hasItem("Certificates/2026/Example")));
+            mockMvc.perform(get("/api/v1/public/gallery")).andExpect(jsonPath("$[?(@.id == '"+asset+"')].source_caption").value(org.hamcrest.Matchers.hasItem("Full certificate description")));
+            jdbc.update("UPDATE achievements SET public_fields=public_fields || '{\"detail\":false}'::jsonb WHERE id=?",record);
+            assertFalse(mockMvc.perform(get("/api/v1/public/gallery")).andReturn().getResponse().getContentAsString().contains("Full certificate description"));
+            jdbc.update("UPDATE achievements SET published=FALSE WHERE id=?",record);
+            mockMvc.perform(get("/api/v1/public/media/"+asset)).andExpect(status().isNotFound());
+            mockMvc.perform(get("/api/v1/public/files")).andExpect(jsonPath("$[?(@.id == '"+asset+"')]").isEmpty());
+            mockMvc.perform(get("/api/v1/public/portfolio")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.projects").isArray()).andExpect(jsonPath("$.experience").isArray()).andExpect(jsonPath("$.gallery").isArray());
+        } finally {
+            jdbc.update("DELETE FROM media_assets WHERE id=?",asset);
+            jdbc.update("DELETE FROM achievements WHERE id=?",record);
+        }
+    }
+
+    @Test
     void publicFileExplorerListsPublishedAssetsOnlyAndClassifiesCertificates() throws Exception {
         UUID privateId = jdbc.queryForObject("""
             INSERT INTO media_assets (original_filename, content_type, byte_size, visibility, file_bytes, uploaded_by)

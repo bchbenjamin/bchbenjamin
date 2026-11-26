@@ -36,6 +36,10 @@ export default function AdminContentManager() {
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [selected, setSelected] = useState<RecordItem | null>(null);
   const [editor, setEditor] = useState(JSON.stringify(templates.profile, null, 2));
+  const [attachments,setAttachments]=useState<File[]>([]);
+  const [attachmentPath,setAttachmentPath]=useState("");
+  const [attachmentCaption,setAttachmentCaption]=useState("");
+  const [attachmentPublic,setAttachmentPublic]=useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Select a record or create a new one.");
 
@@ -64,12 +68,14 @@ export default function AdminContentManager() {
   }, [load, resource]);
 
   function selectRecord(record: RecordItem) {
+    setAttachments([]);setAttachmentPath("");setAttachmentCaption("");
     setSelected(record);
     setEditor(JSON.stringify(camelRecord(record), null, 2));
     setMessage("Editing selected record. Changes are not saved until you press Save.");
   }
 
   function newRecord() {
+    setAttachments([]);setAttachmentPath("");setAttachmentCaption("");
     setSelected(null);
     setEditor(JSON.stringify(templates[resource], null, 2));
     setMessage("New draft. Complete the required fields, then save.");
@@ -89,10 +95,25 @@ export default function AdminContentManager() {
       });
       if (!response.ok) throw new Error(`Save failed (${response.status}). Check required fields and your session.`);
       const saved = await response.json() as RecordItem;
+      const attachmentType = ({profile:"profile",projects:"project",experience:"experience",education:"education",achievements:"achievement"} as Partial<Record<Resource,string>>)[resource];
+      const savedId = String(saved.id ?? selected?.id ?? "");
+      if (attachments.length && attachmentType && savedId) {
+        const failed:string[]=[];
+        for (const file of attachments) {
+          try {
+            const form=new FormData();form.append("file",file);form.append("caption",attachmentCaption);form.append("storagePath",attachmentPath);form.append("visibility","PRIVATE");form.append("followRecord",String(attachmentPublic));form.append("resourceType",attachmentType);form.append("resourceId",savedId);
+            const response=await fetch(`${apiBase}/api/v1/admin/media`,{method:"POST",credentials:"include",headers:{"X-XSRF-TOKEN":token},body:form});
+            if(!response.ok)failed.push(file.name);
+          }catch{failed.push(file.name);}
+        }
+        setAttachments(attachments.filter(f=>failed.includes(f.name)));
+        if(failed.length){setSelected(saved);setEditor(JSON.stringify(camelRecord(saved),null,2));setMessage("Record saved; upload failed for "+failed.join(", ")+". Retry Save to upload those files.");return;}
+      }
+      setAttachments([]);setAttachmentCaption("");setAttachmentPath("");
       await load(resource);
       setSelected(saved);
       setEditor(JSON.stringify(camelRecord(saved), null, 2));
-      setMessage("Saved. The mutation was recorded in the admin audit log.");
+      setMessage("Saved. Public attachments appear automatically in Gallery and File Manager.");
     } catch (error) {
       setMessage(error instanceof SyntaxError ? "The editor does not contain valid JSON." : error instanceof Error ? error.message : "Save failed.");
     } finally {
@@ -173,6 +194,7 @@ export default function AdminContentManager() {
         <div className="admin-editor">
           <div className="admin-list-top"><span>{selected?.id ? "EDIT RECORD" : "NEW RECORD"}</span><span>JSON</span></div>
           <textarea aria-label="Content record JSON editor" spellCheck={false} value={editor} onChange={(event) => setEditor(event.target.value)} />
+          <label className="resume-inclusion-control"><input type="checkbox" checked={parsedEditor.published===true} onChange={e=>setEditor(JSON.stringify({...parsedEditor,published:e.target.checked},null,2))}/><span><strong>Publish record on website</strong><small>Attachments configured to follow this record appear and disappear with it.</small></span></label>
           <div className="field-visibility-panel">
             <div className="admin-list-top"><strong>Website visibility</strong><span>FIELD LEVEL</span></div>
             <p>Only checked fields are included in the public API. Unchecked values stay in the private database.</p>
@@ -180,6 +202,7 @@ export default function AdminContentManager() {
             <button type="button" className="text-link" onClick={addCustomField}>＋ Add a custom parameter</button>
           </div>
           {resource !== "profile" && resource !== "skill-groups" && <label className="resume-inclusion-control"><input type="checkbox" checked={parsedEditor.resumeIncluded !== false} onChange={(event) => setResumeIncluded(event.target.checked)} /><span><strong>Include in generated résumé</strong><small>Separate from website visibility. Private records can still be included in your résumé.</small></span></label>}
+          {["profile","projects","experience","education","achievements"].includes(resource)&&<fieldset className="field-visibility-panel"><legend>Record attachments</legend><p>Attach photos, videos or PDFs to this record. Public images and videos appear automatically in Gallery with the record description unless you enter a caption. All public files appear in File Manager.</p><label>Files<input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,application/pdf" onChange={e=>setAttachments(Array.from(e.target.files??[]))}/></label>{attachments.length>0&&<p>{attachments.map(f=>f.name).join(", ")}</p>}<label>Folder inside Portfolio<input value={attachmentPath} onChange={e=>setAttachmentPath(e.target.value)} placeholder="e.g. Certificates/2026/NPTEL (blank = automatic)"/></label><label>Caption override (optional)<textarea rows={3} value={attachmentCaption} onChange={e=>setAttachmentCaption(e.target.value)}/></label><label><input type="checkbox" checked={attachmentPublic} onChange={e=>setAttachmentPublic(e.target.checked)}/> Automatically publish attachments with this record (including future publication)</label></fieldset>}
           <div className="admin-editor-actions">
             <button className="button button-primary" type="button" disabled={busy} onClick={() => void save()}>{busy ? "Working…" : "Save record"}</button>
             <button className="button button-quiet" type="button" disabled={busy || !selected?.id} onClick={() => void remove()}>Delete</button>
