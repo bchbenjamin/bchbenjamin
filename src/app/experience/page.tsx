@@ -5,6 +5,9 @@ import Surface from "@/components/Surface";
 import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/experience" },
+  openGraph: { url: "/experience", title: "Experience", description: "Professional experience, education, milestones and selected engineering work." },
+  twitter: { card: "summary_large_image", title: "Experience", description: "Professional experience, education, milestones and selected engineering work." },
   title: "Experience",
   description: "Professional experience, education, milestones and selected engineering work."
 };

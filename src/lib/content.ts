@@ -1,3 +1,4 @@
+import { cache } from "react";
 import siteData from "../data/site.json";
 import { normalizeLauncherHomeLayout, type LauncherHomeLayout } from "./launcher-layout";
 
@@ -101,7 +102,7 @@ function emptyLiveSite(): SiteContent {
   };
 }
 
-export async function getSiteContent(): Promise<SiteContent> {
+async function loadSiteContent(): Promise<SiteContent> {
   if (!API_BASE) return site;
   const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = await Promise.all([
     readPublic<Record<string, unknown>>("profile"),
@@ -226,6 +227,8 @@ export async function getSiteContent(): Promise<SiteContent> {
     launcher: launcherConfig
   };
 }
+
+export const getSiteContent = cache(loadSiteContent);
 
 export async function getPublicProjectBySlug(slug: string): Promise<Project | undefined> {
   // A configured live API is authoritative: never fall back to stale snapshot content

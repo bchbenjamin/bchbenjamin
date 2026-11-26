@@ -4,6 +4,9 @@ import { getSiteContent } from "@/lib/content";
 import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
+  openGraph: { url: "/contact", title: "Contact", description: "Send a message about engineering, software and worthwhile collaborations." },
+  twitter: { card: "summary_large_image", title: "Contact", description: "Send a message about engineering, software and worthwhile collaborations." },
   title: "Contact",
   description: "Send a message about engineering, software and worthwhile collaborations."
 };

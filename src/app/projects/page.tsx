@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import {canonical} from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ProjectArtwork from "@/components/ProjectArtwork";
@@ -5,6 +7,9 @@ import SectionHeading from "@/components/SectionHeading";
 import { getSiteContent } from "@/lib/content";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/projects" },
+  openGraph: { url: "/projects", title: "Projects", description: "Selected software, AI, data and edge-computing projects." },
+  twitter: { card: "summary_large_image", title: "Projects", description: "Selected software, AI, data and edge-computing projects." },
   title: "Projects",
   description: "Selected software, AI, data and edge-computing projects."
 };
@@ -15,6 +20,7 @@ export default async function ProjectsPage() {
   const { projects } = await getSiteContent();
   return (
     <section className="shell inner-page">
+      <JsonLd data={{"@context":"https://schema.org","@type":"ItemList",itemListElement:projects.map((project,index)=>({"@type":"ListItem",position:index+1,url:canonical("/projects/"+project.slug),name:project.name}))}} />
       <div className="page-intro" data-reveal>
         <p className="eyebrow"><span className="eyebrow-line" /> WORK / SELECTED PROJECTS</p>
         <h1>Built to solve.<br /><span>Made to be useful.</span></h1>

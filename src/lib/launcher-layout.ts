@@ -4,9 +4,9 @@ export interface LauncherHomeLayout {
 }
 
 export const DEFAULT_WIDGET_PLACEMENTS = {
-  search: { panel: 0, row: 0, column: 0 },
-  clock: { panel: 0, row: 1, column: 0 },
-  gallery: { panel: 0, row: 3, column: 0 }
+  search: { panel: 1, row: 0, column: 0 },
+  clock: { panel: 1, row: 1, column: 0 },
+  gallery: { panel: 0, row: 0, column: 0 }
 } as const;
 
 type WidgetId = keyof typeof DEFAULT_WIDGET_PLACEMENTS;

@@ -4,6 +4,9 @@ import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
+  alternates: { canonical: "/links" },
+  openGraph: { url: "/links", title: "Profile Links", description: "All official profile, portfolio and contact links in one place." },
+  twitter: { card: "summary_large_image", title: "Profile Links", description: "All official profile, portfolio and contact links in one place." },
   title: "Profile Links",
   description: "All official profile, portfolio and contact links in one place."
 };

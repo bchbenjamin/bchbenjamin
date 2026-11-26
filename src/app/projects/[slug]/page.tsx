@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import { pageSeo, projectSchema } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,11 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const site = await getSiteContent();
   const project = site.projects.find(item => item.slug === slug);
   if (!project) return {};
-  return {
-    title: project.name,
-    description: project.summary,
-    openGraph: { title: `${project.name} — ${site.owner.name || "Portfolio"}`, description: project.summary }
-  };
+  return pageSeo(site, "/projects/" + project.slug, project.name, project.summary || project.description);
 }
 
 export const dynamic = "force-dynamic";
@@ -30,6 +28,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   return (
     <article className="shell inner-page project-detail">
+      <JsonLd data={{"@context":"https://schema.org",...projectSchema(project,site)}} />
       <Link className="back-link" href="/projects">← Back to projects</Link>
       <div className="detail-heading" data-reveal>
         <p className="eyebrow"><span className="eyebrow-line" />{project.category}</p>
