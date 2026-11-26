@@ -612,3 +612,4 @@ body:has(.jb-boot) :is(.site-header,.site-footer){display:none}
 .jb-home-widget-gallery .jb-gallery-thumb img{object-fit:contain}
 .jb-home-widget-gallery .jb-gallery-strip button{flex:1 1 0;min-width:0}
 .jb-home-widget-gallery .jb-gallery-strip button .jb-gallery-thumb{min-height:36px;display:grid;place-items:center}
+.jb-welcome-widget .jb-welcome-retry{background:transparent;border:0;text-decoration:underline;color:#91dcf5;font:inherit;padding:3px 0;cursor:pointer}

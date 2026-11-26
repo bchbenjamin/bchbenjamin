@@ -79,13 +79,25 @@ const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERC
 const vercelOrigin = vercelHost ? (/^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`) : "";
 const API_BASE = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || vercelOrigin).replace(/\/$/, "");
 
+export async function fetchPublicJson<T>(url: string): Promise<T | null> {
+  // The container and database may both be waking up on the first visit.
+  // Retry transient failures once, but never retry an authorization failure,
+  // an unpublished resource, or a rate-limit response.
+  for (const timeout of [3500, 6500]) {
+    try {
+      const response = await fetch(url, {
+        cache: "no-store", signal: AbortSignal.timeout(timeout),
+        headers: { Accept: "application/json" }
+      });
+      if (response.ok) return await response.json() as T;
+      if (response.status < 500) return null;
+    } catch { /* A timed-out or interrupted connection may recover. */ }
+  }
+  return null;
+}
 async function readPublic<T>(path: string): Promise<T | null> {
   if (!API_BASE) return null;
-  try {
-    const response = await fetch(`${API_BASE}/api/v1/public/${path}`, { cache: "no-store", signal: AbortSignal.timeout(3500), headers: { Accept: "application/json" } });
-    if (!response.ok) return null;
-    return await response.json() as T;
-  } catch { return null; }
+  return fetchPublicJson<T>(`${API_BASE}/api/v1/public/${path}`);
 }
 function dateLabel(value?: string | null) {
   return value ? new Date(`${value}T00:00:00`).toLocaleDateString("en", { month: "short", year: "numeric" }) : "";

@@ -384,6 +384,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
               <p className="jb-welcome-kicker">WELCOME TO MY PORTFOLIO</p>
               <h1>{site.owner.name || "Personal portfolio"}</h1>
               <p className="jb-welcome-role">{site.owner.headline || "Explore my projects, experience and skills."}</p>
+              {!site.owner.name && <p className="jb-welcome-hint" role="status">The portfolio content is temporarily unavailable. <button type="button" className="jb-welcome-retry" onClick={()=>router.refresh()}>Retry</button></p>}
               <nav aria-label="Explore portfolio" className="jb-welcome-actions">
                 <Link prefetch={false} href="/projects" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey){event.preventDefault();open("projects");}}}>Projects</Link>
                 <Link prefetch={false} href="/about" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey){event.preventDefault();open("about");}}}>About me</Link>
