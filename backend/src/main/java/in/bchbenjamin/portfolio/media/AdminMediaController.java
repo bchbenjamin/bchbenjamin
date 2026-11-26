@@ -65,7 +65,7 @@ public class AdminMediaController {
             INSERT INTO media_assets (original_filename, content_type, byte_size, alt_text, caption, visibility, file_bytes, uploaded_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id
             """, UUID.class, safeFilename(file.getOriginalFilename()), contentType, file.getSize(), trim(altText, 300),
-            trim(caption, 500), state, bytes, actor.getSubject());
+            trim(caption, 16000), state, bytes, actor.getSubject());
         audit.record(actor, "UPLOAD", "media", id);
         return get(id);
     }
@@ -89,7 +89,7 @@ public class AdminMediaController {
     public Map<String, Object> update(@PathVariable UUID id, @RequestBody Map<String, Object> body,
                                       @AuthenticationPrincipal OidcUser actor) {
         String altText = body.get("altText") == null ? "" : trim(String.valueOf(body.get("altText")), 300);
-        String caption = body.get("caption") == null ? "" : trim(String.valueOf(body.get("caption")), 500);
+        String caption = body.get("caption") == null ? "" : trim(String.valueOf(body.get("caption")), 16000);
         String visibility = "PUBLIC".equalsIgnoreCase(String.valueOf(body.get("visibility"))) ? "PUBLIC" : "PRIVATE";
         int changed = jdbc.update("UPDATE media_assets SET alt_text = ?, caption = ?, visibility = ?, updated_at = now() WHERE id = ?",
             altText, caption, visibility, id);

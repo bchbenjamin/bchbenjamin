@@ -1,0 +1,1 @@
+ALTER TABLE media_assets ALTER COLUMN caption TYPE TEXT;
