@@ -86,7 +86,7 @@ export async function fetchPublicJson<T>(url: string): Promise<T | null> {
   // The container and database may both be waking up on the first visit.
   // Retry transient failures once, but never retry an authorization failure,
   // an unpublished resource, or a rate-limit response.
-  for (const timeout of [12000, 22000]) {
+  for (const timeout of [8000, 10000]) {
     try {
       const response = await fetch(url, {
         cache: "no-store", signal: AbortSignal.timeout(timeout),

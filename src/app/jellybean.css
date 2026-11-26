@@ -581,9 +581,6 @@ html:has(.jb-world),body:has(.jb-world){height:100%;overflow:hidden;overscroll-b
 
 /* A110 Launcher: the Remove affordance exists only while an item is being dragged. */
 .jb-a110-remove-zone{position:absolute;z-index:30;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#7b2028f2,#48151be8);border-bottom:1px solid #d58b8b;color:#fff;font-size:14px;font-weight:500;letter-spacing:.4px;pointer-events:none}
-.jb-googleplus-embedded{display:block;width:100%;height:100%;min-height:0;flex:1;border:0;background:#101820}
-.jb-app-content:has(.jb-googleplus-embedded){display:flex;flex-direction:column;overflow:hidden;padding:0!important}
-.jb-app-window:has(.jb-googleplus-embedded){display:flex;flex-direction:column}
 /* Don't shift the workspace when the transient drag affordance appears. */
 .jb-device:has(.jb-a110-remove-zone) .jb-home-viewport{top:25px}
 .jb-device:has(.jb-a110-remove-zone) .jb-status-bar{top:0}
@@ -627,3 +624,47 @@ body:has(.jb-boot) :is(.site-header,.site-footer){display:none}
 .jb-about-hero + h3 + p,.jb-list-card p{white-space:pre-line}
 .jb-media-card>div>b{white-space:pre-wrap;overflow-wrap:anywhere;font-weight:400;line-height:1.5}
 .jb-files .jb-file-row small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Holo list UI: same launcher surface, no nested browser or iframe. */
+
+/* Android 4.1.2 Camera: original AOSP Holo assets, bottom control panel in portrait. */
+.jb-camera-app{display:flex;flex-direction:column;height:100%;min-height:0;background:#000;isolation:isolate}
+.jb-camera-app .jb-camera-view{flex:1;min-height:0;max-height:none;aspect-ratio:auto;width:100%;border:0;background:#000}
+.jb-camera-app .jb-camera-view>video{object-fit:contain}
+.jb-camera-app .jb-camera-view>video.is-negative{filter:invert(1)}
+.jb-camera-app .jb-camera-controls{position:relative;order:3;z-index:3;flex:0 0 88px;width:100%;height:88px;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;justify-items:center;gap:0;margin:0;padding:0;background:#202020 url('/jellybean/camera/bg_camera_pattern.png') repeat;border:0;border-top:1px solid #444;box-shadow:none}
+.jb-camera-app .jb-camera-controls button,.jb-camera-app .jb-camera-indicators button{background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;border-radius:0!important;color:#fff;display:grid;place-items:center;min-width:44px;min-height:44px}
+.jb-camera-app .jb-camera-controls img,.jb-camera-app .jb-camera-indicators img{display:block;object-fit:contain}
+.jb-camera-modes{display:flex;gap:0}.jb-camera-modes button{opacity:.5}.jb-camera-modes button[aria-pressed=true]{opacity:1;background:#33b5e533!important}.jb-camera-modes img{width:30px;height:30px}
+.jb-camera-app .jb-camera-shutter-original img{width:76px;height:76px}.jb-camera-app .jb-camera-thumbnail-original img{width:45px;height:45px;object-fit:cover}
+.jb-camera-indicators{position:relative;order:2;flex:0 0 48px;display:flex;justify-content:space-around;align-items:center;background:#191919;border-top:1px solid #333}
+.jb-camera-app .jb-camera-indicators button{display:flex;gap:5px;align-items:center;justify-content:center;min-width:55px}.jb-camera-indicators img{width:32px;height:32px}.jb-camera-indicators small{font-size:10px;color:#ddd}.jb-camera-indicators button[aria-pressed=true]{background:#33b5e544!important}.jb-camera-indicators button:disabled{opacity:.35}
+.jb-camera-settings-original{position:absolute;z-index:7;bottom:137px;right:8px;width:min(290px,calc(100% - 16px));padding:12px;background:#292929;border:1px solid #666;color:#fff;box-shadow:0 3px 12px #0009}.jb-camera-settings-original b{display:block;border-bottom:2px solid #33b5e5;padding-bottom:8px;font-size:16px;font-weight:400}.jb-camera-settings-original label{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #555;font-size:13px}.jb-camera-settings-original select{background:#333;color:#fff;border:1px solid #777;padding:4px}.jb-camera-settings-original small{font-size:11px;color:#bbb}.jb-camera-settings-original input{width:110px;accent-color:#33b5e5}
+@media(orientation:landscape) and (max-height:650px){.jb-camera-app{flex-direction:row}.jb-camera-app .jb-camera-controls{order:3;flex:0 0 92px;width:92px;height:100%;grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr;border-left:1px solid #444;border-top:0}.jb-camera-modes{flex-direction:column}.jb-camera-indicators{order:2;flex:0 0 55px;flex-direction:column;border-top:0}.jb-camera-indicators small{display:none}.jb-camera-settings-original{bottom:8px;right:150px}}
+
+/* Holo Light / DarkActionBar, based on Android 4.1 Contacts (PeopleTheme).
+   A single in-process activity; no web card layout or nested document. */
+.jb-app-overlay{backdrop-filter:none}
+.jb-app-actionbar{height:48px;flex:0 0 48px;padding:0 8px 0 0;gap:6px;background:linear-gradient(#252525,#111 95%);border-bottom:1px solid #333;color:#fff;box-shadow:none}
+.jb-app-actionbar b{font:400 18px/1.2 Roboto,Arial,sans-serif;text-shadow:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jb-app-actionbar>div{min-width:0}
+.jb-app-actionbar>button.jb-action-up{display:flex;align-items:center;justify-content:flex-start;gap:4px;flex:0 0 53px;width:53px;height:48px;padding:0 5px 0 2px}
+.jb-action-up .jb-app-icon{width:32px!important;height:32px!important;min-width:32px!important;box-shadow:none!important;border:0!important;border-radius:0!important;background:transparent!important;padding:0!important}
+.jb-action-up .jb-app-icon img{width:32px;height:32px;object-fit:contain}
+.jb-holo-up{display:block;width:8px;height:8px;border-left:2px solid #ddd;border-bottom:2px solid #ddd;transform:rotate(45deg);margin-left:3px}
+.jb-action-up:active,.jb-holo-link-row:active{background:#33b5e5}
+.jb-app-content:has(.jb-googleplus){padding:0!important;background:#f3f3f3;color:#222;overflow:auto;min-height:0}
+.jb-googleplus{min-height:100%;font:400 16px/1.35 Roboto,Arial,sans-serif;color:#222}
+.jb-gplus-profile{display:flex;align-items:center;gap:16px;padding:16px;background:#fff;border-bottom:1px solid #c8c8c8}
+.jb-gplus-profile>img{flex:none;object-fit:contain;width:64px;height:64px}
+.jb-gplus-profile>div{min-width:0}
+.jb-gplus-profile h2{font:400 22px/1.25 Roboto,Arial,sans-serif;color:#222;margin:0 0 5px}
+.jb-gplus-profile p{font-size:14px;line-height:1.4;color:#666;margin:0}
+.jb-app-content .jb-holo-section{font:400 14px/1.4 Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:0;color:#0087b5;margin:0;padding:14px 16px 5px;border-bottom:2px solid #33b5e5}
+.jb-holo-link-row{display:flex;align-items:center;gap:16px;min-height:64px;width:100%;padding:9px 16px;background:transparent;border:0;border-bottom:1px solid #ccc;color:#222;font:inherit;text-decoration:none;text-align:left}
+.jb-holo-link-row>img{width:40px;height:40px;object-fit:contain;flex:none}
+.jb-holo-link-row>span{min-width:0;display:flex;flex-direction:column;gap:2px}
+.jb-holo-link-row b{font-size:16px;font-weight:400;color:inherit}
+.jb-holo-link-row small{font-size:13px;color:#666;overflow-wrap:anywhere}
+.jb-holo-link-row:focus-visible,.jb-action-up:focus-visible{outline:2px solid #33b5e5;outline-offset:-2px}
+.jb-navigation-bar button img.jb-system-nav-icon{width:32px;height:24px;object-fit:contain;filter:none}
+html[data-portfolio-booted=true] .jb-boot{display:none}

@@ -17,7 +17,73 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1/public")
 public class PublicPortfolioController {
-    private static final List<String> PRIVATE_COLUMNS = List.of("id", "public_fields", "custom_fields", "created_at", "updated_at", "published", "sort_order", "gallery_image_url", "resume_included");
+    private static final List<String> PRIVATE_COLUMNS = List.of("id", "public_fields", "custom_fields", "created_at", "updated_at", "published", "sort_order", "gallery_image_url", "resume_included", "public_media");
+    private static final String SKILLS_SQL = """
+            SELECT g.id AS group_id, g.name AS group_name, g.description AS group_description,
+                   g.public_fields::text AS group_public_fields, g.custom_fields::text AS group_custom_fields,
+                   s.id AS skill_id, s.name AS skill_name, s.proficiency,
+                   s.public_fields::text AS skill_public_fields, s.custom_fields::text AS skill_custom_fields
+            FROM skill_groups g LEFT JOIN skills s ON s.group_id = g.id
+            WHERE g.published = TRUE ORDER BY g.sort_order, s.sort_order, s.name
+            """;
+    private static final String ACHIEVEMENTS_SQL = """
+            SELECT a.*, (SELECT '/api/v1/public/media/' || m.id::text
+                FROM media_relationships mr JOIN public_media_assets m ON m.id = mr.media_id
+                WHERE mr.resource_type = 'achievement' AND mr.resource_id = a.id AND mr.purpose = 'gallery'
+                  AND m.visibility = 'PUBLIC' AND m.content_type LIKE 'image/%'
+                ORDER BY mr.sort_order, m.uploaded_at DESC LIMIT 1) AS gallery_image_url
+            FROM achievements a WHERE a.published = TRUE ORDER BY a.awarded_on DESC NULLS LAST, a.sort_order
+            """;
+    private static final String GALLERY_SQL = """
+            SELECT m.id, m.original_filename, m.content_type, m.alt_text, m.caption,
+                   '/api/v1/public/media/' || m.id::text AS url,
+                   source.source_type, source.source_title, source.source_caption, m.uploaded_at
+            FROM public_media_assets m
+            LEFT JOIN LATERAL (
+                SELECT mr.resource_type AS source_type,
+                    CASE mr.resource_type
+                        WHEN 'project' THEN (SELECT p.name FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE AND (CASE WHEN jsonb_typeof(p.public_fields->'name')='boolean' THEN p.public_fields->'name'='true'::jsonb ELSE COALESCE(p.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'achievement' THEN (SELECT a.title FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE AND (CASE WHEN jsonb_typeof(a.public_fields->'title')='boolean' THEN a.public_fields->'title'='true'::jsonb ELSE COALESCE(a.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'experience' THEN (SELECT e.role_title FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE AND (CASE WHEN jsonb_typeof(e.public_fields->'roleTitle')='boolean' THEN e.public_fields->'roleTitle'='true'::jsonb ELSE COALESCE(e.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'education' THEN (SELECT d.qualification FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE AND (CASE WHEN jsonb_typeof(d.public_fields->'qualification')='boolean' THEN d.public_fields->'qualification'='true'::jsonb ELSE COALESCE(d.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'profile' THEN (SELECT pr.full_name FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE AND (CASE WHEN jsonb_typeof(pr.public_fields->'fullName')='boolean' THEN pr.public_fields->'fullName'='true'::jsonb ELSE COALESCE(pr.public_fields->'*'='true'::jsonb,FALSE) END))
+                    END AS source_title,
+                    CASE mr.resource_type
+                        WHEN 'project' THEN (SELECT p.description FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE AND (CASE WHEN jsonb_typeof(p.public_fields->'description')='boolean' THEN p.public_fields->'description'='true'::jsonb ELSE COALESCE(p.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'achievement' THEN (SELECT a.detail FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE AND (CASE WHEN jsonb_typeof(a.public_fields->'detail')='boolean' THEN a.public_fields->'detail'='true'::jsonb ELSE COALESCE(a.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'experience' THEN (SELECT e.description FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE AND (CASE WHEN jsonb_typeof(e.public_fields->'description')='boolean' THEN e.public_fields->'description'='true'::jsonb ELSE COALESCE(e.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'education' THEN (SELECT d.description FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE AND (CASE WHEN jsonb_typeof(d.public_fields->'description')='boolean' THEN d.public_fields->'description'='true'::jsonb ELSE COALESCE(d.public_fields->'*'='true'::jsonb,FALSE) END))
+                        WHEN 'profile' THEN (SELECT pr.summary FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE AND (CASE WHEN jsonb_typeof(pr.public_fields->'summary')='boolean' THEN pr.public_fields->'summary'='true'::jsonb ELSE COALESCE(pr.public_fields->'*'='true'::jsonb,FALSE) END))
+                    END AS source_caption
+                FROM media_relationships mr
+                WHERE mr.media_id = m.id
+                ORDER BY mr.sort_order, mr.created_at
+                LIMIT 1
+            ) source ON TRUE
+            WHERE m.visibility = 'PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%')
+            ORDER BY m.uploaded_at DESC
+            """;
+    private static final String PROJECTS_SQL = """
+        SELECT p.*, COALESCE((SELECT jsonb_agg(jsonb_build_object(
+            'id',m.id,'original_filename',m.original_filename,'content_type',m.content_type,
+            'alt_text',m.alt_text,'caption',m.caption,'url','/api/v1/public/media/' || m.id::text)
+            ORDER BY mr.sort_order,m.uploaded_at DESC)
+            FROM media_relationships mr JOIN public_media_assets m ON m.id=mr.media_id
+            WHERE mr.resource_type='project' AND mr.resource_id=p.id),'[]'::jsonb) AS public_media
+        FROM projects p WHERE p.published=TRUE ORDER BY p.sort_order,p.name
+        """;
+    private static final String PROFILE_SQL = "SELECT * FROM profile WHERE published=TRUE ORDER BY updated_at DESC LIMIT 1";
+    private static final String EXPERIENCE_SQL = "SELECT * FROM experience WHERE published=TRUE ORDER BY sort_order,started_on DESC";
+    private static final String EDUCATION_SQL = "SELECT * FROM education WHERE published=TRUE ORDER BY sort_order,started_on DESC";
+    private static final String BUNDLE_SQL = "SELECT jsonb_build_object(" +
+        "'profile',COALESCE((SELECT to_jsonb(p) FROM (" + PROFILE_SQL + ") p),'{}'::jsonb)," +
+        "'projects',COALESCE((SELECT jsonb_agg(p) FROM (" + PROJECTS_SQL + ") p),'[]'::jsonb)," +
+        "'experience',COALESCE((SELECT jsonb_agg(e) FROM (" + EXPERIENCE_SQL + ") e),'[]'::jsonb)," +
+        "'education',COALESCE((SELECT jsonb_agg(e) FROM (" + EDUCATION_SQL + ") e),'[]'::jsonb)," +
+        "'achievements',COALESCE((SELECT jsonb_agg(a) FROM (" + ACHIEVEMENTS_SQL + ") a),'[]'::jsonb)," +
+        "'skills',COALESCE((SELECT jsonb_agg(s) FROM (" + SKILLS_SQL + ") s),'[]'::jsonb)," +
+        "'gallery',COALESCE((SELECT jsonb_agg(g) FROM (" + GALLERY_SQL + ") g),'[]'::jsonb)," +
+        "'siteConfiguration',(SELECT published_config FROM site_configuration WHERE id=1))::text";
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
 
@@ -28,19 +94,20 @@ public class PublicPortfolioController {
 
     @GetMapping("/portfolio")
     public Map<String, Object> portfolio() {
-        Map<String, Object> result = new LinkedHashMap<>();
-        try { result.put("profile", profile()); }
-        catch (ResponseStatusException e) {
-            if (e.getStatusCode() != HttpStatus.NOT_FOUND) throw e;
-            result.put("profile", Map.of());
-        }
-        result.put("projects", projects());
-        result.put("experience", experience());
-        result.put("education", education());
-        result.put("achievements", achievements());
-        result.put("skills", skills());
-        result.put("gallery", gallery());
-        result.put("siteConfiguration", siteConfiguration());
+        // Keep all visibility checks in the existing mapping functions, but take a
+        // single database snapshot and avoid a round trip for every collection/project.
+        String json = jdbc.queryForObject(BUNDLE_SQL,String.class);
+        Map<String,Object> raw = parseObject(json);
+        if (raw.isEmpty()) throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Portfolio snapshot unavailable");
+        Map<String,Object> result = new LinkedHashMap<>();
+        result.put("profile",toPublicMap(parseObject(raw.get("profile"))));
+        result.put("projects",mapProjects(rows(raw.get("projects"))));
+        result.put("experience",rows(raw.get("experience")).stream().map(this::toPublicMap).filter(r->r.containsKey("roleTitle")&&r.containsKey("organization")).toList());
+        result.put("education",rows(raw.get("education")).stream().map(this::toPublicMap).filter(r->r.containsKey("institution")&&r.containsKey("qualification")).toList());
+        result.put("achievements",mapAchievements(rows(raw.get("achievements"))));
+        result.put("skills",mapSkills(rows(raw.get("skills"))));
+        result.put("gallery",rows(raw.get("gallery")));
+        result.put("siteConfiguration",parseObject(raw.get("siteConfiguration")));
         return result;
     }
 
@@ -53,11 +120,15 @@ public class PublicPortfolioController {
 
     @GetMapping("/projects")
     public List<Map<String, Object>> projects() {
-        List<Map<String, Object>> visible = new ArrayList<>();
-        for (Map<String, Object> source : jdbc.queryForList("SELECT * FROM projects WHERE published = TRUE ORDER BY sort_order, name")) {
-            Map<String, Object> project = toPublicMap(source);
+        return mapProjects(jdbc.queryForList(PROJECTS_SQL));
+    }
+
+    private List<Map<String,Object>> mapProjects(List<Map<String,Object>> rows) {
+        List<Map<String,Object>> visible = new ArrayList<>();
+        for (Map<String,Object> source : rows) {
+            Map<String,Object> project=toPublicMap(source);
             if (!project.containsKey("name") || !project.containsKey("slug")) continue;
-            project.put("media", mediaFor("project", source.get("id")));
+            project.put("media",rows(source.get("public_media")));
             visible.add(project);
         }
         return visible;
@@ -87,14 +158,10 @@ public class PublicPortfolioController {
 
     @GetMapping("/skills")
     public List<Map<String, Object>> skills() {
-        List<Map<String, Object>> rows = jdbc.queryForList("""
-            SELECT g.id AS group_id, g.name AS group_name, g.description AS group_description,
-                   g.public_fields::text AS group_public_fields, g.custom_fields::text AS group_custom_fields,
-                   s.id AS skill_id, s.name AS skill_name, s.proficiency,
-                   s.public_fields::text AS skill_public_fields, s.custom_fields::text AS skill_custom_fields
-            FROM skill_groups g LEFT JOIN skills s ON s.group_id = g.id
-            WHERE g.published = TRUE ORDER BY g.sort_order, s.sort_order, s.name
-            """);
+        return mapSkills(jdbc.queryForList(SKILLS_SQL));
+    }
+
+    private List<Map<String,Object>> mapSkills(List<Map<String,Object>> rows) {
         List<Map<String, Object>> visible = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             Map<String, Object> groupFields = parseObject(row.get("group_public_fields"));
@@ -114,14 +181,10 @@ public class PublicPortfolioController {
 
     @GetMapping("/achievements")
     public List<Map<String, Object>> achievements() {
-        List<Map<String, Object>> rows = jdbc.queryForList("""
-            SELECT a.*, (SELECT '/api/v1/public/media/' || m.id::text
-                FROM media_relationships mr JOIN public_media_assets m ON m.id = mr.media_id
-                WHERE mr.resource_type = 'achievement' AND mr.resource_id = a.id AND mr.purpose = 'gallery'
-                  AND m.visibility = 'PUBLIC' AND m.content_type LIKE 'image/%'
-                ORDER BY mr.sort_order, m.uploaded_at DESC LIMIT 1) AS gallery_image_url
-            FROM achievements a WHERE a.published = TRUE ORDER BY a.awarded_on DESC NULLS LAST, a.sort_order
-            """);
+        return mapAchievements(jdbc.queryForList(ACHIEVEMENTS_SQL));
+    }
+
+    private List<Map<String,Object>> mapAchievements(List<Map<String,Object>> rows) {
         return rows.stream().map(row -> {
             Map<String, Object> result = toPublicMap(row);
             if (row.get("gallery_image_url") != null) result.put("imageUrl", row.get("gallery_image_url"));
@@ -131,35 +194,7 @@ public class PublicPortfolioController {
 
     @GetMapping("/gallery")
     public List<Map<String, Object>> gallery() {
-        return jdbc.queryForList("""
-            SELECT m.id, m.original_filename, m.content_type, m.alt_text, m.caption,
-                   '/api/v1/public/media/' || m.id::text AS url,
-                   source.source_type, source.source_title, source.source_caption, m.uploaded_at
-            FROM public_media_assets m
-            LEFT JOIN LATERAL (
-                SELECT mr.resource_type AS source_type,
-                    CASE mr.resource_type
-                        WHEN 'project' THEN (SELECT p.name FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE AND (CASE WHEN jsonb_typeof(p.public_fields->'name')='boolean' THEN p.public_fields->'name'='true'::jsonb ELSE COALESCE(p.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'achievement' THEN (SELECT a.title FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE AND (CASE WHEN jsonb_typeof(a.public_fields->'title')='boolean' THEN a.public_fields->'title'='true'::jsonb ELSE COALESCE(a.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'experience' THEN (SELECT e.role_title FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE AND (CASE WHEN jsonb_typeof(e.public_fields->'roleTitle')='boolean' THEN e.public_fields->'roleTitle'='true'::jsonb ELSE COALESCE(e.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'education' THEN (SELECT d.qualification FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE AND (CASE WHEN jsonb_typeof(d.public_fields->'qualification')='boolean' THEN d.public_fields->'qualification'='true'::jsonb ELSE COALESCE(d.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'profile' THEN (SELECT pr.full_name FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE AND (CASE WHEN jsonb_typeof(pr.public_fields->'fullName')='boolean' THEN pr.public_fields->'fullName'='true'::jsonb ELSE COALESCE(pr.public_fields->'*'='true'::jsonb,FALSE) END))
-                    END AS source_title,
-                    CASE mr.resource_type
-                        WHEN 'project' THEN (SELECT p.description FROM projects p WHERE p.id = mr.resource_id AND p.published = TRUE AND (CASE WHEN jsonb_typeof(p.public_fields->'description')='boolean' THEN p.public_fields->'description'='true'::jsonb ELSE COALESCE(p.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'achievement' THEN (SELECT a.detail FROM achievements a WHERE a.id = mr.resource_id AND a.published = TRUE AND (CASE WHEN jsonb_typeof(a.public_fields->'detail')='boolean' THEN a.public_fields->'detail'='true'::jsonb ELSE COALESCE(a.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'experience' THEN (SELECT e.description FROM experience e WHERE e.id = mr.resource_id AND e.published = TRUE AND (CASE WHEN jsonb_typeof(e.public_fields->'description')='boolean' THEN e.public_fields->'description'='true'::jsonb ELSE COALESCE(e.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'education' THEN (SELECT d.description FROM education d WHERE d.id = mr.resource_id AND d.published = TRUE AND (CASE WHEN jsonb_typeof(d.public_fields->'description')='boolean' THEN d.public_fields->'description'='true'::jsonb ELSE COALESCE(d.public_fields->'*'='true'::jsonb,FALSE) END))
-                        WHEN 'profile' THEN (SELECT pr.summary FROM profile pr WHERE pr.id = mr.resource_id AND pr.published = TRUE AND (CASE WHEN jsonb_typeof(pr.public_fields->'summary')='boolean' THEN pr.public_fields->'summary'='true'::jsonb ELSE COALESCE(pr.public_fields->'*'='true'::jsonb,FALSE) END))
-                    END AS source_caption
-                FROM media_relationships mr
-                WHERE mr.media_id = m.id
-                ORDER BY mr.sort_order, mr.created_at
-                LIMIT 1
-            ) source ON TRUE
-            WHERE m.visibility = 'PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%')
-            ORDER BY m.uploaded_at DESC
-            """);
+        return jdbc.queryForList(GALLERY_SQL);
     }
 
     @GetMapping("/files")
@@ -222,8 +257,17 @@ public class PublicPortfolioController {
 
     private Map<String, Object> parseObject(Object value) {
         if (value == null) return Map.of();
-        try { return mapper.readValue(String.valueOf(value), new TypeReference<>() { }); }
+        try { return value instanceof Map<?,?> ? mapper.convertValue(value,new TypeReference<>() {}) : mapper.readValue(String.valueOf(value), new TypeReference<>() { }); }
         catch (Exception ignored) { return Map.of(); }
+    }
+
+    private List<Map<String,Object>> rows(Object value) {
+        if(value==null) return List.of();
+        try {
+            return value instanceof List<?> ? mapper.convertValue(value,new TypeReference<>() {}) : mapper.readValue(String.valueOf(value),new TypeReference<>() {});
+        } catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Invalid portfolio collection");
+        }
     }
 
     private static boolean isVisible(Map<String, Object> visibility, String field) {

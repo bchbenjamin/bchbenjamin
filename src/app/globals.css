@@ -17,14 +17,6 @@
 
 .profile-links-page{padding-bottom:6rem}.profile-links-list{display:grid;gap:12px;max-width:760px;margin:3rem auto 0}.profile-link-card{display:flex;align-items:center;gap:18px;min-height:88px;padding:17px 20px;border:1px solid var(--line,rgba(255,255,255,.15));background:var(--surface,rgba(255,255,255,.035));color:inherit;text-decoration:none;transition:transform .2s ease,border-color .2s ease,background .2s ease}.profile-link-card:hover{transform:translateY(-2px);border-color:var(--accent,#7bc5dc);background:rgba(255,255,255,.07)}.profile-link-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.09);overflow:hidden}.profile-link-icon img{width:36px;height:36px;object-fit:contain}.profile-link-icon>span{font-size:23px}.profile-link-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}.profile-link-copy strong{font-size:15px}.profile-link-copy small{font-size:12px;opacity:.68;overflow-wrap:anywhere}.profile-link-arrow{font-size:20px;opacity:.65}.profile-links-note{max-width:760px;margin:20px auto 0;font-size:12px;opacity:.55}
 
-body:has(.profile-links-embedded) .site-header,
-body:has(.profile-links-embedded) .site-footer,
-body:has(.profile-links-embedded) .skip-link{display:none!important}
-body:has(.profile-links-embedded) #main-content{min-height:100%;}
-.profile-links-embedded{min-height:100%;padding:22px 18px 28px!important}
-.profile-links-embedded .page-intro{margin-top:0!important}
-.profile-links-embedded .profile-links-list{margin-top:18px}
-.profile-links-embedded .profile-link-card{min-height:64px;padding:10px 13px}
 
 /* Administration workspace */
 body:has(.admin-dashboard) .site-header,body:has(.admin-dashboard) .site-footer{display:none}

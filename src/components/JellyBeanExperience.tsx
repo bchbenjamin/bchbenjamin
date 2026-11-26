@@ -7,9 +7,11 @@ import Image from "next/image";
 import Link from "next/link";
 import type { SiteContent } from "@/lib/content";
 import ProjectArtwork from "@/components/ProjectArtwork";
+import JellyBeanGooglePlus from "@/components/JellyBeanGooglePlus";
 import JellyBeanFiles from "@/components/JellyBeanFiles";
 import JellyBeanMessaging from "@/components/JellyBeanMessaging";
 import { DEFAULT_WIDGET_PLACEMENTS, isDownwardSwipe, isLauncherRemoveDrop, placeWidgetWithoutOverlap, removeWidgetPlacement } from "@/lib/launcher-layout";
+import { invertPhotoPixels } from "@/lib/camera-effects";
 import { sortLauncherApps } from "@/lib/launcher-app-sort";
 
 type AppId = string;
@@ -72,13 +74,11 @@ function SystemStatusIcon({ kind }: { kind: "wifi" | "signal" | "battery" }) {
 }
 
 function SystemNavigationIcon({ kind }: { kind: "back" | "home" | "recent" }) {
-  return <svg className={`jb-system-nav-icon jb-system-nav-${kind}`} viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" strokeLinejoin="miter">
-    {kind === "back" ? <path d="M19 12H5m0 0 7-7m-7 7 7 7" /> : kind === "home" ? <circle cx="12" cy="12" r="7.2" /> : <><path d="M7 5h12v14H7z" /><path d="M4 8v13h12" /></>}
-  </svg>;
+  return <Image className="jb-system-nav-icon" src={"/jellybean/nav-"+kind+".png"} alt="" width={32} height={24} unoptimized draggable={false}/>;
 }
 
-export default function JellyBeanExperience({ site }: { site: SiteContent }) {
-  useEffect(() => { clearAdminEntry(); }, []);
+export default function JellyBeanExperience({ site, initialApp = null }: { site: SiteContent; initialApp?: AppId | null }) {
+  useEffect(() => { clearAdminEntry(); document.documentElement.dataset.portfolioBooted="true"; }, []);
   const router = useRouter();
   const [panel, setPanel] = useState(0);
   const [drawer, setDrawer] = useState(false);
@@ -89,7 +89,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   const [recentApps, setRecentApps] = useState<string[]>([]);
   const [launcherEditMode, setLauncherEditMode] = useState(false);
   const [selectionMenu, setSelectionMenu] = useState<{x:number;y:number}|null>(null);
-  const [activeApp, setActiveApp] = useState<AppId | null>(null);
+  const [activeApp, setActiveApp] = useState<AppId | null>(initialApp);
   const [filePath,setFilePath]=useState<string[]>([]);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [settingsPage, setSettingsPage] = useState<"main" | "about">("main");
@@ -189,7 +189,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
   useEffect(() => { if (activeApp === "terminal") { window.scrollTo(0, 0); terminalInputRef.current?.focus({ preventScroll: true }); if (terminalOutputRef.current) terminalOutputRef.current.scrollTop = terminalOutputRef.current.scrollHeight; } }, [activeApp, terminalLines]);
 
   const goPanel = useCallback((next: number) => setPanel(Math.max(0, Math.min(4, next))), []);
-  const closeOverlays = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); setDrawer(false); setShade(false); setRecent(false); }, [activeApp]);
+  const closeOverlays = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ ...window.history.state, marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); setDrawer(false); setShade(false); setRecent(false); }, [activeApp]);
   const navBack = useCallback(() => {
     if (showJellyBeanEgg) { setShowJellyBeanEgg(false); setBeanShower(false); }
     else if (launcherEditMode) setLauncherEditMode(false);
@@ -198,23 +198,23 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     else if (recent) setRecent(false);
     else if (activeApp === "files" && filePath.length) setFilePath(path=>path.slice(0,-1));
     else if (activeApp && selectedProject) setSelectedProject(null);
-    else if (activeApp) { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); }
+    else if (activeApp) { if (activeApp === "googleplus") window.history.replaceState({ ...window.history.state, marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); }
     else goPanel(0);
   }, [showJellyBeanEgg, launcherEditMode, shade, drawer, recent, activeApp, selectedProject, filePath.length, goPanel]);
-  const navHome = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); closeOverlays(); setSelectedProject(null); setLauncherEditMode(false); goPanel(0); }, [activeApp, closeOverlays, goPanel]);
+  const navHome = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ ...window.history.state, marker: "jb-phone-navigation" }, "", "/"); closeOverlays(); setSelectedProject(null); setLauncherEditMode(false); goPanel(0); }, [activeApp, closeOverlays, goPanel]);
   const navBackRef = useRef(navBack);
   useEffect(() => { navBackRef.current = navBack; }, [navBack]);
   useEffect(() => {
     const marker = "jb-phone-navigation";
-    window.history.pushState({ marker }, "", window.location.href);
+    window.history.pushState({ ...window.history.state, marker }, "", window.location.href);
     const onPopState = () => {
       navBackRef.current();
-      window.history.pushState({ marker }, "", window.location.href);
+      window.history.pushState({ ...window.history.state, marker }, "", window.location.href);
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
-  const navRecent = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); setDrawer(false); setShade(false); setRecent(true); }, [activeApp]);
+  const navRecent = useCallback(() => { if (activeApp === "googleplus") window.history.replaceState({ ...window.history.state, marker: "jb-phone-navigation" }, "", "/"); setActiveApp(null); setDrawer(false); setShade(false); setRecent(true); }, [activeApp]);
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") { if (launcherEditMode) setLauncherEditMode(false); else closeOverlays(); }
@@ -225,7 +225,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeApp, drawer, shade, panel, closeOverlays, goPanel, launcherEditMode]);
 
-  function open(appId: string) { if(appId==="files")setFilePath([]); if (appId === "googleplus") window.history.pushState({ marker: "jb-phone-navigation", app: "googleplus" }, "", "/links"); const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url && appId !== "googleplus") { if (external.url.startsWith("/")) router.push(external.url); else window.location.assign(external.url); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
+  function open(appId: string) { if(appId==="files")setFilePath([]); if (appId === "googleplus" && window.location.pathname !== "/links") window.history.pushState({ ...window.history.state, marker: "jb-phone-navigation", app: "googleplus" }, "", "/links"); const external = visibleApps.find(item => item.id === appId && item.url); if (external?.url && appId !== "googleplus") { if (external.url.startsWith("/")) router.push(external.url); else window.location.assign(external.url); return; } setLauncherEditMode(false); setDrawer(false); setShade(false); setRecent(false); setSelectedProject(null); setRecentApps(items => [appId, ...items.filter(item => item !== appId)].slice(0, 5)); if (appId === "settings") setSettingsPage("main"); setActiveApp(appId); }
   function commitHomeLayout(icons: Record<string, { panel: number; slot: number }>, widgets: Record<string, { panel: number; row: number; column: number }>) {
     setHomePlacements(icons);
     setWidgetPlacements(widgets);
@@ -430,7 +430,7 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
       {shade && <div className="jb-overlay jb-shade-overlay" onClick={() => setShade(false)}><div className="jb-notification-shade" onClick={(e) => e.stopPropagation()} onTouchStart={(e) => { const t=e.touches[0]; touchStart.current={x:t.clientX,y:t.clientY}; }} onTouchEnd={(e) => { if (!touchStart.current) return; const t=e.changedTouches[0]; if (touchStart.current.y-t.clientY>65) setShade(false); touchStart.current=null; }}><div className="jb-shade-head"><div><b>{clock}</b><span>{dateLabel}</span></div><div className="jb-shade-controls"><Image className="jb-shade-rotation" src="/jellybean/ic_notify_rotation_off_normal.png" alt="Rotation lock" width={36} height={36} unoptimized /><button type="button" className="jb-shade-settings-button" onClick={() => { setShade(false); setSettingsPage("main"); setActiveApp("settings"); }} aria-label="Open Settings"><Image src="/jellybean/icons/aosp-4.1.2/settings.png" alt="" width={36} height={36} unoptimized /></button><Image className="jb-shade-clear" src="/jellybean/ic_notify_clear_normal.png" alt="Dismiss all notifications" width={36} height={36} unoptimized /></div></div><div className="jb-notification-empty"><span className="jb-notification-symbol"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 34h28l-4-5V18a10 10 0 0 0-20 0v11z" fill="none" stroke="currentColor" strokeWidth="2.4"/><path d="M19 38q5 6 10 0" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/></svg></span><b>No notifications</b></div></div></div>}
 
       {recent && <div className="jb-overlay jb-recent-overlay"><div className="jb-recent-stack">{recentApps.length ? recentApps.map(id=>{const item=visibleApps.find(candidate=>candidate.id===id) ?? APPS.find(candidate=>candidate.id===id);return item?<button key={id} onClick={()=>open(id)}><AppIcon app={item} size="large"/><b>{item.name}</b></button>:null;}) : <p>No recent apps</p>}<button onClick={navHome}><span className="jb-recent-home">○</span><b>Home</b></button></div></div>}
-      {app && <div className="jb-overlay jb-app-overlay"><div className="jb-app-window"><header className="jb-app-actionbar"><button onClick={navBack} aria-label="Back">‹</button><div><b>{currentProject?.name ?? app.name}</b></div></header><div className="jb-app-content">
+      {app && <div className="jb-overlay jb-app-overlay"><div className="jb-app-window"><header className="jb-app-actionbar"><button className="jb-action-up" onClick={navBack} aria-label="Navigate up"><span aria-hidden="true" className="jb-holo-up"/><AppIcon app={app}/></button><div><b>{currentProject?.name ?? app.name}</b></div></header><div className="jb-app-content">
         {activeApp === "about" && <><div className="jb-about-hero"><div className="jb-about-avatar">{site.owner.monogram}</div><h2>{site.owner.name}</h2><p>{site.owner.role}</p></div>{site.owner.intro && <><h3>MY STORY</h3><p>{site.owner.intro}</p></>}{site.owner.location && <div className="jb-info-row"><span>LOCATION</span><b>{site.owner.location}</b></div>}{site.owner.github && <div className="jb-info-row"><span>GITHUB</span><a href={site.owner.github} target="_blank" rel="noreferrer">Open profile ↗</a></div>}</>}
         {activeApp === "camera" && <LocalCamera />}
         {activeApp === "calendar" && <LocalCalendar birthdayMonthDay="12-13" />}
@@ -451,11 +451,13 @@ export default function JellyBeanExperience({ site }: { site: SiteContent }) {
         {showJellyBeanEgg && <div className={`jb-android-easter-egg${beanShower ? " is-bean-shower" : ""}`}><button type="button" className="jb-egg-close" onClick={()=>{setShowJellyBeanEgg(false);setBeanShower(false);}}>‹ About phone</button><p>ANDROID 4.1.1</p><button type="button" className="jb-giant-jellybean" aria-label="Jelly Bean Easter egg" onPointerDown={()=>{eggHoldTimer.current=window.setTimeout(()=>setBeanShower(true),550);}} onPointerUp={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onPointerLeave={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onPointerCancel={()=>{if(eggHoldTimer.current)window.clearTimeout(eggHoldTimer.current);}} onClick={()=>setBeanShower(true)}><span className="jb-egg-face">☺</span></button><h2>Jelly Bean</h2><small>Touch and hold the bean</small>{beanShower && <div className="jb-floating-beans" aria-hidden="true">{Array.from({length:18},(_,index)=><i key={index} style={{left:`${(index*37)%92+4}%`,animationDelay:`${(index%6)*-.7}s`,background:["#e94e78","#ffc247","#6db7e9","#9b73d3","#5fc79a"][index%5]}}/>)}</div>}</div>}
         {activeApp === "chess" && <><h3>CHESS</h3><p>Choose a chess platform.</p><div className="jb-chess-folder"><a href={site.launcher.chessComProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/chessdotcom.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Chess.com profile</span></a><a href={site.launcher.lichessProfileUrl} target="_blank" rel="noreferrer"><Image src="/jellybean/icons/brands/lichess.svg" alt="" width={64} height={64} unoptimized draggable={false}/><span>Lichess profile</span></a></div></>}
         {activeApp === "github" && <><h3>GITHUB</h3>{site.owner.github ? <><p>Explore public repositories and current engineering work.</p><a className="jb-project-action" href={site.owner.github} target="_blank" rel="noreferrer">OPEN GITHUB ↗</a></> : <p>No public GitHub profile is configured.</p>}</>}
-        {activeApp === "googleplus" && <iframe className="jb-googleplus-embedded" src="/links?embedded=1" title="Google+ profile links" /> }
+        {activeApp === "googleplus" && <JellyBeanGooglePlus site={site} onHome={navHome} /> }
       </div></div></div>}
     </div>
   </main>;
 }
+
+function CameraIcon({name}:{name:string}){return <Image src={"/jellybean/camera/"+name+".png"} alt="" width={64} height={64} unoptimized draggable={false}/>;}
 
 function LocalCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -470,6 +472,7 @@ function LocalCamera() {
   const [facing, setFacing] = useState<"user" | "environment">("environment");
   const [zoom, setZoom] = useState(1);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [negative,setNegative]=useState(false);
   const [flash, setFlash] = useState<"off"|"auto"|"on">("auto");
   const [lastCapture, setLastCapture] = useState<{url:string;kind:"photo"|"video"}|null>(null);
   const [reviewing, setReviewing] = useState(false);
@@ -504,7 +507,9 @@ function LocalCamera() {
     const video = videoRef.current; if (!video || !video.videoWidth) return;
     const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     const context = canvas.getContext("2d"); if (!context) return;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const cropWidth=video.videoWidth/zoom,cropHeight=video.videoHeight/zoom;
+    context.drawImage(video,(video.videoWidth-cropWidth)/2,(video.videoHeight-cropHeight)/2,cropWidth,cropHeight,0,0,canvas.width,canvas.height);
+    if(negative){const pixels=context.getImageData(0,0,canvas.width,canvas.height);invertPhotoPixels(pixels.data);context.putImageData(pixels,0,0);}
     canvas.toBlob(blob => { if (blob) { rememberCapture(blob,"photo"); download(blob, `IMG_${Date.now()}.jpg`); } }, "image/jpeg", .95);
   }
   function startRecording() {
@@ -523,21 +528,20 @@ function LocalCamera() {
   function focusAt(event: React.PointerEvent<HTMLDivElement>) { const rect=event.currentTarget.getBoundingClientRect(); setFocus({x:event.clientX-rect.left,y:event.clientY-rect.top}); window.setTimeout(()=>setFocus(null),1100); }
   return <section className="jb-camera-app" aria-label="Micromax A110 Camera">
     <div className="jb-camera-view" onPointerDown={event=>{touchStart.current={x:event.clientX,y:event.clientY};}} onPointerUp={event=>{if(!touchStart.current)return;const dx=event.clientX-touchStart.current.x;if(dx < -55 && lastCapture)setReviewing(true);else if(dx > 55)setReviewing(false);touchStart.current=null;}} onClick={focusAt}>
-      <video ref={videoRef} autoPlay muted playsInline style={{transform:`scale(${zoom}) scaleX(${facing === "user" ? -1 : 1})`}} />
+      <video ref={videoRef} autoPlay muted playsInline className={negative&&mode==="photo"?"is-negative":undefined} style={{transform:`scale(${zoom}) scaleX(${facing === "user" ? -1 : 1})`}} />
       {!streaming && !reviewing && <div className="jb-camera-start-overlay"><span className="jb-camera-lens">◉</span><b>{error ? "Camera unavailable" : "Camera"}</b><small>{error || "Tap the shutter to start the camera"}</small><button type="button" onClick={event=>{event.stopPropagation();void startCamera();}}>START CAMERA</button></div>}
       {focus && streaming && <span className="jb-camera-focus-ring" style={{left:focus.x,top:focus.y}}/>}
       {recording && <div className="jb-camera-recording"><i/> Recording</div>}
       {reviewing && lastCapture && <div className="jb-camera-review"><button type="button" onClick={()=>setReviewing(false)} aria-label="Return to camera">‹ Camera</button>{lastCapture.kind === "photo" ? <img src={lastCapture.url} alt="Most recent photo"/> : <video src={lastCapture.url} controls autoPlay playsInline/>}<span>Swipe right to return to camera</span></div>}
-      {streaming && !reviewing && <div className="jb-camera-zoom"><span>+</span><input aria-label="Zoom" type="range" min="1" max="4" step="0.1" value={zoom} onChange={event=>setZoom(Number(event.target.value))}/><span>−</span></div>}
+
     </div>
-    <aside className="jb-camera-controls" aria-label="Micromax A110 camera controls">
-      <button type="button" className={`jb-camera-control-button ${settingsOpen ? "active" : ""}`} onClick={()=>setSettingsOpen(value=>!value)} aria-label="Camera settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6z"/><path d="m19.4 13.5 1.2.9-1.2 2.1-1.5-.5a7.7 7.7 0 0 1-1.5.9l-.3 1.6h-2.5l-.4-1.6a7.7 7.7 0 0 1-1.6-.9l-1.5.5-1.2-2.1 1.2-.9a7 7 0 0 1 0-1.8l-1.2-.9 1.2-2.1 1.5.5a7.7 7.7 0 0 1 1.6-.9l.4-1.6h2.5l.3 1.6a7.7 7.7 0 0 1 1.5.9l1.5-.5 1.2 2.1-1.2.9a7 7 0 0 1 0 1.8z"/></svg></button>
-      <button type="button" className="jb-camera-control-button" onClick={()=>changeMode(mode === "photo" ? "video" : "photo")} aria-label={mode === "photo" ? "Switch to video mode" : "Switch to camera mode"} title={mode === "photo" ? "Video mode" : "Camera mode"}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{mode === "photo" ? <><rect x="2.5" y="6" width="13.5" height="12" rx="1.5"/><path d="m16 10 5-3v10l-5-3z"/></> : <><path d="M3 7h4l2-2h6l2 2h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></>}</svg></button>
-      <button className="jb-camera-thumbnail" type="button" aria-label="View gallery" title="Gallery" onClick={()=>lastCapture&&setReviewing(true)}>{lastCapture?.kind === "photo" ? <img src={lastCapture.url} alt=""/> : lastCapture ? <span>▶</span> : <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>}</button>
-      <button type="button" className={`jb-camera-shutter ${mode === "video" ? "video-mode" : ""} ${recording ? "recording" : ""}`} aria-label={recording ? "Stop recording" : mode === "photo" ? "Take photo" : "Start recording"} onClick={shutter} title={mode === "photo" ? "Take picture" : "Record video"}><span/></button>
-      {settingsOpen && <div className="jb-camera-settings"><b>Camera settings</b><label>Flash <select value={flash} onChange={event=>setFlash(event.target.value as "off"|"auto"|"on")}><option value="auto">Auto</option><option value="on">On</option><option value="off">Off</option></select></label><label>Camera <span>{facing === "environment" ? "Back" : "Front"}</span></label><button type="button" className="jb-camera-settings-flip" onClick={flipCamera}>Switch camera</button><label>Zoom <span>{zoom.toFixed(1)}×</span></label><small>Photos and videos download to this device only.</small></div>}
-      <span className="jb-camera-mode-label">{recording ? "REC" : mode === "photo" ? "CAMERA" : "VIDEO"}</span>
+    <aside className="jb-camera-controls" aria-label="Android 4.1 camera controls">
+      <div className="jb-camera-modes"><button type="button" disabled={recording} aria-label="Photo mode" aria-pressed={mode==="photo"} onClick={()=>changeMode("photo")}><CameraIcon name="ic_switch_camera_holo_light"/></button><button type="button" disabled={recording} aria-label="Video mode" aria-pressed={mode==="video"} onClick={()=>changeMode("video")}><CameraIcon name="ic_switch_video_holo_light"/></button></div>
+      <button type="button" className="jb-camera-shutter-original" aria-label={recording?"Stop recording":mode==="photo"?"Take photo":"Start recording"} onClick={shutter}><CameraIcon name={mode==="photo"?"btn_camera_shutter_holo":recording?"btn_video_shutter_recording_holo":"btn_video_shutter_holo"}/></button>
+      <button className="jb-camera-thumbnail-original" type="button" aria-label="View last capture" onClick={()=>lastCapture&&setReviewing(true)}>{lastCapture?.kind==="photo"?<img src={lastCapture.url} alt=""/>:lastCapture?<span>▶</span>:<Image src="/jellybean/icons/aosp-4.1.2/gallery.png" width={40} height={40} alt="" unoptimized/>}</button>
     </aside>
+    <div className="jb-camera-indicators"><button type="button" disabled={recording} onClick={flipCamera} aria-label="Switch front or back camera"><CameraIcon name="ic_switch_photo_facing_holo_light"/></button><button type="button" disabled={mode==="video"||recording} aria-label="Negative photo effect" aria-pressed={negative} onClick={()=>setNegative(v=>!v)}><CameraIcon name="ic_effects_holo_light"/><small>{negative?"Negative":"None"}</small></button><button type="button" onClick={()=>setSettingsOpen(v=>!v)} aria-label="Camera settings" aria-expanded={settingsOpen}><CameraIcon name="ic_settings_holo_light"/></button></div>
+    {settingsOpen&&<div className="jb-camera-settings-original"><b>Camera settings</b><label>Color effect<select disabled={mode==="video"} value={negative?"negative":"none"} onChange={e=>setNegative(e.target.value==="negative")}><option value="none">None</option><option value="negative">Negative</option></select></label><label>Zoom<input aria-label="Camera zoom" type="range" min="1" max="4" step=".1" value={zoom} onChange={e=>setZoom(Number(e.target.value))}/></label><label>Flash<select value={flash} onChange={e=>setFlash(e.target.value as "off"|"auto"|"on")}><option value="auto">Auto</option><option value="off">Off</option><option value="on">On</option></select></label><small>Flash availability depends on the browser and device.</small></div>}
     {error && streaming && <div className="jb-camera-inline-error" role="alert">{error}</div>}
   </section>;
 }

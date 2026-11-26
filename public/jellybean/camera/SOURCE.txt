@@ -1,0 +1,5 @@
+Android Open Source Project Camera, android-4.1.2_r2.1 (e607294).
+https://android.googlesource.com/platform/packages/apps/Camera/+/android-4.1.2_r2.1/
+Original drawable-xhdpi PNG assets, Apache License 2.0. See NOTICE.txt.
+Layout references: res/layout-port/camera_control.xml, indicator_bar.xml,
+mode_picker.xml and the corresponding landscape layouts.
