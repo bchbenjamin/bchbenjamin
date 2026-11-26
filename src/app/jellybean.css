@@ -613,3 +613,15 @@ body:has(.jb-boot) :is(.site-header,.site-footer){display:none}
 .jb-home-widget-gallery .jb-gallery-strip button{flex:1 1 0;min-width:0}
 .jb-home-widget-gallery .jb-gallery-strip button .jb-gallery-thumb{min-height:36px;display:grid;place-items:center}
 .jb-welcome-widget .jb-welcome-retry{background:transparent;border:0;text-decoration:underline;color:#91dcf5;font:inherit;padding:3px 0;cursor:pointer}
+/* Read-only Android-era file manager. */
+.jb-files{font:400 14px/1.4 Roboto,Arial,sans-serif;color:#29353c}
+.jb-files-toolbar{display:flex;align-items:center;gap:10px;background:#d7dfe3;border:1px solid #bac5cb;padding:8px;margin-bottom:8px;overflow-wrap:anywhere}
+.jb-files-toolbar button{min-width:40px;min-height:38px;border:1px solid #a0afb6;background:linear-gradient(#f8fafb,#d7e0e5);font-size:20px;color:#344d5a}
+.jb-files-toolbar button:disabled{opacity:.45}
+.jb-files .jb-file-row{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 4px;border:0;border-bottom:1px solid #c3cdd2;background:transparent;text-align:left;color:#29353c;text-decoration:none;font:inherit}
+.jb-file-row>svg,.jb-file-document{flex:0 0 38px}
+.jb-file-row>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}
+.jb-file-row b,.jb-file-row small{display:block}.jb-file-row small{font-size:11px;color:#586a74;white-space:normal}
+.jb-file-document{display:grid;place-items:center;background:#edf2f4;border:1px solid #aebbc3;color:#27779b;font-size:11px;height:38px}
+.jb-files .jb-file-row:active{background:#c6e8f7}.jb-file-empty{padding:18px 4px;color:#657780}
+.jb-about-hero + h3 + p,.jb-list-card p{white-space:pre-line}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getSiteContent, site as staticSite } from "@/lib/content";
+import { getSiteContent } from "@/lib/content";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
@@ -18,10 +18,10 @@ function favicon(url: string) {
 
 export default async function LinksPage({ searchParams }: { searchParams: Promise<{ embedded?: string }> }) {
   const [{ embedded }, site] = await Promise.all([searchParams, getSiteContent()]);
-  const website = site.owner.website || staticSite.owner.website;
-  const github = site.owner.github || staticSite.owner.github;
-  const linkedin = site.owner.linkedin || staticSite.owner.linkedin;
-  const email = site.owner.email || staticSite.owner.email;
+  const website = site.owner.website;
+  const github = site.owner.github;
+  const linkedin = site.owner.linkedin;
+  const email = site.owner.email;
   const candidates = [
     { label: "Portfolio", href: "https://www.bchbenjamin.in", detail: "Personal portfolio and selected work" },
     ...(website ? [{ label: "Website", href: website, detail: "Personal website" }] : []),

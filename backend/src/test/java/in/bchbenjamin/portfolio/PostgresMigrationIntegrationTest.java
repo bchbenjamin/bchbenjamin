@@ -184,6 +184,38 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
+    void publicFileExplorerListsPublishedAssetsOnlyAndClassifiesCertificates() throws Exception {
+        UUID privateId = jdbc.queryForObject("""
+            INSERT INTO media_assets (original_filename, content_type, byte_size, visibility, file_bytes, uploaded_by)
+            VALUES ('private-test-document.pdf','application/pdf',4,'PRIVATE',decode('25504446','hex'),'integration-test') RETURNING id
+            """, UUID.class);
+        UUID publicId = jdbc.queryForObject("""
+            INSERT INTO media_assets (original_filename, content_type, byte_size, caption, visibility, file_bytes, uploaded_by)
+            VALUES ('Course certificate.pdf','application/pdf',4,'Course completion','PUBLIC',decode('25504446','hex'),'integration-test') RETURNING id
+            """, UUID.class);
+        try {
+            MvcResult result = mockMvc.perform(get("/api/v1/public/files"))
+                .andExpect(status().isOk()).andReturn();
+            var rows = new com.fasterxml.jackson.databind.ObjectMapper().readTree(result.getResponse().getContentAsString());
+            boolean found = false;
+            for (var row : rows) {
+                assertFalse(privateId.toString().equals(row.path("id").asText()));
+                assertFalse(row.has("file_bytes"));
+                assertFalse(row.has("uploaded_by"));
+                if (publicId.toString().equals(row.path("id").asText())) {
+                    assertEquals("Certificates", row.path("category").asText());
+                    assertEquals("Course completion", row.path("caption").asText());
+                    found = true;
+                }
+            }
+            assertTrue(found);
+            mockMvc.perform(get("/api/v1/public/media/" + privateId)).andExpect(status().isNotFound());
+        } finally {
+            jdbc.update("DELETE FROM media_assets WHERE id IN (?,?)", privateId, publicId);
+        }
+    }
+
+    @Test
     void linkedInTokensAreEncryptedAtRestAndCanBeDecrypted() {
         var registration = clientRegistrations.findByRegistrationId("linkedin-publisher");
         Instant issued = Instant.now();

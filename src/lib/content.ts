@@ -23,8 +23,8 @@ export interface Project {
   featured: boolean;
 }
 export interface ExperienceEntry { label: string; title: string; organization: string; period: string; description: string; repo?: string; }
-export interface EducationEntry { qualification: string; fieldOfStudy: string; institution: string; period: string; description: string; }
-export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; }
+export interface EducationEntry { qualification: string; fieldOfStudy: string; institution: string; period: string; description: string; grade?: string; }
+export interface Achievement { label: string; title: string; detail: string; imageUrl?: string; awardedOn?: string; issuer?: string; credentialUrl?: string; issuedLabel?: string; }
 export interface SkillGroup { name: string; skills: string[]; }
 export interface HomeSection { id: string; type: string; enabled: boolean; order: number; }
 export interface LauncherShortcut { id: string; name: string; url: string; iconUrl?: string; }
@@ -57,7 +57,7 @@ const DEFAULT_HOME_SECTIONS: HomeSection[] = [
   { id: "skills", type: "skills", enabled: true, order: 50 },
   { id: "contact", type: "contact", enabled: true, order: 60 }
 ];
-const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], homeLayout: { icons: {}, widgets: {} }, chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "android-default", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","gallery","projects","breach-defend","hermes-quizzer","street-safety","googleplus","experience","education","skills","terminal","magisk","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true, showStatusBar: true, showDock: true, showPageIndicator: true, showNavigationBar: true };
+const DEFAULT_LAUNCHER: LauncherConfig = { customApps: [], homeLayout: { icons: {}, widgets: {} }, chessComProfileUrl: "https://www.chess.com", lichessProfileUrl: "https://lichess.org", wallpaper: "android-default", wallpaperImageUrl: "", appLabels: {}, microbeCount: 28, microbeSpeed: 0.65, appColumns: 4, showLabels: true, hiddenApps: [], appOrder: ["about","files","certifications","gallery","projects","breach-defend","hermes-quizzer","street-safety","googleplus","experience","education","skills","terminal","magisk","github","contact","settings","chess","achievements","journey","email","contactDetails"], showSearch: true, showClock: true, showGallery: true, showStatusBar: true, showDock: true, showPageIndicator: true, showNavigationBar: true };
 const DEFAULT_HOME_CONTENT: HomeContent = {
   heroEyebrow: "PERSONAL PORTFOLIO · SELECTED WORK", focus: "Software engineering · AI · Data systems · Technical research",
   aboutTitle: "Technical curiosity.\nPractical engineering.",
@@ -176,12 +176,16 @@ async function loadSiteContent(): Promise<SiteContent> {
   const liveEducation: EducationEntry[] = (educationRows ?? []).filter((row) => row.institution && row.qualification).map((row) => ({
     qualification: String(row.qualification), fieldOfStudy: String(row.fieldOfStudy ?? ""), institution: String(row.institution),
     period: String(row.displayPeriod ?? periodLabel(row.startedOn as string | null, row.endedOn as string | null, false)),
+    grade: row.grade ? String(row.grade) : undefined,
     description: String(row.description ?? "")
   }));
   const liveAchievements: Achievement[] = (achievementRows ?? []).filter((row) => row.title).map((row) => ({
     label: String(row.category ?? "MILESTONE"), title: String(row.title), detail: String(row.detail ?? ""),
     imageUrl: row.imageUrl ? `${API_BASE}${String(row.imageUrl)}` : undefined,
     media: [],
+    issuedLabel: row.issuedLabel ? String(row.issuedLabel) : undefined,
+    issuer: row.issuer ? String(row.issuer) : undefined,
+    credentialUrl: row.credentialUrl ? String(row.credentialUrl) : undefined,
     awardedOn: row.awardedOn ? String(row.awardedOn) : undefined
   }));
   const groups = new Map<string, string[]>();

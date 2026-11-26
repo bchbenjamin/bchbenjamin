@@ -49,7 +49,7 @@ export default async function ExperiencePage() {
               <p className="eyebrow">{entry.period}</p>
               <h2>{entry.qualification}</h2>
               <div className="timeline-meta"><strong>{entry.institution}</strong>{entry.fieldOfStudy && <span>{entry.fieldOfStudy}</span>}</div>
-              {entry.description && <p>{entry.description}</p>}
+              {entry.grade && <p>Grade: {entry.grade}</p>}{entry.description && <p>{entry.description}</p>}
             </Surface>
           </article>
         ))}
@@ -59,7 +59,7 @@ export default async function ExperiencePage() {
       <div className="achievement-grid">
         {site.achievements.map((item, index) => (
           <Surface as="article" className="achievement-card" key={item.title}>
-            <span className="achievement-index">0{index + 1} / {item.label}</span>
+            <span className="achievement-index">0{index + 1} / {item.label}{item.issuer ? " · " + item.issuer : ""}{item.issuedLabel ? " · " + item.issuedLabel : ""}</span>
             <h3>{item.title}</h3>
             <p>{item.detail}</p>
           </Surface>

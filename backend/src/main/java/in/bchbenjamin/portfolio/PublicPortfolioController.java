@@ -144,6 +144,32 @@ public class PublicPortfolioController {
             """);
     }
 
+    @GetMapping("/files")
+    public List<Map<String, Object>> files() {
+        return jdbc.queryForList("""
+            SELECT m.id, m.original_filename, m.content_type, m.byte_size, m.caption,
+                '/api/v1/public/media/' || m.id::text AS url,
+                CASE
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN achievements a ON a.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='achievement' AND a.published=TRUE
+                        AND (lower(a.category) LIKE '%certif%' OR lower(a.category) LIKE '%credential%'))
+                        OR lower(m.original_filename || ' ' || m.caption) ~ '(certificate|certification|credential)' THEN 'Certificates'
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN projects p ON p.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='project' AND p.published=TRUE) THEN 'Projects'
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN experience e ON e.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='experience' AND e.published=TRUE) THEN 'Experience'
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN education d ON d.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='education' AND d.published=TRUE) THEN 'Education'
+                    WHEN m.content_type LIKE 'image/%' THEN 'Images'
+                    WHEN m.content_type LIKE 'video/%' THEN 'Videos'
+                    ELSE 'Documents'
+                END AS category
+            FROM media_assets m
+            WHERE m.visibility='PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%' OR m.content_type='application/pdf')
+            ORDER BY lower(m.original_filename), m.id
+            """);
+    }
+
     @GetMapping("/site-configuration")
     public Map<String, Object> siteConfiguration() {
         String json = jdbc.queryForObject("SELECT published_config::text FROM site_configuration WHERE id = 1", String.class);
