@@ -66,8 +66,23 @@ class PortfolioApiApplicationTest {
     }
 
     @Test
-    void launcherLayoutWriteRejectsAnonymousAndSpoofedIdentityHeaders() throws Exception {
+    void launcherLayoutWriteWithoutCsrfIsForbidden() throws Exception {
         mockMvc.perform(put("/api/v1/admin/site-configuration/launcher-layout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"icons\":{},\"widgets\":{}}"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void launcherLayoutWriteRejectsAnonymousAndSpoofedIdentityHeaders() throws Exception {
+        var response = mockMvc.perform(get("/api/v1/csrf"))
+            .andExpect(status().isOk()).andReturn().getResponse();
+        var cookie = response.getCookie("XSRF-TOKEN");
+        var token = new com.fasterxml.jackson.databind.ObjectMapper()
+            .readTree(response.getContentAsString()).get("token").asText();
+        mockMvc.perform(put("/api/v1/admin/site-configuration/launcher-layout")
+                .cookie(cookie)
+                .header("X-XSRF-TOKEN", token)
                 .header("X-Role", "ADMIN")
                 .header("X-Forwarded-User", "owner@example.com")
                 .header("X-Auth-Request-Email", "owner@example.com")

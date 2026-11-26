@@ -84,6 +84,25 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
+    void anonymousAnalyticsPersistsVisitsAndHonoursOptOut() throws Exception {
+        String source = "integration-" + UUID.randomUUID();
+        String body = "{\"event\":\"visit\",\"source\":\"" + source + "\",\"model\":\"Test device\"}";
+        mockMvc.perform(post("/api/v1/public/analytics")
+                .header("Origin", "https://www.bchbenjamin.in")
+                .header("Sec-GPC", "1")
+                .contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isNoContent());
+        assertEquals(0L, jdbc.queryForObject("SELECT count(*) FROM portfolio_analytics WHERE source=?", Long.class, source));
+        mockMvc.perform(post("/api/v1/public/analytics")
+                .header("Origin", "https://www.bchbenjamin.in")
+                .header("x-vercel-ip-country", "IN")
+                .contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isNoContent());
+        assertEquals(1L, jdbc.queryForObject("SELECT sum(visits) FROM portfolio_analytics WHERE source=? AND country='IN' AND model='Test device'", Long.class, source));
+        mockMvc.perform(get("/api/v1/admin/analytics")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void jdbcSessionMigrationCreatesPersistentSessionTables() {
         assertNotNull(jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION", Long.class));
         assertNotNull(jdbc.queryForObject("SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES", Long.class));
