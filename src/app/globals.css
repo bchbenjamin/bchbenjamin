@@ -25,3 +25,11 @@ body:has(.profile-links-embedded) #main-content{min-height:100%;}
 .profile-links-embedded .page-intro{margin-top:0!important}
 .profile-links-embedded .profile-links-list{margin-top:18px}
 .profile-links-embedded .profile-link-card{min-height:64px;padding:10px 13px}
+
+/* Administration workspace */
+body:has(.admin-dashboard) .site-header,body:has(.admin-dashboard) .site-footer{display:none}
+body:has(.admin-dashboard) .admin-workspace-panel,body:has(.admin-dashboard) .contact-page{width:100%;max-width:none;margin:0;padding:0;border:0;background:none}
+.admin-dashboard{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh;background:#111318;color:#e7e9ee;font-family:system-ui,sans-serif}
+.admin-sidebar{padding:24px 16px;background:#191c23;border-right:1px solid #30343e;display:flex;flex-direction:column;gap:24px}
+.admin-sidebar h2{font-size:18px;margin:0}.admin-sidebar nav{display:grid;gap:4px}.admin-sidebar nav button{border:0;border-radius:6px;text-align:left;padding:12px;background:transparent;color:inherit;cursor:pointer}.admin-sidebar nav button[aria-current]{background:#303b50;color:#d9e7ff}.admin-main{padding:32px;min-width:0}.admin-main>header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #30343e;margin-bottom:24px;padding-bottom:16px}.admin-main h1{font-size:28px;margin:4px 0}.admin-main header span,.admin-main small{color:#aeb6c5}.admin-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0}.admin-metrics article,.admin-report{border:1px solid #30343e;background:#191c23;border-radius:8px;padding:20px}.admin-metrics strong{display:block;font-size:30px;margin-top:8px}.admin-report{margin:16px 0}.admin-report h3{text-transform:capitalize}.admin-table-scroll{overflow:auto}.admin-report table{width:100%;border-collapse:collapse;text-align:left}.admin-report td,.admin-report th{padding:12px;border-bottom:1px solid #30343e;white-space:nowrap}
+@media(max-width:760px){.admin-dashboard{grid-template-columns:1fr}.admin-sidebar{padding:14px;gap:12px}.admin-sidebar nav{display:flex;overflow:auto}.admin-sidebar nav button{white-space:nowrap}.admin-main{padding:16px}.admin-metrics{grid-template-columns:1fr}}

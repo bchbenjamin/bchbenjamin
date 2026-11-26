@@ -63,7 +63,7 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/v1/agent/**", "/mcp", "/api/v1/public/contact/**", "/api/v1/internal/maintenance"))
+                .ignoringRequestMatchers("/api/v1/agent/**", "/mcp", "/api/v1/public/contact/**", "/api/v1/public/analytics", "/api/v1/internal/maintenance"))
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation(fixation -> fixation.migrateSession()))
@@ -72,6 +72,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
                 .requestMatchers("/api/v1/agent/**", "/mcp").denyAll() // MCP remains intentionally disabled pending a separate security review.
                 .requestMatchers(HttpMethod.POST, "/api/v1/public/contact/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/public/analytics").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/internal/maintenance").permitAll()
                 .requestMatchers("/api/v1/admin/session", "/api/v1/admin/totp/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/admin/**").access((authentication, context) -> {

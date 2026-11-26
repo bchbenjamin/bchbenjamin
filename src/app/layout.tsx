@@ -4,6 +4,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import PageTransition from "@/components/PageTransition";
 import ScrollExperience from "@/components/ScrollExperience";
+import PortfolioTelemetry from "@/components/PortfolioTelemetry";
 import { getSiteContent } from "@/lib/content";
 import "./globals.css";
 import "./jellybean.css";
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </PageTransition>
         <SiteFooter ownerName={site.owner.name} github={site.owner.github} linkedin={site.owner.linkedin} email={site.owner.email} />
         <ScrollExperience />
+        <PortfolioTelemetry />
       </body>
     </html>
   );
