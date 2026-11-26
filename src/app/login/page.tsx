@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import DeveloperEntry from "@/components/DeveloperEntry";
+import "../admin/admin.css";
 
 export const metadata: Metadata = {
   title: "Owner sign in",
@@ -8,25 +11,11 @@ export const metadata: Metadata = {
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
 export default function LoginPage() {
-  return (
-    <main className="shell inner-page contact-page">
-      <section className="page-intro">
-        <p className="eyebrow"><span className="eyebrow-line" /> PRIVATE AREA / OWNER ACCESS</p>
-        <h1>Sign in, <span>securely.</span></h1>
-        <p>Portfolio administration is restricted to identities explicitly allowlisted by the owner. Signing in with an unapproved account does not grant access.</p>
-      </section>
-      <section className="contact-panel" aria-label="Sign-in providers">
-        <div className="contact-panel-copy">
-          <p className="eyebrow">AUTHENTICATION</p>
-          <h2 className="about-heading">Choose an identity provider</h2>
-          <p>Authentication uses OpenID Connect authorization-code flow, server-side sessions and an exact provider-subject allowlist.</p>
-        </div>
-        <div className="contact-panel-links">
-          <a href={`${apiBase}/oauth2/authorization/google`}><span>CONTINUE WITH</span><strong>Google <i>↗</i></strong></a>
-          <a href={`${apiBase}/oauth2/authorization/linkedin`}><span>CONTINUE WITH</span><strong>LinkedIn <i>↗</i></strong></a>
-          <div className="contact-location"><span>ACCESS POLICY</span><strong>Owner allowlist only</strong></div>
-        </div>
-      </section>
-    </main>
-  );
+  return <DeveloperEntry><section className="kippo-auth">
+    <p className="eyebrow">Developer options / owner access</p>
+    <h1>Owner sign in</h1><p>Access is restricted to allowlisted accounts. Authenticator verification is required.</p>
+    <a className="button button-primary" href={`${apiBase}/oauth2/authorization/google`}>Continue with Google</a>
+    <a className="button button-quiet" href={`${apiBase}/oauth2/authorization/linkedin`}>Continue with LinkedIn</a><p className="kippo-note">LinkedIn requires valid OAuth credentials on the server.</p>
+    <Link className="button button-quiet" href="/">Return to launcher</Link>
+  </section></DeveloperEntry>;
 }

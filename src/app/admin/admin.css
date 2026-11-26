@@ -1,0 +1,73 @@
+/* DESIGN.md — Kippo. All selectors are limited to the private workspace. */
+body:has(.kippo-admin) {background:#000!important;overflow-x:hidden}
+body:has(.kippo-admin) :is(.site-header,.site-footer,.skip-link){display:none!important}
+body:has(.kippo-admin) :is(.page-main,#main-content){width:100%!important;max-width:none!important;min-width:0!important;padding:0!important;margin:0!important;background:#000!important}
+.kippo-admin {
+ --kippo-pink:#ee1f66;--kippo-ink:#fff;--kippo-void:#000;--kippo-carbon:#29292a;--kippo-ash:#333;
+ --font-body:"Source Code Pro","JetBrains Mono","Fira Code",monospace;
+ --font-display:var(--font-body);--ink:#fff;--blue:#ee1f66;--accent:#ee1f66;--line:#333;--surface:#000;
+ color-scheme:dark;background:#000;color:#fff;min-height:100svh;width:100%;font-family:var(--font-body);font-size:14px;line-height:1.65;font-feature-settings:"zero";overflow-wrap:anywhere;
+}
+.kippo-admin *, .kippo-admin *::before,.kippo-admin *::after{box-sizing:border-box;min-width:0;font-family:inherit!important;box-shadow:none!important;text-shadow:none!important}
+.kippo-admin :is(h1,h2,h3,h4,p,small,label,strong,span,code,a,button,legend,summary){color:inherit}
+.kippo-admin :is(h1,h2,h3,h4){line-height:1.25;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin:0 0 15px}
+.kippo-admin h1{font-size:clamp(23px,4vw,42px);letter-spacing:.14em}.kippo-admin h2{font-size:clamp(19px,2.5vw,25px)!important;letter-spacing:.08em!important}.kippo-admin h3{font-size:16px!important}
+.kippo-admin :is(p,label,small,span){white-space:normal}
+.kippo-admin p{margin:0 0 15px;line-height:1.65}
+.kippo-admin .eyebrow,.kippo-admin .kippo-note,.kippo-admin .admin-muted,.kippo-admin .admin-step-note{color:#bdbdbd!important;font-size:12px!important;letter-spacing:.08em;line-height:1.55}
+.kippo-layout{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto 1fr;min-height:100svh;align-items:start;gap:0 25px;padding:20px}
+.kippo-top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:15px;border:1px solid white;border-radius:10px;padding:15px 20px;margin-bottom:25px;min-height:62px}
+.kippo-brand{font-weight:700;letter-spacing:.12em;text-decoration:none;font-size:14px}
+.kippo-verified{font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.kippo-admin .kippo-menu{display:none}
+.kippo-sidebar{display:grid;gap:20px;position:sticky;top:20px;border:1px solid white;border-radius:15px;padding:15px;align-self:start}
+.kippo-sidebar nav{display:grid;gap:5px}
+.kippo-admin .kippo-sidebar nav button{display:flex;gap:10px;align-items:center;text-align:left;border:0!important;border-bottom:1px solid transparent!important;border-radius:0!important;padding:12px 5px!important;background:transparent!important;justify-content:flex-start;white-space:normal;min-height:44px;font-size:12px}
+.kippo-sidebar nav button span{color:#999!important;font-size:11px}.kippo-admin .kippo-sidebar nav button[aria-current]{border-bottom-color:#ee1f66!important;color:#fff!important}
+.kippo-main,.kippo-panel{width:100%;min-width:0}.kippo-section-head{margin:0 0 25px;padding:0 0 15px;border-bottom:1px solid #fff}.kippo-section-head p{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#aaa;margin-bottom:10px}
+.kippo-admin .kippo-auth,.kippo-admin .admin-step-up{width:min(calc(100% - 30px),560px);max-width:560px;margin:0 auto!important;padding:30px!important;border:1px solid #fff!important;border-radius:15px!important;background:#000!important;color:#fff!important}
+.kippo-admin:has(.kippo-auth),.kippo-admin:has(.admin-step-up){display:grid;place-items:center;padding:30px 0}
+.kippo-loading{padding:30px;text-align:center}.kippo-auth .button{display:flex;width:100%;margin:15px 0}
+.kippo-admin :is(button,.button,input[type=submit]){background:#000!important;color:#fff!important;border:1px solid #fff!important;border-radius:10px!important;padding:10px 15px!important;min-height:44px;font-size:12px!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase;white-space:normal;line-height:1.35;cursor:pointer;transform:none!important}
+.kippo-admin :is(.button-primary,.resume-generate-button){background:#ee1f66!important;border-color:#ee1f66!important;color:#fff!important}
+.kippo-admin :is(button,.button):disabled{opacity:.45;cursor:not-allowed}.kippo-admin :is(button,.button,a,input,select,textarea):focus-visible{outline:2px solid #fff!important;outline-offset:3px}
+.kippo-admin :is(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),textarea,select){background:#000!important;color:#fff!important;border:1px solid #fff!important;border-radius:10px!important;padding:12px!important;max-width:100%;width:100%;min-width:0;font-size:16px!important;letter-spacing:normal!important;line-height:1.5;text-transform:none}
+.kippo-admin :is(input[type=checkbox],input[type=radio],input[type=range]){accent-color:#ee1f66!important}
+.kippo-admin :is(input,textarea)::placeholder{color:#aaa!important}.kippo-admin textarea{resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere}
+.kippo-admin .admin-totp-form input{max-width:100%;font-size:24px!important;letter-spacing:.35em!important;text-align:center}
+.kippo-admin :is(.admin-module,.admin-manager,.admin-contact-panel,.linkedin-panel,.admin-report,.admin-metrics article,.admin-step-up){background:#000!important;border:1px solid #fff!important;border-radius:15px!important;padding:25px!important;margin:0 0 20px!important;color:#fff!important;max-width:100%;width:100%;overflow-wrap:anywhere}
+.kippo-admin :is(.admin-module-heading,.admin-manager-head,.admin-list-top,.media-library-toolbar,.linkedin-drafts-head,.linkedin-compose-actions,.admin-editor-actions,.media-attach-targets,.resume-generated-result,.admin-contact-detail-head){display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;min-width:0;margin:0 0 15px;padding:0 0 12px;border-color:#333!important}
+.kippo-admin :is(.admin-module-heading h2 span,.resume-mode-icon,.template-overline,.arrow-up-right){color:#fff!important}
+.kippo-admin :is(.admin-module-heading p,.admin-module-heading small,.admin-empty,.admin-message,.admin-step-note,.site-content-grid label,.custom-field-form label,.resume-mode-explainer p,.resume-template-card p,.media-asset-info span,.media-empty,.launcher-custom-apps p,.launcher-app-labels label span,.launcher-app-order span,.admin-review-note,.linkedin-composer){color:#ccc!important}
+.kippo-admin :is(.admin-manager-grid,.admin-contact-grid,.resume-studio-grid,.media-upload-panel,.site-content-grid,.field-visibility-grid,.media-asset-grid,.launcher-app-visibility,.admin-metrics){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;max-width:100%;min-width:0;align-items:start}
+.kippo-admin .admin-metrics{grid-template-columns:repeat(3,minmax(0,1fr));margin:20px 0}
+.kippo-admin .admin-metrics strong{display:block;font-size:28px;line-height:1.2}.kippo-admin .admin-metrics small{font-size:12px}
+.kippo-admin :is(.admin-record-list,.admin-editor,.admin-contact-detail,.field-visibility-panel,.site-content-editor,.resume-builder-panel,.resume-history-panel,.resume-template-card,.resume-integrity-note,.resume-history-item,.media-dropzone,.media-asset-card,.media-asset-preview,.media-upload-panel,.site-section-row,.launcher-custom-app-row,.linkedin-draft,.admin-totp-secret,.admin-contact-ai,.admin-contact-message,.resume-inclusion-control,.custom-field-list article){background:#000!important;color:#fff!important;border:1px solid #fff!important;border-radius:15px!important;padding:15px!important;max-width:100%;min-width:0;overflow-wrap:anywhere}
+.kippo-admin :is(.site-section-row.enabled,.resume-mode-switch button.active,.admin-record.is-selected,.media-dropzone.is-dragging,.media-dropzone.has-file,.media-dropzone.is-complete){background:#000!important;border-color:#ee1f66!important}
+.kippo-admin :is(.admin-record,.resume-mode-switch button,.resume-history-item,.site-section-row,.launcher-custom-app-row){white-space:normal;max-width:100%}
+.kippo-admin :is(.admin-record-list,.resume-history-panel,.linkedin-drafts,.site-section-list){max-height:none!important;overflow:visible!important}
+.kippo-admin :is(.admin-contact-badge,.draft-status,.linkedin-connection,.admin-module-heading>span,.resume-history-icon,.media-upload-symbol){color:#fff!important;background:#000!important;border-color:#fff!important;border-radius:10px!important}
+.kippo-admin .media-asset-preview{padding:0!important;overflow:hidden}.kippo-admin :is(img,video,iframe){max-width:100%}
+.kippo-admin .admin-table-scroll{max-width:100%;overflow-x:auto}.kippo-admin table{border-collapse:collapse;width:100%;font-size:12px;text-align:left}.kippo-admin :is(th,td){border-bottom:1px solid #333;padding:10px;overflow-wrap:anywhere;white-space:normal}.kippo-admin .admin-report h3{text-transform:uppercase}
+.kippo-admin :is(.admin-step-error,.admin-message){color:#fff!important;overflow-wrap:anywhere}
+.kippo-admin .launcher-app-order>div{grid-template-columns:minmax(0,1fr) auto auto}.kippo-admin .launcher-app-labels label{grid-template-columns:minmax(0,1fr)}
+.kippo-admin .media-dropzone::before{display:none}.kippo-admin .media-upload-progress i{background:#fff!important}
+@media(max-width:760px){
+ .kippo-layout{display:block;padding:15px;min-height:100svh}.kippo-top{margin-bottom:15px;padding:10px 12px;min-height:0}.kippo-admin .kippo-menu{display:block;flex:none}.kippo-verified{display:none}
+ .kippo-sidebar{display:none;position:static;margin:0 0 20px;padding:10px}.kippo-sidebar.is-open{display:grid}.kippo-section-head{margin-bottom:15px}
+ .kippo-admin :is(.admin-manager-grid,.admin-contact-grid,.resume-studio-grid,.media-upload-panel,.site-content-grid,.field-visibility-grid,.media-asset-grid,.launcher-app-visibility){grid-template-columns:minmax(0,1fr)!important}
+ .kippo-admin .admin-metrics{grid-template-columns:minmax(0,1fr)}
+ .kippo-admin :is(.admin-module,.admin-manager,.admin-contact-panel,.linkedin-panel,.admin-report,.admin-metrics article){padding:15px!important}
+ .kippo-admin :is(.admin-record-list,.admin-editor,.admin-contact-detail,.field-visibility-panel,.site-content-editor,.resume-builder-panel,.resume-history-panel,.media-upload-panel,.resume-template-card){padding:12px!important}
+ .kippo-admin :is(.resume-mode-switch,.media-upload-fields,.media-attach-targets,.launcher-app-labels,.site-section-row){display:flex;flex-direction:column;align-items:stretch;gap:10px}
+ .kippo-admin .admin-resource-select{width:100%;max-width:100%}.kippo-admin .kippo-auth,.kippo-admin .admin-step-up{padding:20px!important}
+}
+/* Override legacy public button effects only inside the developer workspace. */
+.kippo-admin .button.button-primary,.kippo-admin .button.button-primary:hover,.kippo-admin .button.button-primary:focus-visible{background:#ee1f66!important;border-color:#ee1f66!important;color:#fff!important}
+.kippo-admin .button.button-primary::before,.kippo-admin .button.button-quiet::before{display:none!important}
+.kippo-admin .button.button-primary .arrow-up-right{color:#fff!important}
+.kippo-admin .admin-step-up{margin:0 auto!important}
+.kippo-admin :is(.admin-module-heading,.admin-manager-head) > div{min-width:0;max-width:100%}
+.kippo-admin :is(.admin-editor,.resume-builder-panel,.resume-history-panel,.admin-contact-detail,.media-upload-fields,.site-content-grid)>*{max-width:100%}
+.kippo-admin :is(.admin-editor textarea,.resume-jd-input textarea,.linkedin-composer textarea){min-width:0!important;width:100%!important}
+.kippo-admin .kippo-sidebar form{margin:0}.kippo-admin .kippo-sidebar form button{width:100%}

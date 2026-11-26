@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import DeveloperEntry from "@/components/DeveloperEntry";
+import "./admin.css";
 import AdminGate from "@/components/AdminGate";
 
 export const metadata: Metadata = {
@@ -8,8 +10,6 @@ export const metadata: Metadata = {
 
 export default function AdminPage() {
   return (
-    <main className="shell inner-page contact-page">
-      <section className="contact-panel admin-workspace-panel"><AdminGate /></section>
-    </main>
+    <DeveloperEntry><AdminGate /></DeveloperEntry>
   );
 }

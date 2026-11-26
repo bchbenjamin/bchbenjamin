@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import AdminAnalytics from "@/components/AdminAnalytics";
 import LogoutButton from "@/components/LogoutButton";
 import AdminContentManager from "@/components/AdminContentManager";
@@ -19,6 +20,7 @@ export default function AdminGate() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [section,setSection]=useState("Analytics");
+  const [menu,setMenu]=useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -42,8 +44,8 @@ export default function AdminGate() {
   if (loading) return <p className="admin-state">Checking owner session…</p>;
   if (!session?.authenticated) {
     return (
-      <div className="admin-state">
-        <p>No active owner session was found.</p>
+      <div className="kippo-auth">
+        <h1>Owner access</h1><p>Sign in to unlock the developer workspace.</p>
         <a className="button button-primary" href="/login">Sign in to continue <span className="arrow-up-right">↗</span></a>
       </div>
     );
@@ -53,5 +55,9 @@ export default function AdminGate() {
 
   const sections = {"Analytics":AdminAnalytics,"Site builder":SiteBuilder,"Profile & content":AdminContentManager,"Media":MediaLibrary,"Resume":ResumeStudio,"Inbox":AdminContactPanel,"LinkedIn":LinkedInPublishingPanel};
   const Panel=sections[section as keyof typeof sections];
-  return <div className="admin-dashboard"><aside className="admin-sidebar"><h2>Portfolio Admin</h2><nav aria-label="Administration">{Object.keys(sections).map(name=><button key={name} aria-current={section===name?"page":undefined} onClick={()=>setSection(name)}>{name}</button>)}</nav><LogoutButton/></aside><main className="admin-main"><header><div><small>Owner workspace</small><h1>{section}</h1></div><span>Verified · TOTP</span></header><Panel/></main></div>;
+  return <div className="kippo-layout">
+    <header className="kippo-top"><Link href="/" className="kippo-brand">PORTFOLIO / DEV</Link><button type="button" className="kippo-menu" aria-expanded={menu} aria-controls="kippo-nav" onClick={()=>setMenu(!menu)}> {menu?"Close":"Menu"} </button><span className="kippo-verified">TOTP verified</span></header>
+    <aside className={`kippo-sidebar ${menu?"is-open":""}`} id="kippo-nav"><nav aria-label="Administration">{Object.keys(sections).map((name,index)=><button key={name} aria-current={section===name?"page":undefined} onClick={()=>{setSection(name);setMenu(false);}}><span>{String(index+1).padStart(2,"0")}</span>{name}</button>)}</nav><LogoutButton/></aside>
+    <div className="kippo-main"><header className="kippo-section-head"><p>Developer workspace / {section}</p><h1>{section}</h1></header><div className="kippo-panel"><Panel/></div></div>
+  </div>;
 }
