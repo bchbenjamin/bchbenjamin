@@ -11,6 +11,7 @@ export async function GET(_request:Request,{params}:{params:Promise<{path?:strin
 }
 export async function POST(request:Request,{params}:{params:Promise<{path?:string[]}>}){
  const {path=[]}=await params;
+ if(path[0]==="contact"){const {submitContact}=await import("@/lib/server/contact");const {fail}=await import("@/lib/server/owner-auth");try{return Response.json(await submitContact(request,path.slice(1)),{status:path.length===1?202:200,headers})}catch(e){return fail(e)}}
  if(path.join("/")!=="analytics")return Response.json({error:"not_found"},{status:404,headers});
  if(request.headers.get("DNT")==="1"||request.headers.get("Sec-GPC")==="1")return new Response(null,{status:204,headers});
  const origin=request.headers.get("origin");

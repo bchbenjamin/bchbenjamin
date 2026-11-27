@@ -1,6 +1,7 @@
 import JellyBeanExperience from "@/components/JellyBeanExperience";
 import {getSiteContent} from "@/lib/content";
 import {pageSeo} from "@/lib/seo";
-export const dynamic="force-dynamic";
+export const dynamic="force-static";
+export const revalidate=60;
 export async function generateMetadata(){const site=await getSiteContent();return pageSeo(site,"/experience","Experience",site.owner.headline);}
 export default async function Page(){const site=await getSiteContent();return <JellyBeanExperience site={site} initialApp="experience"/>;}

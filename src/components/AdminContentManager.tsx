@@ -1,4 +1,5 @@
 "use client";
+import {uploadMedia} from "@/lib/upload-media";
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -108,7 +109,7 @@ export default function AdminContentManager() {
       let saved = await response.json() as RecordItem;
       if(resource==="profile" && profilePhotoUpload){
         const form=new FormData();form.append("file",profilePhotoUpload);form.append("visibility","PRIVATE");form.append("followRecord","true");form.append("resourceType","profile");form.append("resourceId",String(saved.id??selected?.id));form.append("storagePath","Profile");form.append("caption","Profile photo");
-        const uploaded=await fetch(apiBase+"/api/v1/admin/media",{method:"POST",credentials:"include",headers:{"X-XSRF-TOKEN":token},body:form});
+        const uploaded=await uploadMedia(apiBase,form,token);
         if(!uploaded.ok)throw Error("Profile saved, but photo upload failed.");
         const media=await uploaded.json() as {id:string};
         const update=await fetch(apiBase+"/api/v1/admin/content/profile/"+String(saved.id??selected?.id),{method:"PUT",credentials:"include",headers:{"Content-Type":"application/json","X-XSRF-TOKEN":token},body:JSON.stringify({profilePhotoId:media.id,publicFields:{...((body.publicFields as Record<string,boolean>)??{}),profilePhotoId:((body.publicFields as Record<string,boolean>)?.profilePhotoId ?? true)}})});
@@ -122,7 +123,7 @@ export default function AdminContentManager() {
         for (const file of attachments) {
           try {
             const form=new FormData();form.append("file",file);form.append("caption",attachmentCaption);form.append("storagePath",attachmentPath);form.append("visibility","PRIVATE");form.append("followRecord",String(attachmentPublic));form.append("resourceType",attachmentType);form.append("resourceId",savedId);
-            const response=await fetch(`${apiBase}/api/v1/admin/media`,{method:"POST",credentials:"include",headers:{"X-XSRF-TOKEN":token},body:form});
+            const response=await uploadMedia(apiBase,form,token);
             if(!response.ok)failed.push(file.name);
           }catch{failed.push(file.name);}
         }

@@ -13,6 +13,7 @@ async function getCsrf() {
 
 export default function LinkedInPublishingPanel() {
   const [connected, setConnected] = useState(false);
+  const [configured,setConfigured]=useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [content, setContent] = useState("");
   const [busy, setBusy] = useState(false);
@@ -26,10 +27,10 @@ export default function LinkedInPublishingPanel() {
         fetch(`${apiBase}/api/v1/admin/linkedin/drafts`, { credentials: "include" })
       ]);
       if (!connectionResponse.ok || !draftsResponse.ok) throw new Error("Could not load LinkedIn publishing status.");
-      const connection = await connectionResponse.json() as { connected: boolean };
-      setConnected(connection.connected);
+      const connection = await connectionResponse.json() as { connected: boolean; configured?:boolean };
+      setConnected(connection.connected);setConfigured(connection.configured===true);
       setDrafts(await draftsResponse.json() as Draft[]);
-      setMessage(connection.connected ? "Connected. New posts always enter the review queue." : "LinkedIn publishing is not connected.");
+      setMessage(connection.connected ? "Connected. New posts always enter the review queue." : connection.configured?"LinkedIn publishing is not connected.":"LinkedIn publishing is not configured. You can still create and review drafts.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to load LinkedIn publishing.");
     } finally {
@@ -83,7 +84,7 @@ export default function LinkedInPublishingPanel() {
         <div><p className="eyebrow">LINKEDIN / MANUAL PUBLISHING</p><h2>Review before posting.</h2></div>
         <span className={`linkedin-connection${connected ? " is-connected" : ""}`}>{connected ? "CONNECTED" : "NOT CONNECTED"}</span>
       </div>
-      {!connected && <a className="button button-primary linkedin-connect" href={`${apiBase}/oauth2/authorization/linkedin-publisher`}>Connect LinkedIn publishing <span className="arrow-up-right">↗</span></a>}
+      {!connected && configured && <a className="button button-primary linkedin-connect" href={`${apiBase}/oauth2/authorization/linkedin-publisher`}>Connect LinkedIn publishing <span className="arrow-up-right">↗</span></a>}
       <p className="admin-muted">Drafts are never auto-published. Create a draft, review it, explicitly approve it, then publish in a separate action.</p>
       <label className="linkedin-composer">New post draft
         <textarea value={content} maxLength={3000} onChange={(event) => setContent(event.target.value)} placeholder="Write the post you want to review…" />

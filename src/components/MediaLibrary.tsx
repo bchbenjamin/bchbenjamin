@@ -1,4 +1,5 @@
 "use client";
+import {uploadMedia} from "@/lib/upload-media";
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
@@ -58,19 +59,8 @@ export default function MediaLibrary() {
     try {
       const token = await csrfToken();
       const body = new FormData(); body.append("file", file); body.append("altText", altText); body.append("caption", caption); body.append("visibility", publish?"PUBLIC":"PRIVATE");body.append("storagePath",storagePath);if(attachOnUpload&&resourceId){body.append("resourceType",resourceType);body.append("resourceId",resourceId);}
-      const result = await new Promise<{ status: number; responseText: string }>((resolve, reject) => {
-        const request = new XMLHttpRequest();
-        request.open("POST", `${apiBase}/api/v1/admin/media`);
-        request.withCredentials = true;
-        request.setRequestHeader("X-XSRF-TOKEN", token);
-        request.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) setUploadProgress(Math.min(99, Math.round((event.loaded / event.total) * 100)));
-        });
-        request.addEventListener("load", () => resolve({ status: request.status, responseText: request.responseText }));
-        request.addEventListener("error", () => reject(new Error("The upload connection failed. Please try again.")));
-        request.addEventListener("abort", () => reject(new Error("The upload was cancelled.")));
-        request.send(body);
-      });
+      const uploaded=await uploadMedia(apiBase,body,token,setUploadProgress);
+      const result={status:uploaded.status,responseText:await uploaded.text()};
       let responseMessage = "";
       try { responseMessage = (JSON.parse(result.responseText) as { message?: string }).message ?? ""; } catch { /* response body may be empty */ }
       if (result.status < 200 || result.status >= 300) throw new Error(responseMessage || `Upload failed (${result.status}). Images, MP4/WebM videos and PDFs up to 12 MB are supported.`);

@@ -10,7 +10,8 @@ export async function generateMetadata() {
   return {...pageSeo(site,"/",title,site.owner.intro || site.owner.headline),title:{absolute:title}};
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic="force-static";
+export const revalidate=60;
 
 export default async function HomePage() {
   const site = await getSiteContent();

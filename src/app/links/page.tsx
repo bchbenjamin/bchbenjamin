@@ -3,7 +3,8 @@ import JellyBeanExperience from "@/components/JellyBeanExperience";
 import {getSiteContent} from "@/lib/content";
 import {pageSeo} from "@/lib/seo";
 
-export const dynamic="force-dynamic";
+export const dynamic="force-static";
+export const revalidate=60;
 export async function generateMetadata():Promise<Metadata>{
  const site=await getSiteContent();
  return pageSeo(site,"/links","Profile Links","Official profile and contact links.");

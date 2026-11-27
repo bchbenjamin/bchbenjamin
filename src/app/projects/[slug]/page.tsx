@@ -15,7 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageSeo(site, "/projects/" + project.slug, project.name, project.summary || project.description);
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic="force-static";
+export const revalidate=60;
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
@@ -25,3 +26,5 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   return <><JsonLd data={{"@context":"https://schema.org",...projectSchema(project,site)}}/><JellyBeanExperience site={site} initialApp="projects" initialProject={slug}/></>;
 }
+
+export async function generateStaticParams(){return [];}

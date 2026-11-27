@@ -128,7 +128,7 @@ async function loadSiteContent(): Promise<SiteContent> {
   if (!API_BASE && !process.env.DATABASE_URL) return process.env.NODE_ENV === "production" ? emptyLiveSite() : site;
   type PublicBundle = { notifications?: import("./notifications").PortfolioNotification[]; files?: PublicFile[]; profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
   const bundle = await readPublic<PublicBundle>("portfolio");
-  if(process.env.DATABASE_URL&&!bundle)return emptyLiveSite();
+  if(process.env.DATABASE_URL&&!bundle)throw new Error("Published portfolio database snapshot unavailable");
   const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = bundle ? [
     bundle.profile, bundle.projects, bundle.gallery, bundle.experience, bundle.education, bundle.achievements, bundle.skills, bundle.siteConfiguration
   ] as const : await Promise.all([

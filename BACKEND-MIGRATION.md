@@ -1,35 +1,37 @@
-# Low-cost backend migration
+# Native Next.js backend
 
-## Phase 1 — public reads and telemetry
-The public API collections and SSR read directly from the existing Neon PostgreSQL
-database using the HTTP serverless driver. No new database is created. Public queries
-retain publication filters, field visibility and attachment visibility. Ordinary
-visitors no longer call the owner-session endpoint. Telemetry sends one anonymous
-visit instead of periodic heartbeats. Notifications are delivered with the initial
-portfolio snapshot; expiry is evaluated locally.
+The production project uses Next.js App Router and the existing Neon PostgreSQL database.
+There is no Java runtime, Maven build, Docker backend or external Spring API in the deployment.
+Historical SQL migrations are retained in db/migrations. V21 adds native owner sessions
+and staged media uploads without deleting previous tables or records.
 
-The previous Spring API remains routed for contact, owner login/TOTP,
-admin CRUD, uploads, resume, LinkedIn, scoped agent/MCP and maintenance. It must
-not be removed until parity/security tests pass. Public files use visibility-checked streaming/range responses and conditional HTTP validation for revocation safety. The public read path fails closed when the database is unavailable.
+## Runtime
+- Public portfolio routes use ISR (60 seconds); admin content mutations invalidate public layout caches.
+- Public API and media reads enforce existing publication and attachment visibility rules.
+- Google OIDC uses PKCE, nonce, state, an owner allowlist and secure cookies. TOTP is required
+  for privileged operations. Existing encrypted authenticator enrollment is retained.
+  Sign in again after migration because the native session format differs.
+- Uploads are staged in 2 MiB chunks and assembled server-side, with a 12 MiB file limit.
+- Native admin routes handle content, site settings, private media, analytics, notifications,
+  audit, resume PDF generation, contact and LinkedIn integrations.
+- Agent/MCP remote execution remains disabled by design.
+- Contact email and LinkedIn publishing require configured provider credentials.
+  Resume AI is optional; an evidence-based fallback is available.
 
-## Phase 2 — separate media and delivery
-Use a static/CDN-first public frontend. Publish only sanitized public data; keep
-private media inaccessible. A publication/unpublication must invalidate the public
-HTML and media caches. Add distributed abuse prevention for public write endpoints and manual speed tests. Account for the existing 12 MB media upload capability before switching media
-to a function runtime with smaller request/response limits.
+## Operations
+Run npm ci, npm test, npm run lint, npm run typecheck and npm run build.
+For an existing database, apply pending schema migrations with npm run db:migrate
+using DATABASE_URL. Do not reset or replace the existing database.
+Required production authentication variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+ADMIN_ALLOWED_SUBJECTS, TOKEN_ENCRYPTION_KEY and DATABASE_URL. FRONTEND_URL defaults
+to https://www.bchbenjamin.in. Optional provider variables are documented in .env.example.
+CRON_SECRET is required for authenticated scheduled maintenance.
+Do not publish secrets or local .env files.
 
-## Phase 3 — private backend parity
-Port Google OIDC (state, nonce, PKCE, exact redirect), server-side sessions, owner
-subject allowlist, TOTP encryption/verification, CSRF and rate limits first. Port
-CRUD, audit logs, site configuration, attachment publication, notifications, private
-resume generation, contact verification/moderation/mail, agent credentials/MCP,
-LinkedIn publishing and scheduled maintenance. Keep the existing PostgreSQL schema
-and data; version migrations and test rollback. Compare public/private behavior,
-authorization, upload sizes and API contracts before switching traffic. Keep the
-legacy service as rollback until verified; do not reset the production database.
+Rollback: retain the previous deployment and Git commit. V21 is additive, so the previous
+application can still use the same database. Do not drop tables during a rollback.
 
-## Hosting target
-Cloudflare Workers static assets / Pages are an alternative for the public frontend:
-static requests need no Worker invocation. Dynamic requests, database compute and
-storage still have quotas. Vercel Hobby remains viable for a CDN-first public site
-with low-frequency private operations, but is not unlimited.
+## Cost
+The CDN serves cached public pages and static assets. Only dynamic operations use functions.
+There is no continuously running JVM. Hobby quotas still apply to function usage, bandwidth,
+ISR, storage and database compute; no unlimited-traffic guarantee is implied.
