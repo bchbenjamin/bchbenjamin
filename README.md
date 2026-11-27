@@ -151,6 +151,6 @@ For engineering discussions, collaboration or a worthwhile problem to solve:
 <details>
 <summary>About this repository</summary>
 
-This is the special GitHub profile repository for **bchbenjamin** and the source code for [bchbenjamin.in](https://bchbenjamin.in). The portfolio platform is built with Next.js, Java / Spring Boot and PostgreSQL. Its engineering documentation, architecture notes and development instructions live in the repository's `docs/` directory.
+This is the special GitHub profile repository for **bchbenjamin** and the source code for [bchbenjamin.in](https://bchbenjamin.in). The portfolio platform is built with Next.js App Router and PostgreSQL. Its engineering documentation, architecture notes and development instructions live in the repository's `docs/` directory.
 
 </details>

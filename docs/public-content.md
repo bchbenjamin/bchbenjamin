@@ -1,6 +1,6 @@
 # Public site data flow
 
-The public site consumes a dedicated Spring Boot read model. It does not fetch private CMS records and does not hide confidential fields in the browser.
+The public site consumes a dedicated native Next.js public read model. It does not fetch private CMS records and does not hide confidential fields in the browser.
 
 ## Publication rules
 

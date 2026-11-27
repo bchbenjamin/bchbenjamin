@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "")).replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
 
 export default function ContactVerification({ token }: { token: string }) {
   const [message, setMessage] = useState(token ? "Confirm that you control this email address to complete your submission." : "This verification link is incomplete.");

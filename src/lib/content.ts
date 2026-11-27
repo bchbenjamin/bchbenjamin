@@ -78,7 +78,7 @@ export const featuredProjects = projects.filter((project) => project.featured);
 export function getProjectBySlug(slug: string): Project | undefined { return projects.find((project) => project.slug === slug); }
 // On Vercel, use the stable production alias for server-side requests. VERCEL_URL
 // can be an auth-protected deployment hostname, which would return a login page
-// instead of the public Spring API during SSR. Local development can point directly
+// instead of the public API during SSR. Local development can point directly
 // at the API using NEXT_PUBLIC_API_BASE_URL.
 const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || "";
 const vercelOrigin = vercelHost ? (/^https?:\/\//i.test(vercelHost) ? vercelHost : `https://${vercelHost}`) : "";
@@ -86,7 +86,7 @@ const MEDIA_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "
 const API_BASE = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || vercelOrigin).replace(/\/$/, "");
 
 export async function fetchPublicJson<T>(url: string): Promise<T | null> {
-  // The container and database may both be waking up on the first visit.
+  // A remote API or database may be waking up on the first visit.
   // Retry transient failures once, but never retry an authorization failure,
   // an unpublished resource, or a rate-limit response.
   for (const timeout of [8000, 10000]) {

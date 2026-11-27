@@ -44,7 +44,7 @@ The implementation borrows architectural patterns rather than importing a second
 - [ATS Engine](https://github.com/VeriWorkly/ats-engine): deterministic requirement matching and evidence-backed fit reporting.
 - [CVTailor](https://github.com/Kiranism/cvtailor): live-editing workflow and parser-friendly single-column layout.
 
-These repositories are references only; this service stays within the existing Spring Boot system.
+These repositories are references only; this service stays within the native Next.js backend.
 
 ## Validation
 

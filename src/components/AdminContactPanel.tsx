@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "")).replace(/\/$/, "");
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
 type ContactRecord = {
   id: string; sender_name: string; organization?: string; sender_email: string; subject: string;
   message: string; ai_decision: string; ai_confidence?: number; ai_risk_score?: number;
