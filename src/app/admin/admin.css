@@ -71,3 +71,4 @@ body:has(.kippo-admin) :is(.page-main,#main-content){width:100%!important;max-wi
 .kippo-admin :is(.admin-editor,.resume-builder-panel,.resume-history-panel,.admin-contact-detail,.media-upload-fields,.site-content-grid)>*{max-width:100%}
 .kippo-admin :is(.admin-editor textarea,.resume-jd-input textarea,.linkedin-composer textarea){min-width:0!important;width:100%!important}
 .kippo-admin .kippo-sidebar form{margin:0}.kippo-admin .kippo-sidebar form button{width:100%}
+.admin-notifications form{display:grid;gap:12px;max-width:640px}.admin-notifications label{display:grid;gap:6px}.admin-notifications input,.admin-notifications textarea,.admin-notifications select{width:100%;min-width:0;padding:10px}.admin-notifications article{border-top:1px solid #8885;padding:14px 0}.admin-notifications article small{display:block}

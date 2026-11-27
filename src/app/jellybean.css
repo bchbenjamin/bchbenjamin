@@ -689,3 +689,45 @@ html[data-portfolio-booted=true] .jb-boot{display:none}
 .jb-terminal-output p{margin:0;min-height:1.45em;white-space:pre-wrap}
 .jb-terminal-output .jb-termux-prompt{min-height:0;height:auto;display:flex;align-items:baseline;gap:.55ch;padding:0;margin:0;border:0;background:transparent;font:inherit;line-height:inherit}
 .jb-terminal-output .jb-termux-prompt input{height:1.45em;min-height:0;font:inherit;line-height:inherit;min-width:0;flex:1}
+
+/* Settings preferences use Android 4.1 title/summary rows, edge to edge. */
+.jb-app-content:has(.jb-settings-screen){padding:0!important;background:#f2f2f2}
+.jb-settings-screen{padding:0!important}
+.jb-about-phone{background:#f2f2f2}
+.jb-about-phone .jb-settings-row,.jb-about-phone .jb-build-number{display:flex;align-items:center;justify-content:flex-start;min-height:56px;padding:11px 16px;background:transparent;border:0;border-bottom:1px solid #c8c8c8;color:#222;font:400 16px/1.3 Roboto,Arial,sans-serif;text-align:left}
+.jb-about-phone small{display:block;color:#707070;font-size:12px;margin-top:4px;white-space:normal}
+.jb-about-phone button:active{background:#b9e6f5}
+.jb-original-egg{position:absolute;inset:0;z-index:12;display:grid;place-items:center;background:#000;touch-action:none;overflow:hidden}
+.jb-app-window:has(.jb-original-egg) .jb-app-actionbar{display:none}
+.jb-app-window:has(.jb-original-egg) .jb-app-content{position:relative;padding:0!important}
+.jb-original-logo{width:100%;height:100%;display:grid;place-items:center;background:transparent;border:0;padding:32px;touch-action:none;user-select:none}
+.jb-original-logo img{width:100%;height:100%;max-width:768px;max-height:768px;object-fit:contain;pointer-events:none}
+.jb-original-egg canvas{width:100%;height:100%;display:block;touch-action:none}
+.jb-egg-toast{position:absolute;bottom:48px;background:#333e;color:#fff;padding:12px 22px;text-align:center;font-size:17px;box-shadow:0 2px 6px #0008;border-radius:2px;pointer-events:none}
+.jb-egg-toast b{display:block;font-size:14px}
+.jb-gallery-photo{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer}
+.jb-media-viewer{position:absolute;inset:0;z-index:15;background:#000;color:#fff;display:flex;flex-direction:column;min-height:0}
+.jb-media-viewer header{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 12px;background:#202020;font:400 13px Roboto,Arial,sans-serif}
+.jb-media-viewer header span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jb-media-viewer header button,.jb-media-viewer header a{background:transparent;border:0;color:#fff;text-decoration:none;flex:none}
+.jb-media-viewer header button{font-size:30px}
+.jb-viewer-body{flex:1;min-height:0;display:grid;place-items:center;overflow:auto}
+.jb-viewer-body img,.jb-viewer-body video{width:100%;height:100%;min-height:0;object-fit:contain}
+.jb-media-viewer footer{max-height:30%;overflow:auto;background:#222;padding:10px 14px;white-space:pre-wrap;font-size:12px;line-height:1.45}
+.jb-document-preview{text-align:center;padding:20px}.jb-document-preview a{color:#33b5e5}
+.jb-auth-world .jb-auth-device{display:flex;flex-direction:column;padding-top:25px;background:#f1f1f1;color:#222}
+.jb-auth-device .jb-app-actionbar{flex:0 0 48px;background:linear-gradient(#292929,#111);color:#fff}
+.jb-auth-device .jb-app-actionbar a{font-size:32px;color:#fff;text-decoration:none}
+.jb-auth-body{flex:1;overflow:auto;padding:16px;color:#222;font-family:Roboto,Arial,sans-serif}
+.jb-auth-body .jb-auth-form,.jb-auth-body .admin-step-up{padding:0!important;margin:0!important;max-width:none!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#222!important}
+.jb-auth-body h1,.jb-auth-body h2{font:400 22px/1.3 Roboto,Arial,sans-serif!important;color:#222!important;margin:12px 0}
+.jb-auth-body p,.jb-auth-body label{color:#555!important;font-size:14px!important}
+.jb-auth-body .button{display:block;width:100%;margin:12px 0;background:linear-gradient(#fafafa,#ddd)!important;color:#222!important;border:1px solid #aaa!important;border-radius:2px!important;padding:12px!important;text-align:center;font:400 14px Roboto,Arial,sans-serif!important;box-shadow:none!important}
+.jb-auth-body input{color:#222!important;background:#fff!important;border:1px solid #aaa!important}
+.jb-auth-nav{height:46px;display:grid;place-items:center;background:#07090c;color:#fff}.jb-auth-nav a{color:#fff;font-size:24px;text-decoration:none}
+.jb-broadcast-list button{width:100%;display:flex;gap:12px;align-items:flex-start;background:#17212b;color:#fff;text-align:left;border:0;border-bottom:1px solid #52616d;padding:12px}
+.jb-broadcast-list button span{min-width:0;flex:1}.jb-broadcast-list b,.jb-broadcast-list small{display:block;white-space:pre-wrap;overflow-wrap:anywhere}.jb-broadcast-list b{font-size:15px}.jb-broadcast-list small{font-size:12px;color:#d0d8df;margin-top:3px}.jb-clear-notifications{border:0;background:transparent;padding:0}.jb-broadcast-icon{font-size:14px;position:absolute;left:8px}
+.jb-project-list-button{text-decoration:none;color:inherit}
+.kippo-admin .jb-auth-world *{font-family:Roboto,Arial,sans-serif!important;text-transform:none;letter-spacing:normal}
+.kippo-admin .jb-auth-body :is(.eyebrow,.admin-step-note){color:#666!important}
+.jb-app-content:has(.jb-media-viewer){overflow:hidden}

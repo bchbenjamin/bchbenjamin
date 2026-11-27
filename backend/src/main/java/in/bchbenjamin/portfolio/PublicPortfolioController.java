@@ -75,6 +75,29 @@ public class PublicPortfolioController {
     private static final String PROFILE_SQL = "SELECT * FROM profile WHERE published=TRUE ORDER BY updated_at DESC LIMIT 1";
     private static final String EXPERIENCE_SQL = "SELECT * FROM experience WHERE published=TRUE ORDER BY sort_order,started_on DESC";
     private static final String EDUCATION_SQL = "SELECT * FROM education WHERE published=TRUE ORDER BY sort_order,started_on DESC";
+    private static final String FILES_SQL = """
+            SELECT m.id, m.original_filename, m.content_type, m.byte_size, m.caption, m.storage_path,
+                '/api/v1/public/media/' || m.id::text AS url,
+                CASE
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN achievements a ON a.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='achievement' AND a.published=TRUE
+                        AND (lower(a.category) LIKE '%certif%' OR lower(a.category) LIKE '%credential%'))
+                        OR lower(m.original_filename || ' ' || m.caption) ~ '(certificate|certification|credential)' THEN 'Certificates'
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN projects p ON p.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='project' AND p.published=TRUE) THEN 'Projects'
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN experience e ON e.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='experience' AND e.published=TRUE) THEN 'Experience'
+                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN education d ON d.id=mr.resource_id
+                        WHERE mr.media_id=m.id AND mr.resource_type='education' AND d.published=TRUE) THEN 'Education'
+                    WHEN m.content_type LIKE 'image/%' THEN 'Images'
+                    WHEN m.content_type LIKE 'video/%' THEN 'Videos'
+                    ELSE 'Documents'
+                END AS category
+            FROM public_media_assets m
+            WHERE m.visibility='PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%' OR m.content_type='application/pdf')
+            ORDER BY lower(m.original_filename), m.id
+            """;
+    private static final String NOTIFICATIONS_SQL = "SELECT id,title,body,target,published_at,expires_at FROM portfolio_notifications WHERE NOT revoked AND published_at<=now() AND expires_at>now() ORDER BY published_at DESC LIMIT 50";
     private static final String BUNDLE_SQL = "SELECT jsonb_build_object(" +
         "'profile',COALESCE((SELECT to_jsonb(p) FROM (" + PROFILE_SQL + ") p),'{}'::jsonb)," +
         "'projects',COALESCE((SELECT jsonb_agg(p) FROM (" + PROJECTS_SQL + ") p),'[]'::jsonb)," +
@@ -83,6 +106,7 @@ public class PublicPortfolioController {
         "'achievements',COALESCE((SELECT jsonb_agg(a) FROM (" + ACHIEVEMENTS_SQL + ") a),'[]'::jsonb)," +
         "'skills',COALESCE((SELECT jsonb_agg(s) FROM (" + SKILLS_SQL + ") s),'[]'::jsonb)," +
         "'gallery',COALESCE((SELECT jsonb_agg(g) FROM (" + GALLERY_SQL + ") g),'[]'::jsonb)," +
+        "'files',COALESCE((SELECT jsonb_agg(f) FROM (" + FILES_SQL + ") f),'[]'::jsonb)," +
         "'siteConfiguration',(SELECT published_config FROM site_configuration WHERE id=1))::text";
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
@@ -107,6 +131,7 @@ public class PublicPortfolioController {
         result.put("achievements",mapAchievements(rows(raw.get("achievements"))));
         result.put("skills",mapSkills(rows(raw.get("skills"))));
         result.put("gallery",rows(raw.get("gallery")));
+        result.put("files",rows(raw.get("files")));
         result.put("siteConfiguration",parseObject(raw.get("siteConfiguration")));
         return result;
     }
@@ -197,30 +222,12 @@ public class PublicPortfolioController {
         return jdbc.queryForList(GALLERY_SQL);
     }
 
+    @GetMapping("/notifications")
+    public List<Map<String,Object>> notifications() { return jdbc.queryForList(NOTIFICATIONS_SQL); }
+
     @GetMapping("/files")
     public List<Map<String, Object>> files() {
-        return jdbc.queryForList("""
-            SELECT m.id, m.original_filename, m.content_type, m.byte_size, m.caption, m.storage_path,
-                '/api/v1/public/media/' || m.id::text AS url,
-                CASE
-                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN achievements a ON a.id=mr.resource_id
-                        WHERE mr.media_id=m.id AND mr.resource_type='achievement' AND a.published=TRUE
-                        AND (lower(a.category) LIKE '%certif%' OR lower(a.category) LIKE '%credential%'))
-                        OR lower(m.original_filename || ' ' || m.caption) ~ '(certificate|certification|credential)' THEN 'Certificates'
-                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN projects p ON p.id=mr.resource_id
-                        WHERE mr.media_id=m.id AND mr.resource_type='project' AND p.published=TRUE) THEN 'Projects'
-                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN experience e ON e.id=mr.resource_id
-                        WHERE mr.media_id=m.id AND mr.resource_type='experience' AND e.published=TRUE) THEN 'Experience'
-                    WHEN EXISTS (SELECT 1 FROM media_relationships mr JOIN education d ON d.id=mr.resource_id
-                        WHERE mr.media_id=m.id AND mr.resource_type='education' AND d.published=TRUE) THEN 'Education'
-                    WHEN m.content_type LIKE 'image/%' THEN 'Images'
-                    WHEN m.content_type LIKE 'video/%' THEN 'Videos'
-                    ELSE 'Documents'
-                END AS category
-            FROM public_media_assets m
-            WHERE m.visibility='PUBLIC' AND (m.content_type LIKE 'image/%' OR m.content_type LIKE 'video/%' OR m.content_type='application/pdf')
-            ORDER BY lower(m.original_filename), m.id
-            """);
+        return jdbc.queryForList(FILES_SQL);
     }
 
     @GetMapping("/site-configuration")

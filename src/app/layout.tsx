@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { SITE_ORIGIN } from "@/lib/seo";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
-import PageTransition from "@/components/PageTransition";
-import ScrollExperience from "@/components/ScrollExperience";
 import PortfolioTelemetry from "@/components/PortfolioTelemetry";
 import { getSiteContent } from "@/lib/content";
 import "./globals.css";
@@ -37,19 +33,17 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
-async function PublicHeader() { const {owner}=await getSiteContent(); return <SiteHeader ownerName={owner.name} />; }
-async function PublicFooter() { const {owner}=await getSiteContent(); return <SiteFooter ownerName={owner.name} github={owner.github} linkedin={owner.linkedin} email={owner.email} />; }
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <a className="skip-link" href="#main-content">Skip to content</a>
-        <Suspense fallback={null}><PublicHeader /></Suspense>
-        <PageTransition>
+
+
           <div id="main-content">{children}</div>
-        </PageTransition>
-        <Suspense fallback={null}><PublicFooter /></Suspense>
-        <ScrollExperience />
+
+
+
         <PortfolioTelemetry />
       </body>
     </html>

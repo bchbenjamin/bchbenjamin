@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useState,type ReactNode} from "react";
+import HoloAuth from "@/components/HoloAuth";
 import {hasAdminEntry} from "@/lib/admin-entry";
 export default function DeveloperEntry({children}:{children:ReactNode}){
  const [allowed,setAllowed]=useState(false);
@@ -8,5 +9,5 @@ export default function DeveloperEntry({children}:{children:ReactNode}){
   const id=requestAnimationFrame(()=>setAllowed(true));
   return ()=>cancelAnimationFrame(id);
  },[]);
- return <div className="kippo-admin">{allowed?children:<p className="kippo-loading" role="status">Checking entry…</p>}</div>;
+ return <div className="kippo-admin">{allowed?children:<HoloAuth><p role="status">Checking entry…</p></HoloAuth>}</div>;
 }

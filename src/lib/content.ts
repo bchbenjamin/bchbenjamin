@@ -1,3 +1,4 @@
+import type {PublicFile} from "./public-files";
 import { cache } from "react";
 import siteData from "../data/site.json";
 import { normalizeLauncherHomeLayout, type LauncherHomeLayout } from "./launcher-layout";
@@ -40,6 +41,7 @@ export interface SiteContent {
   owner: { name: string; monogram: string; role: string; location: string; email: string; website: string; github: string; linkedin: string; headline: string; intro: string; };
   projects: Project[];
   gallery: GalleryMedia[];
+  files?: PublicFile[];
   experience: ExperienceEntry[];
   education: EducationEntry[];
   achievements: Achievement[];
@@ -119,7 +121,7 @@ function emptyLiveSite(): SiteContent {
 
 async function loadSiteContent(): Promise<SiteContent> {
   if (!API_BASE) return process.env.NODE_ENV === "production" ? emptyLiveSite() : site;
-  type PublicBundle = { profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
+  type PublicBundle = { files?: PublicFile[]; profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
   const bundle = await readPublic<PublicBundle>("portfolio");
   const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = bundle ? [
     bundle.profile, bundle.projects, bundle.gallery, bundle.experience, bundle.education, bundle.achievements, bundle.skills, bundle.siteConfiguration
@@ -241,6 +243,7 @@ async function loadSiteContent(): Promise<SiteContent> {
     },
     projects: liveProjects,
     gallery: liveGallery,
+    files: bundle?.files?.map(f=>({...f,url:MEDIA_BASE+f.url})),
     experience: liveExperience,
     education: liveEducation,
     achievements: liveAchievements,

@@ -184,6 +184,20 @@ class PostgresMigrationIntegrationTest {
     }
 
     @Test
+    void publicNotificationsExcludeExpiredAndRevokedRecords() throws Exception {
+        UUID active=jdbc.queryForObject("INSERT INTO portfolio_notifications(title,body,target) VALUES ('Active notification test','Body','app:gallery') RETURNING id",UUID.class);
+        UUID expired=jdbc.queryForObject("INSERT INTO portfolio_notifications(title,body,target,published_at,expires_at) VALUES ('Expired notification test','Body','app:gallery',now()-interval '8 days',now()-interval '1 day') RETURNING id",UUID.class);
+        UUID revoked=jdbc.queryForObject("INSERT INTO portfolio_notifications(title,body,target,revoked) VALUES ('Revoked notification test','Body','app:gallery',true) RETURNING id",UUID.class);
+        try{
+            String response=mockMvc.perform(get("/api/v1/public/notifications")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            assertTrue(response.contains(active.toString()));
+            assertFalse(response.contains(expired.toString()));
+            assertFalse(response.contains(revoked.toString()));
+            mockMvc.perform(get("/api/v1/public/portfolio")).andExpect(status().isOk()).andExpect(jsonPath("$.files").isArray());
+        }finally{jdbc.update("DELETE FROM portfolio_notifications WHERE id IN (?,?,?)",active,expired,revoked);}
+    }
+
+    @Test
     void recordAttachmentsFollowPublicationAndInheritOnlyPublicCaptions() throws Exception {
         UUID record = jdbc.queryForObject("""
             INSERT INTO achievements(category,title,detail,published,public_fields)

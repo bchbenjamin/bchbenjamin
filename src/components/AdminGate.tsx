@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import HoloAuth from "@/components/HoloAuth";
+import AdminNotifications from "@/components/AdminNotifications";
 import AdminAnalytics from "@/components/AdminAnalytics";
 import LogoutButton from "@/components/LogoutButton";
 import AdminContentManager from "@/components/AdminContentManager";
@@ -41,19 +43,19 @@ export default function AdminGate() {
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, []);
 
-  if (loading) return <p className="admin-state">Checking owner session…</p>;
+  if (loading) return <HoloAuth><p>Checking owner session…</p></HoloAuth>;
   if (!session?.authenticated) {
     return (
-      <div className="kippo-auth">
+      <HoloAuth><div className="jb-auth-form">
         <h1>Owner access</h1><p>Sign in to unlock the developer workspace.</p>
         <a className="button button-primary" href="/login">Sign in to continue <span className="arrow-up-right">↗</span></a>
-      </div>
+      </div></HoloAuth>
     );
   }
 
-  if (!session.stepUp) return <AdminStepUp configured={session.totpConfigured} onVerified={() => setSession(current => current ? { ...current, totpConfigured: true, stepUp: true } : current)} />;
+  if (!session.stepUp) return <HoloAuth><AdminStepUp configured={session.totpConfigured} onVerified={() => setSession(current => current ? { ...current, totpConfigured: true, stepUp: true } : current)} /></HoloAuth>;
 
-  const sections = {"Analytics":AdminAnalytics,"Site builder":SiteBuilder,"Profile & content":AdminContentManager,"Media":MediaLibrary,"Resume":ResumeStudio,"Inbox":AdminContactPanel,"LinkedIn":LinkedInPublishingPanel};
+  const sections = {"Analytics":AdminAnalytics,"Notifications":AdminNotifications,"Site builder":SiteBuilder,"Profile & content":AdminContentManager,"Media":MediaLibrary,"Resume":ResumeStudio,"Inbox":AdminContactPanel,"LinkedIn":LinkedInPublishingPanel};
   const Panel=sections[section as keyof typeof sections];
   return <div className="kippo-layout">
     <header className="kippo-top"><Link href="/" className="kippo-brand">PORTFOLIO / DEV</Link><button type="button" className="kippo-menu" aria-expanded={menu} aria-controls="kippo-nav" onClick={()=>setMenu(!menu)}> {menu?"Close":"Menu"} </button><span className="kippo-verified">TOTP verified</span></header>
