@@ -8,7 +8,7 @@ type Resource = (typeof resources)[number];
 type RecordItem = Record<string, unknown> & { id?: string };
 
 const templates: Record<Resource, Record<string, unknown>> = {
-  profile: { fullName: "", headline: "", summary: "", location: "", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", published: false, publicFields: { "*": false }, customFields: {} },
+  profile: { fullName: "", headline: "", summary: "", location: "", email: "", websiteUrl: "", githubUrl: "", linkedinUrl: "", profilePhotoId: null, published: false, publicFields: { "*": false }, customFields: {} },
   projects: { slug: "", name: "", tagline: "", summary: "", description: "", shortDescription: "", resumeDescription: "", role: "", status: "IN DEVELOPMENT", repositoryUrl: "", liveUrl: "", featured: false, published: false, resumeIncluded: true, sortOrder: 0, startedOn: null, completedOn: null, publicFields: { "*": false }, customFields: {} },
   experience: { roleTitle: "", organization: "", employmentType: "", location: "", description: "", startedOn: null, endedOn: null, isCurrent: false, published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
   education: { institution: "", qualification: "", fieldOfStudy: "", location: "", description: "", startedOn: null, endedOn: null, grade: "", published: false, resumeIncluded: true, sortOrder: 0, publicFields: { "*": false }, customFields: {} },
@@ -36,6 +36,8 @@ export default function AdminContentManager() {
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [selected, setSelected] = useState<RecordItem | null>(null);
   const [editor, setEditor] = useState(JSON.stringify(templates.profile, null, 2));
+  const [profilePhotos,setProfilePhotos]=useState<{id:string;original_filename:string;content_type:string;visibility:string}[]>([]);
+  const [profilePhotoUpload,setProfilePhotoUpload]=useState<File|null>(null);
   const [attachments,setAttachments]=useState<File[]>([]);
   const [attachmentPath,setAttachmentPath]=useState("");
   const [attachmentCaption,setAttachmentCaption]=useState("");
@@ -67,7 +69,15 @@ export default function AdminContentManager() {
     return () => { active = false; };
   }, [load, resource]);
 
+  useEffect(()=>{
+    if(resource!=="profile")return;
+    const controller=new AbortController();
+    void fetch(apiBase+"/api/v1/admin/media",{credentials:"include",signal:controller.signal,cache:"no-store"}).then(r=>r.ok?r.json():[]).then((rows:typeof profilePhotos)=>setProfilePhotos(rows.filter(m=>["image/jpeg","image/png","image/webp","image/gif"].includes(m.content_type)&&m.visibility==="PUBLIC"))).catch(()=>{});
+    return()=>controller.abort();
+  },[resource]);
+
   function selectRecord(record: RecordItem) {
+    setProfilePhotoUpload(null);
     setAttachments([]);setAttachmentPath("");setAttachmentCaption("");
     setSelected(record);
     setEditor(JSON.stringify(camelRecord(record), null, 2));
@@ -75,6 +85,7 @@ export default function AdminContentManager() {
   }
 
   function newRecord() {
+    setProfilePhotoUpload(null);
     setAttachments([]);setAttachmentPath("");setAttachmentCaption("");
     setSelected(null);
     setEditor(JSON.stringify(templates[resource], null, 2));
@@ -94,7 +105,16 @@ export default function AdminContentManager() {
         body: JSON.stringify(body)
       });
       if (!response.ok) throw new Error(`Save failed (${response.status}). Check required fields and your session.`);
-      const saved = await response.json() as RecordItem;
+      let saved = await response.json() as RecordItem;
+      if(resource==="profile" && profilePhotoUpload){
+        const form=new FormData();form.append("file",profilePhotoUpload);form.append("visibility","PRIVATE");form.append("followRecord","true");form.append("resourceType","profile");form.append("resourceId",String(saved.id??selected?.id));form.append("storagePath","Profile");form.append("caption","Profile photo");
+        const uploaded=await fetch(apiBase+"/api/v1/admin/media",{method:"POST",credentials:"include",headers:{"X-XSRF-TOKEN":token},body:form});
+        if(!uploaded.ok)throw Error("Profile saved, but photo upload failed.");
+        const media=await uploaded.json() as {id:string};
+        const update=await fetch(apiBase+"/api/v1/admin/content/profile/"+String(saved.id??selected?.id),{method:"PUT",credentials:"include",headers:{"Content-Type":"application/json","X-XSRF-TOKEN":token},body:JSON.stringify({profilePhotoId:media.id,publicFields:{...((body.publicFields as Record<string,boolean>)??{}),profilePhotoId:((body.publicFields as Record<string,boolean>)?.profilePhotoId ?? true)}})});
+        if(!update.ok)throw Error("Photo uploaded, but profile selection could not be saved.");
+        saved=await update.json() as RecordItem;setProfilePhotoUpload(null);
+      }
       const attachmentType = ({profile:"profile",projects:"project",experience:"experience",education:"education",achievements:"achievement"} as Partial<Record<Resource,string>>)[resource];
       const savedId = String(saved.id ?? selected?.id ?? "");
       if (attachments.length && attachmentType && savedId) {
@@ -145,6 +165,9 @@ export default function AdminContentManager() {
   const customKeys = parsedEditor.customFields && typeof parsedEditor.customFields === "object" ? Object.keys(parsedEditor.customFields as Record<string, unknown>).map((key) => `customFields.${key}`) : [];
   const visibilityFields = [...Object.keys(parsedEditor).filter((key) => !["id", "createdAt", "updatedAt", "publicFields", "customFields", "published", "resumeIncluded", "sortOrder"].includes(key) && typeof parsedEditor[key] !== "object"), ...customKeys];
 
+  function setProfileField(field:string,value:unknown){
+    setEditor(JSON.stringify({...parsedEditor,[field]:value},null,2));
+  }
   function setResumeIncluded(included: boolean) {
     try {
       const body = JSON.parse(editor) as Record<string, unknown>;
@@ -193,6 +216,7 @@ export default function AdminContentManager() {
         </div>
         <div className="admin-editor">
           <div className="admin-list-top"><span>{selected?.id ? "EDIT RECORD" : "NEW RECORD"}</span><span>JSON</span></div>
+          {resource==="profile"&&<fieldset className="field-visibility-panel"><legend>Public profile and link preview</legend><p>Name, About and profile photo are shared by the phone app and social link preview. They follow your publication and visibility settings.</p><label>Name<input value={String(parsedEditor.fullName??"")} onChange={e=>setProfileField("fullName",e.target.value)}/></label><label>Headline<input value={String(parsedEditor.headline??"")} onChange={e=>setProfileField("headline",e.target.value)}/></label><label>About<textarea rows={7} value={String(parsedEditor.summary??"")} onChange={e=>setProfileField("summary",e.target.value)}/></label><label>Profile photo<select value={String(parsedEditor.profilePhotoId??"")} onChange={e=>{setProfilePhotoUpload(null);setEditor(JSON.stringify({...parsedEditor,profilePhotoId:e.target.value||null,publicFields:{...publicFields,profilePhotoId:!!e.target.value}},null,2));}}><option value="">No photo</option>{Boolean(parsedEditor.profilePhotoId)&&!profilePhotos.some(p=>p.id===parsedEditor.profilePhotoId)&&<option value={String(parsedEditor.profilePhotoId)}>Current photo</option>}{profilePhotos.map(p=><option key={p.id} value={p.id}>{p.original_filename}</option>)}</select></label><label>Or upload a new profile photo<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={e=>{setProfilePhotoUpload(e.target.files?.[0]??null);if(e.target.files?.[0])setFieldVisibility("profilePhotoId",true);}}/></label>{profilePhotoUpload&&<p>{profilePhotoUpload.name} will be uploaded when you save. It follows profile publication and is available in Gallery when public.</p>}<label><input type="checkbox" checked={publicFields.profilePhotoId??publicFields["*"]??false} onChange={e=>setFieldVisibility("profilePhotoId",e.target.checked)}/> Show selected photo on the public profile and link preview</label></fieldset>}
           <textarea aria-label="Content record JSON editor" spellCheck={false} value={editor} onChange={(event) => setEditor(event.target.value)} />
           <label className="resume-inclusion-control"><input type="checkbox" checked={parsedEditor.published===true} onChange={e=>setEditor(JSON.stringify({...parsedEditor,published:e.target.checked},null,2))}/><span><strong>Publish record on website</strong><small>Attachments configured to follow this record appear and disappear with it.</small></span></label>
           <div className="field-visibility-panel">

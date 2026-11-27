@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { type ReactNode } from "react";
-import { SITE_ORIGIN } from "@/lib/seo";
+import { SITE_ORIGIN, shareImage, summary } from "@/lib/seo";
 import PortfolioTelemetry from "@/components/PortfolioTelemetry";
 import { getSiteContent } from "@/lib/content";
 import "./globals.css";
@@ -9,7 +9,8 @@ import "./jellybean.css";
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteContent();
   const ownerName = site.owner.name || "Personal Portfolio";
-  const description = (site.owner.intro || site.owner.headline || "Professional portfolio and selected engineering work.").slice(0, 320);
+  const description = summary(site.owner.intro || site.owner.headline || "Professional portfolio and selected engineering work.", 300);
+  const image = shareImage(site);
   const metadataBase = new URL(SITE_ORIGIN);
   const pageTitle = `${ownerName} — Portfolio`;
   return {
@@ -21,8 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: site.owner.name || undefined,
     publisher: site.owner.name || undefined,
     icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }], shortcut: "/favicon.svg" },
-    openGraph: { type: "website", url: SITE_ORIGIN, siteName: pageTitle, title: pageTitle, description },
-    twitter: { card: "summary_large_image", title: pageTitle, description }
+    openGraph: { type: "website", url: SITE_ORIGIN, siteName: pageTitle, title: pageTitle, description, images: [{url:image,width:1200,height:630,alt:pageTitle}] },
+    twitter: { card: "summary_large_image", title: pageTitle, description, images: [image] }
   };
 }
 

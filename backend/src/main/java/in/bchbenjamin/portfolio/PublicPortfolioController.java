@@ -17,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1/public")
 public class PublicPortfolioController {
-    private static final List<String> PRIVATE_COLUMNS = List.of("id", "public_fields", "custom_fields", "created_at", "updated_at", "published", "sort_order", "gallery_image_url", "resume_included", "public_media");
+    private static final List<String> PRIVATE_COLUMNS = List.of("id", "public_fields", "custom_fields", "created_at", "updated_at", "published", "sort_order", "gallery_image_url", "resume_included", "public_media", "profile_photo_id", "profile_photo_url");
     private static final String SKILLS_SQL = """
             SELECT g.id AS group_id, g.name AS group_name, g.description AS group_description,
                    g.public_fields::text AS group_public_fields, g.custom_fields::text AS group_custom_fields,
@@ -72,7 +72,11 @@ public class PublicPortfolioController {
             WHERE mr.resource_type='project' AND mr.resource_id=p.id),'[]'::jsonb) AS public_media
         FROM projects p WHERE p.published=TRUE ORDER BY p.sort_order,p.name
         """;
-    private static final String PROFILE_SQL = "SELECT * FROM profile WHERE published=TRUE ORDER BY updated_at DESC LIMIT 1";
+    private static final String PROFILE_SQL = """
+        SELECT p.*, (SELECT '/api/v1/public/media/' || m.id::text
+        FROM public_media_assets m WHERE m.id=p.profile_photo_id AND m.content_type IN ('image/png','image/jpeg','image/webp','image/gif')) AS profile_photo_url
+        FROM profile p WHERE p.published=TRUE ORDER BY p.updated_at DESC LIMIT 1
+        """;
     private static final String EXPERIENCE_SQL = "SELECT * FROM experience WHERE published=TRUE ORDER BY sort_order,started_on DESC";
     private static final String EDUCATION_SQL = "SELECT * FROM education WHERE published=TRUE ORDER BY sort_order,started_on DESC";
     private static final String FILES_SQL = """
@@ -124,7 +128,7 @@ public class PublicPortfolioController {
         Map<String,Object> raw = parseObject(json);
         if (raw.isEmpty()) throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Portfolio snapshot unavailable");
         Map<String,Object> result = new LinkedHashMap<>();
-        result.put("profile",toPublicMap(parseObject(raw.get("profile"))));
+        result.put("profile",mapProfile(parseObject(raw.get("profile"))));
         result.put("projects",mapProjects(rows(raw.get("projects"))));
         result.put("experience",rows(raw.get("experience")).stream().map(this::toPublicMap).filter(r->r.containsKey("roleTitle")&&r.containsKey("organization")).toList());
         result.put("education",rows(raw.get("education")).stream().map(this::toPublicMap).filter(r->r.containsKey("institution")&&r.containsKey("qualification")).toList());
@@ -138,9 +142,9 @@ public class PublicPortfolioController {
 
     @GetMapping("/profile")
     public Map<String, Object> profile() {
-        List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM profile WHERE published = TRUE ORDER BY updated_at DESC LIMIT 1");
+        List<Map<String, Object>> rows = jdbc.queryForList(PROFILE_SQL);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
-        return toPublicMap(rows.getFirst());
+        return mapProfile(rows.getFirst());
     }
 
     @GetMapping("/projects")
@@ -245,6 +249,15 @@ public class PublicPortfolioController {
             WHERE mr.resource_type = ? AND mr.resource_id = ? AND m.visibility = 'PUBLIC'
             ORDER BY mr.sort_order, m.uploaded_at DESC
             """, type, resourceId);
+    }
+
+    private Map<String,Object> mapProfile(Map<String,Object> row) {
+        Map<String,Object> result=toPublicMap(row);
+        result.remove("profilePhotoUrl");
+        result.remove("profilePhotoId");
+        if (isVisible(parseObject(row.get("public_fields")), "profilePhotoId") && row.get("profile_photo_url") != null)
+            result.put("profilePhotoUrl", row.get("profile_photo_url"));
+        return result;
     }
 
     private Map<String, Object> toPublicMap(Map<String, Object> row) {

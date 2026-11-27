@@ -43,6 +43,8 @@ export default function AdminGate() {
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, []);
 
+  useEffect(()=>{if(session?.authenticated&&session.stepUp){try{localStorage.setItem("jb-owner-session-hint","1");}catch{}}},[session]);
+
   if (loading) return <HoloAuth><p>Checking owner session…</p></HoloAuth>;
   if (!session?.authenticated) {
     return (

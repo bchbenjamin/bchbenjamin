@@ -731,3 +731,4 @@ html[data-portfolio-booted=true] .jb-boot{display:none}
 .kippo-admin .jb-auth-world *{font-family:Roboto,Arial,sans-serif!important;text-transform:none;letter-spacing:normal}
 .kippo-admin .jb-auth-body :is(.eyebrow,.admin-step-note){color:#666!important}
 .jb-app-content:has(.jb-media-viewer){overflow:hidden}
+.jb-about-avatar{overflow:hidden}.jb-about-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}

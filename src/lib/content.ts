@@ -38,10 +38,11 @@ export interface HomeContent {
   contactTitle: string; contactDescription: string;
 }
 export interface SiteContent {
-  owner: { name: string; monogram: string; role: string; location: string; email: string; website: string; github: string; linkedin: string; headline: string; intro: string; };
+  owner: { name: string; monogram: string; role: string; location: string; email: string; website: string; github: string; linkedin: string; headline: string; intro: string; photoUrl?: string; };
   projects: Project[];
   gallery: GalleryMedia[];
   files?: PublicFile[];
+  notifications?: import("./notifications").PortfolioNotification[];
   experience: ExperienceEntry[];
   education: EducationEntry[];
   achievements: Achievement[];
@@ -101,6 +102,10 @@ export async function fetchPublicJson<T>(url: string): Promise<T | null> {
   return null;
 }
 async function readPublic<T>(path: string): Promise<T | null> {
+  if(process.env.DATABASE_URL){
+    try{const {readPublicResource}=await import("./server/public-portfolio");return await readPublicResource(path.split("/")) as T|null;}
+    catch{return null;}
+  }
   if (!API_BASE) return null;
   return fetchPublicJson<T>(`${API_BASE}/api/v1/public/${path}`);
 }
@@ -120,9 +125,10 @@ function emptyLiveSite(): SiteContent {
 }
 
 async function loadSiteContent(): Promise<SiteContent> {
-  if (!API_BASE) return process.env.NODE_ENV === "production" ? emptyLiveSite() : site;
-  type PublicBundle = { files?: PublicFile[]; profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
+  if (!API_BASE && !process.env.DATABASE_URL) return process.env.NODE_ENV === "production" ? emptyLiveSite() : site;
+  type PublicBundle = { notifications?: import("./notifications").PortfolioNotification[]; files?: PublicFile[]; profile: Record<string, unknown>; projects: Record<string, unknown>[]; gallery: Record<string, unknown>[]; experience: Record<string, unknown>[]; education: Record<string, unknown>[]; achievements: Record<string, unknown>[]; skills: Record<string, unknown>[]; siteConfiguration: Record<string, unknown> };
   const bundle = await readPublic<PublicBundle>("portfolio");
+  if(process.env.DATABASE_URL&&!bundle)return emptyLiveSite();
   const [profile, projectRows, galleryRows, experienceRows, educationRows, achievementRows, skillRows, siteConfig] = bundle ? [
     bundle.profile, bundle.projects, bundle.gallery, bundle.experience, bundle.education, bundle.achievements, bundle.skills, bundle.siteConfiguration
   ] as const : await Promise.all([
@@ -239,11 +245,13 @@ async function loadSiteContent(): Promise<SiteContent> {
       name: liveOwnerName, monogram: ownerInitials, role: String(publicProfile.headline ?? ""),
       location: String(publicProfile.location ?? ""), email: String(publicProfile.email ?? ""),
       website: String(publicProfile.websiteUrl ?? ""), github: String(publicProfile.githubUrl ?? ""), linkedin: String(publicProfile.linkedinUrl ?? ""),
-      headline: String(publicProfile.headline ?? ""), intro: String(publicProfile.summary ?? "")
+      headline: String(publicProfile.headline ?? ""), intro: String(publicProfile.summary ?? ""),
+      photoUrl: typeof publicProfile.profilePhotoUrl === "string" && /^\/api\/v1\/public\/media\/[0-9a-f-]{36}$/i.test(publicProfile.profilePhotoUrl) ? MEDIA_BASE+publicProfile.profilePhotoUrl : undefined
     },
     projects: liveProjects,
     gallery: liveGallery,
     files: bundle?.files?.map(f=>({...f,url:MEDIA_BASE+f.url})),
+    notifications: bundle?.notifications,
     experience: liveExperience,
     education: liveEducation,
     achievements: liveAchievements,
@@ -259,7 +267,7 @@ export const getSiteContent = cache(loadSiteContent);
 export async function getPublicProjectBySlug(slug: string): Promise<Project | undefined> {
   // A configured live API is authoritative: never fall back to stale snapshot content
   // when the project is unpublished, hidden or the API is temporarily unavailable.
-  if (!API_BASE && process.env.NODE_ENV !== "production") return getProjectBySlug(slug);
+  if (!API_BASE && !process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return getProjectBySlug(slug);
   const content = await getSiteContent();
   return content.projects.find((project) => project.slug === slug);
 }

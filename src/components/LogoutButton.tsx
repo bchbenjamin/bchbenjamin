@@ -15,7 +15,7 @@ export default function LogoutButton() {
   }, []);
 
   return (
-    <form action={`${apiBase}/logout`} method="post">
+    <form action={`${apiBase}/logout`} method="post" onSubmit={()=>{try{localStorage.removeItem("jb-owner-session-hint");}catch{}}}>
       <input type="hidden" name="_csrf" value={csrf} />
       <button className="button button-quiet" type="submit" disabled={!csrf}>Sign out <span className="arrow-up-right">↗</span></button>
     </form>

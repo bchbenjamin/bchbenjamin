@@ -89,10 +89,10 @@ export default function JellyBeanExperience({ site, initialApp = null, initialPr
   const [drawerTab, setDrawerTab] = useState<"apps" | "widgets">("apps");
   const [drawerPage, setDrawerPage] = useState(0);
   const [shade, setShade] = useState(false);
-  const [notifications,setNotifications]=useState<PortfolioNotification[]>([]);
+  const [notifications,setNotifications]=useState<PortfolioNotification[]>(site.notifications??[]);
   const [dismissed,setDismissed]=useState<string[]>([]);
   const [notificationNow,setNotificationNow]=useState(0);
-  useEffect(()=>{const controller=new AbortController();const update=()=>{setNotificationNow(Date.now());void fetch("/api/v1/public/notifications",{signal:controller.signal,cache:"no-store",credentials:"omit"}).then(r=>r.ok?r.json():[]).then(setNotifications).catch(()=>{});};const timer=window.setTimeout(()=>{try{setDismissed(JSON.parse(sessionStorage.getItem("jb-dismissed-notifications")||"[]"));}catch{}update();},0);const interval=window.setInterval(update,60000);return()=>{controller.abort();clearTimeout(timer);clearInterval(interval);};},[]);
+  useEffect(()=>{const controller=new AbortController();const update=()=>{setNotificationNow(Date.now());void fetch("/api/v1/public/notifications",{signal:controller.signal,cache:"no-store",credentials:"omit"}).then(r=>r.ok?r.json():[]).then(setNotifications).catch(()=>{});};const timer=window.setTimeout(()=>{try{setDismissed(JSON.parse(sessionStorage.getItem("jb-dismissed-notifications")||"[]"));}catch{}if(!site.notifications)update();else setNotificationNow(Date.now());},0);const interval=window.setInterval(()=>setNotificationNow(Date.now()),60000);return()=>{controller.abort();clearTimeout(timer);clearInterval(interval);};},[site.notifications]);
   const currentNotifications=activeNotifications(notifications,dismissed,notificationNow);
   function dismissNotifications(){const ids=[...new Set([...dismissed,...currentNotifications.map(n=>n.id)])];setDismissed(ids);try{sessionStorage.setItem("jb-dismissed-notifications",JSON.stringify(ids));}catch{}}
 
@@ -172,6 +172,8 @@ export default function JellyBeanExperience({ site, initialApp = null, initialPr
     const timeout = window.setTimeout(() => controller.abort(), 2500);
     async function initialiseLayout() {
       try {
+        // Only browsers that previously verified owner access need a server session check.
+        if(localStorage.getItem("jb-owner-session-hint")!=="1")throw Error("Guest layout");
         const response = await fetch(`${apiBase}/api/v1/admin/session`, { credentials: "include", cache: "no-store", headers: { Accept: "application/json" }, signal: controller.signal });
         if (response.ok) {
           const session = await response.json() as { authenticated?: boolean; stepUp?: boolean };
@@ -448,7 +450,7 @@ export default function JellyBeanExperience({ site, initialApp = null, initialPr
 
       {recent && <div className="jb-overlay jb-recent-overlay" onClick={event=>{if(!(event.target as Element).closest(".jb-recent-stack > button"))setRecent(false);}}><div className="jb-recent-stack">{recentApps.length ? recentApps.map(id=>{const item=visibleApps.find(candidate=>candidate.id===id) ?? APPS.find(candidate=>candidate.id===id);return item?<button key={id} onClick={()=>open(id)}><AppIcon app={item} size="large"/><b>{item.name}</b></button>:null;}) : <p>No recent apps</p>}<button onClick={navHome}><span className="jb-recent-home">○</span><b>Home</b></button></div></div>}
       {app && <div className="jb-overlay jb-app-overlay"><div className="jb-app-window"><header className="jb-app-actionbar"><button className="jb-action-up" onClick={navBack} aria-label="Navigate up"><span aria-hidden="true" className="jb-holo-up"/><AppIcon app={app}/></button><div><b>{currentProject?.name ?? (activeApp==="settings"&&settingsPage!=="main"?(settingsPage==="wifi"?"Wi-Fi":"About phone"):app.name)}</b></div></header><div className="jb-app-content">
-        {activeApp === "about" && <><div className="jb-about-hero"><div className="jb-about-avatar">{site.owner.monogram}</div><h2>{site.owner.name}</h2><p>{site.owner.role}</p></div>{site.owner.intro && <><h3>MY STORY</h3><p>{site.owner.intro}</p></>}{site.owner.location && <div className="jb-info-row"><span>LOCATION</span><b>{site.owner.location}</b></div>}{site.owner.github && <div className="jb-info-row"><span>GITHUB</span><a href={site.owner.github} target="_blank" rel="noreferrer">Open profile ↗</a></div>}</>}
+        {activeApp === "about" && <><div className="jb-about-hero"><div className="jb-about-avatar">{site.owner.photoUrl?<Image src={site.owner.photoUrl} alt={site.owner.name} width={112} height={112} unoptimized/>:site.owner.monogram}</div><h2>{site.owner.name}</h2><p>{site.owner.role}</p></div>{site.owner.intro && <><h3>MY STORY</h3><p>{site.owner.intro}</p></>}{site.owner.location && <div className="jb-info-row"><span>LOCATION</span><b>{site.owner.location}</b></div>}{site.owner.github && <div className="jb-info-row"><span>GITHUB</span><a href={site.owner.github} target="_blank" rel="noreferrer">Open profile ↗</a></div>}</>}
         {activeApp === "camera" && <LocalCamera settingsOpen={cameraSettingsOpen} setSettingsOpen={setCameraSettingsOpen} />}
         {activeApp === "calendar" && <LocalCalendar birthdayMonthDay="12-13" />}
         {activeApp === "files" && <JellyBeanFiles path={filePath} onPath={setFilePath} initialFiles={site.files} onOpen={(file:PublicFile)=>setViewingMedia(file)}/> }

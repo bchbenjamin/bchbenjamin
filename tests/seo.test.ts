@@ -23,3 +23,12 @@ describe("public portfolio SEO",()=>{
   expect(summary("Portfolio project description ".repeat(20)).length).toBeLessThanOrEqual(155);
  });
 });
+
+it("uses the actual About text for social metadata and invalidates the preview after edits",()=>{
+ const a={...site,owner:{...site.owner,intro:"The actual published biography.",photoUrl:"/api/v1/public/media/12345678-1234-1234-1234-123456789012"}};
+ const first=pageSeo(a,"/","Portfolio",a.owner.intro);
+ const second=pageSeo({...a,owner:{...a.owner,intro:"New published biography."}},"/","Portfolio","New published biography.");
+ expect(first.openGraph?.description).toBe(a.owner.intro);
+ expect(first.openGraph?.images).not.toEqual(second.openGraph?.images);
+ expect(JSON.stringify(first.openGraph?.images)).toContain("/share-image?v=");
+});

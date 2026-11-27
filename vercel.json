@@ -12,15 +12,137 @@
     }
   },
   "rewrites": [
-    { "source": "/api/v1/(.*)", "destination": { "service": "backend" } },
-    { "source": "/oauth2/(.*)", "destination": { "service": "backend" } },
-    { "source": "/login/oauth2/code/(.*)", "destination": { "service": "backend" } },
-    { "source": "/logout", "destination": { "service": "backend" } },
-    { "source": "/mcp", "destination": { "service": "backend" } },
-    { "source": "/actuator/(.*)", "destination": { "service": "backend" } },
-    { "source": "/(.*)", "destination": { "service": "frontend" } }
+    {
+      "source": "/api/v1/public/media/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/portfolio",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/profile",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/projects",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/experience",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/education",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/skills",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/achievements",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/gallery",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/files",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/notifications",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/site-configuration",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/analytics",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/public/projects/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    },
+    {
+      "source": "/api/v1/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/oauth2/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/login/oauth2/code/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/logout",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/mcp",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/actuator/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
   ],
   "crons": [
-    { "path": "/api/cron/contact-maintenance", "schedule": "17 3 * * *" }
+    {
+      "path": "/api/cron/contact-maintenance",
+      "schedule": "17 3 * * *"
+    }
   ]
 }
